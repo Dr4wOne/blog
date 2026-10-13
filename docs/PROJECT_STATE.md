@@ -4,7 +4,7 @@ Updated: 2026-10-13 04:30   Mode: NEW   Stack: Astro + Cloudflare Pages
 Architecture level: small service (static site)
 
 ## Current phase
-**3 Rewrite to standard** (IN PROGRESS - Phase 2 POC complete, now refactoring)
+**3 Rewrite to standard** (IN PROGRESS - 50% complete - Diagrams refactored, Hero refactored, Hero verified)
 
 ## Status
 | Phase | State | Notes |
