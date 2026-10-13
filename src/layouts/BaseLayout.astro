@@ -1,4 +1,6 @@
 ---
+import { COLORS } from '../constants/colors';
+
 interface Props {
   title: string;
   description?: string;
@@ -15,14 +17,21 @@ const { title, description } = Astro.props;
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description || "A blog about AI, agents, and tooling"} />
     <title>{title} | dr4w blog</title>
-    <style>
+    <style define:vars={{
+      bgDark: COLORS.bg,
+      bgLight: COLORS.white,
+      fgPrimary: COLORS.white,
+      fgSecondary: '#A0A0A0',
+      accentColor: '#0066FF',
+      borderColor: '#2A2A3F',
+    }}>
       :root {
-        --bg-dark: #0A0A0F;
-        --bg-light: #FFFFFF;
-        --fg-primary: #FFFFFF;
-        --fg-secondary: #A0A0A0;
-        --accent: #0066FF;
-        --border: #2A2A3F;
+        --bg-dark: var(--bgDark);
+        --bg-light: var(--bgLight);
+        --fg-primary: var(--fgPrimary);
+        --fg-secondary: var(--fgSecondary);
+        --accent: var(--accentColor);
+        --border: var(--borderColor);
       }
 
       body {

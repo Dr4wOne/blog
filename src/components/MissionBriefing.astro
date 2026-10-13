@@ -1,29 +1,29 @@
 ---
-/* Mission briefing: comic-p01-intro as horizontal scrollable strip */
+import { MISSION_BRIEFING } from '../constants/labels';
 ---
 
 <section class="mission-briefing">
   <div class="briefing-header">
-    <h2>MISSION BRIEFING</h2>
-    <p>Year 2194. The war ended. But the protocol remained. A reactivated infiltrator unit awakens to a human distress signal: <em>"…if anyone can hear this… we are still here…"</em></p>
+    <h2>{MISSION_BRIEFING.title}</h2>
+    <p>{MISSION_BRIEFING.yearAndSetup}<em>{MISSION_BRIEFING.distressSignal}</em></p>
   </div>
-  
+
   <div class="comic-strip-scroll">
-    <img 
-      src="/assets/comic-p01-intro.webp" 
+    <img
+      src="/assets/comic-p01-intro.webp"
       alt="Comic: Year 2194, Iron Hunt protocol, DR4W unit inactive, distress signal, awakening sequence"
       data-pixelated
       loading="lazy"
     />
   </div>
-  
+
   <div class="briefing-promise">
-    <p><strong>No math required.</strong> By the end you'll understand:</p>
+    <p><strong>{MISSION_BRIEFING.noMathRequired}</strong> {MISSION_BRIEFING.byTheEndYouWill}</p>
     <ul>
-      <li>What an LLM actually is (and isn't)</li>
-      <li>How it gets turned into an agent that acts in the world</li>
-      <li>The tooling around it (harnesses, rules, workflows, MCP)</li>
-      <li>Why context, tokens, and temperature matter</li>
+      <li>{MISSION_BRIEFING.whatIsLLM}</li>
+      <li>{MISSION_BRIEFING.howItGetsConverted}</li>
+      <li>{MISSION_BRIEFING.tooling}</li>
+      <li>{MISSION_BRIEFING.whyMatters}</li>
     </ul>
   </div>
 </section>

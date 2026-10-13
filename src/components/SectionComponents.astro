@@ -1,5 +1,5 @@
 ---
-/* Clean section components with glass card aesthetic */
+import { SECTION_TYPES } from '../constants/labels';
 
 export interface Props {
   type: 'core' | 'analogy' | 'memory' | 'file' | 'test' | 'next';
@@ -13,7 +13,7 @@ const { type, title, href } = Astro.props;
 
 {type === 'core' && (
   <div class="section-card core-idea">
-    <div class="card-label">Core Idea</div>
+    <div class="card-label">{SECTION_TYPES.core}</div>
     <div class="card-content">
       <slot />
     </div>
@@ -22,7 +22,7 @@ const { type, title, href } = Astro.props;
 
 {type === 'analogy' && (
   <aside class="section-card field-analogy">
-    <div class="card-label">Analogy</div>
+    <div class="card-label">{SECTION_TYPES.analogy}</div>
     <div class="card-content">
       <slot />
     </div>
@@ -31,7 +31,7 @@ const { type, title, href } = Astro.props;
 
 {type === 'memory' && (
   <div class="section-card key-insight">
-    <div class="card-label">Key Insight</div>
+    <div class="card-label">{SECTION_TYPES.memory}</div>
     <div class="card-content">
       <slot />
     </div>
@@ -51,7 +51,7 @@ const { type, title, href } = Astro.props;
 
 {type === 'test' && (
   <div class="section-card field-test">
-    <div class="card-label">Try It</div>
+    <div class="card-label">{SECTION_TYPES.test}</div>
     <div class="card-content">
       <slot />
     </div>

@@ -1,16 +1,15 @@
 ---
-/* Interactive widgets: tokenizer, temperature slider, agent stepper */
+import { INTERACTIVE_WIDGETS } from '../constants/labels';
 ---
 
-<!-- Tokenizer widget for Part 2 -->
 <div class="widget tokenizer-widget">
   <div class="widget-header">
-    <h4>💾 Try tokenization</h4>
-    <p class="widget-hint">Type text and see how it splits into tokens</p>
+    <h4>{INTERACTIVE_WIDGETS.tokenizerTitle}</h4>
+    <p class="widget-hint">{INTERACTIVE_WIDGETS.tokenizerHint}</p>
   </div>
-  <textarea 
-    id="tokenizer-input" 
-    placeholder="Type something... (e.g., unconstitutionally)"
+  <textarea
+    id="tokenizer-input"
+    placeholder={INTERACTIVE_WIDGETS.tokenizerPlaceholder}
     rows="3"
   ></textarea>
   <div class="tokenizer-output">
@@ -19,57 +18,69 @@
       <span id="tokenizer-count">0 tokens</span>
     </div>
   </div>
-  <p class="widget-note">Note: token counts are approximate (illustrative, not from a real tokenizer)</p>
+  <p class="widget-note">{INTERACTIVE_WIDGETS.tokenizerNote}</p>
 </div>
 
-<!-- Temperature slider widget for Part 5 -->
 <div class="widget temperature-widget">
   <div class="widget-header">
-    <h4>🎲 Temperature slider</h4>
-    <p class="widget-hint">Adjust randomness and see sample completions change</p>
+    <h4>{INTERACTIVE_WIDGETS.temperatureTitle}</h4>
+    <p class="widget-hint">{INTERACTIVE_WIDGETS.temperatureHint}</p>
   </div>
   <div class="temperature-control">
-    <label for="temp-slider">Temperature:</label>
+    <label for="temp-slider">{INTERACTIVE_WIDGETS.temperatureLabel}</label>
     <input type="range" id="temp-slider" min="0" max="2" step="0.1" value="1">
     <span id="temp-value">1.0</span>
   </div>
   <div class="temperature-outputs">
     <div class="sample-output">
-      <p class="sample-label">Sample 1:</p>
+      <p class="sample-label">{INTERACTIVE_WIDGETS.temperatureSample1}</p>
       <p id="sample-1" class="sample-text">The next word is likely to be…</p>
     </div>
     <div class="sample-output">
-      <p class="sample-label">Sample 2:</p>
+      <p class="sample-label">{INTERACTIVE_WIDGETS.temperatureSample2}</p>
       <p id="sample-2" class="sample-text">The next word might be…</p>
     </div>
   </div>
 </div>
 
-<!-- Agent loop stepper for Part 6 -->
 <div class="widget agent-widget">
   <div class="widget-header">
-    <h4>🤖 Agent loop stepper</h4>
-    <p class="widget-hint">Step through: Goal → Reason → Act → Observe</p>
+    <h4>{INTERACTIVE_WIDGETS.agentTitle}</h4>
+    <p class="widget-hint">{INTERACTIVE_WIDGETS.agentHint}</p>
   </div>
   <div class="agent-loop">
     <div class="loop-display">
       <div id="agent-step" class="step-current">
-        <strong>GOAL:</strong>
-        <p>Fix the login bug in auth.ts</p>
+        <strong>{INTERACTIVE_WIDGETS.agentGoal}:</strong>
+        <p>{INTERACTIVE_WIDGETS.agentExampleGoal}</p>
       </div>
     </div>
-    <button id="agent-next-btn" class="agent-button">► Next Step</button>
-    <button id="agent-reset-btn" class="agent-button agent-secondary">↻ Reset</button>
+    <button id="agent-next-btn" class="agent-button">{INTERACTIVE_WIDGETS.agentNextBtn}</button>
+    <button id="agent-reset-btn" class="agent-button agent-secondary">{INTERACTIVE_WIDGETS.agentResetBtn}</button>
     <div id="agent-approval" class="approval-gate" style="display: none;">
-      <p><strong>⚠ APPROVAL REQUIRED</strong></p>
+      <p><strong>{INTERACTIVE_WIDGETS.agentApprovalRequired}</strong></p>
       <p>Run: <code>npm test</code></p>
-      <button id="agent-approve-btn" class="agent-approve">✓ Approve</button>
-      <button id="agent-deny-btn" class="agent-deny">✗ Deny</button>
+      <button id="agent-approve-btn" class="agent-approve">{INTERACTIVE_WIDGETS.agentApproveBtn}</button>
+      <button id="agent-deny-btn" class="agent-deny">{INTERACTIVE_WIDGETS.agentDenyBtn}</button>
     </div>
   </div>
 </div>
 
-<script>
+<script define:vars={{
+  agentGoal: INTERACTIVE_WIDGETS.agentGoal,
+  agentExampleGoal: INTERACTIVE_WIDGETS.agentExampleGoal,
+  agentReason: INTERACTIVE_WIDGETS.agentReason,
+  agentReasonExample: INTERACTIVE_WIDGETS.agentReasonExample,
+  agentAct: INTERACTIVE_WIDGETS.agentAct,
+  agentActExample: INTERACTIVE_WIDGETS.agentActExample,
+  agentObserve: INTERACTIVE_WIDGETS.agentObserve,
+  agentObserveExample: INTERACTIVE_WIDGETS.agentObserveExample,
+  agentGoalMet: INTERACTIVE_WIDGETS.agentGoalMet,
+  agentGoalMetExample: INTERACTIVE_WIDGETS.agentGoalMetExample,
+  temperatureLikelyPrefix: INTERACTIVE_WIDGETS.temperatureLikelyPrefix,
+  temperaturePossiblyPrefix: INTERACTIVE_WIDGETS.temperaturePossiblyPrefix,
+  agentDeniedMsg: INTERACTIVE_WIDGETS.agentDeniedMsg,
+}}>
   // Tokenizer widget
   const tokenizerInput = document.getElementById('tokenizer-input');
   const tokenizerBricks = document.getElementById('tokenizer-bricks');
@@ -106,23 +117,21 @@
   function updateTemperature() {
     const temp = parseFloat(tempSlider.value).toFixed(1);
     tempValue.textContent = temp;
-    
-    // Mock: low temp = first option, high temp = random
+
     const index = temp < 0.7 ? 0 : temp > 1.3 ? 2 : 1;
-    document.getElementById('sample-1').textContent = `The next word is likely: "${samples[index][0]}"`;
-    document.getElementById('sample-2').textContent = `Or possibly: "${samples[index][1]}"`;
+    document.getElementById('sample-1').textContent = `${temperatureLikelyPrefix} "${samples[index][0]}"`;
+    document.getElementById('sample-2').textContent = `${temperaturePossiblyPrefix} "${samples[index][1]}"`;
   }
   
   tempSlider?.addEventListener('input', updateTemperature);
   updateTemperature();
   
-  // Agent stepper
   const agentSteps = [
-    { phase: 'GOAL', text: 'Fix the login bug in auth.ts', action: false },
-    { phase: 'REASON', text: 'Read the file to understand the issue', action: false },
-    { phase: 'ACT', text: 'Run: npm test', action: true },
-    { phase: 'OBSERVE', text: 'Test output: PASS', action: false },
-    { phase: 'GOAL MET', text: '✓ Bug fixed', action: false }
+    { phase: agentGoal, text: agentExampleGoal, action: false },
+    { phase: agentReason, text: agentReasonExample, action: false },
+    { phase: agentAct, text: agentActExample, action: true },
+    { phase: agentObserve, text: agentObserveExample, action: false },
+    { phase: agentGoalMet, text: agentGoalMetExample, action: false }
   ];
   
   let currentStep = 0;
@@ -163,7 +172,7 @@
   
   document.getElementById('agent-deny-btn')?.addEventListener('click', () => {
     agentApproval.style.display = 'none';
-    alert('❌ Agent loop denied. Returning to planning phase.');
+    alert(agentDeniedMsg);
   });
   
   displayStep();

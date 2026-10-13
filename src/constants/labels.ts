@@ -63,6 +63,16 @@ export const SECTION_TYPES = {
 export const FOOTER = {
   copyright: '© 2026 DR4W. All rights reserved.',
   tagline: 'Signal Log — Essays on AI, systems, and engineering.',
+  exploreMore: 'Explore More',
+  mainSite: 'Daniel Baumann\'s Main Site',
+  about: 'About',
+  projects: 'Projects',
+  aiAgents: 'AI & Agents',
+  signalLog: 'Signal Log',
+  blogHome: 'Blog Home',
+  allArticles: 'All Articles',
+  footerTagline: 'Signal Log — Technical essays on AI, systems, and engineering',
+  footerCopyright: '© 2026 Daniel Baumann',
 } as const;
 
 export const NAVIGATION = {
@@ -89,4 +99,53 @@ export const DIAGRAM_TITLES = {
   D13: 'Harness architecture',
   D15: 'Directory structure',
   D16: 'System architecture',
+} as const;
+
+export const MISSION_BRIEFING = {
+  title: 'MISSION BRIEFING',
+  yearAndSetup: 'Year 2194. The war ended. But the protocol remained. A reactivated infiltrator unit awakens to a human distress signal: ',
+  distressSignal: '"…if anyone can hear this… we are still here…"',
+  noMathRequired: 'No math required.',
+  byTheEndYouWill: 'By the end you\'ll understand:',
+  whatIsLLM: 'What an LLM actually is (and isn\'t)',
+  howItGetsConverted: 'How it gets turned into an agent that acts in the world',
+  tooling: 'The tooling around it (harnesses, rules, workflows, MCP)',
+  whyMatters: 'Why context, tokens, and temperature matter',
+} as const;
+
+export const INTERACTIVE_WIDGETS = {
+  tokenizerTitle: '💾 Try tokenization',
+  tokenizerHint: 'Type text and see how it splits into tokens',
+  tokenizerPlaceholder: 'Type something... (e.g., unconstitutionally)',
+  tokenizerNote: 'Note: token counts are approximate (illustrative, not from a real tokenizer)',
+  temperatureTitle: '🎲 Temperature slider',
+  temperatureHint: 'Adjust randomness and see sample completions change',
+  temperatureLabel: 'Temperature:',
+  temperatureSample1: 'Sample 1:',
+  temperatureSample2: 'Sample 2:',
+  temperatureLikelyPrefix: 'The next word is likely:',
+  temperaturePossiblyPrefix: 'Or possibly:',
+  agentTitle: '🤖 Agent loop stepper',
+  agentHint: 'Step through: Goal → Reason → Act → Observe',
+  agentGoal: 'GOAL',
+  agentExampleGoal: 'Fix the login bug in auth.ts',
+  agentReason: 'REASON',
+  agentReasonExample: 'Read the file to understand the issue',
+  agentAct: 'ACT',
+  agentActExample: 'Run: npm test',
+  agentObserve: 'OBSERVE',
+  agentObserveExample: 'Test output: PASS',
+  agentGoalMet: 'GOAL MET',
+  agentGoalMetExample: '✓ Bug fixed',
+  agentNextBtn: '► Next Step',
+  agentResetBtn: '↻ Reset',
+  agentApprovalRequired: '⚠ APPROVAL REQUIRED',
+  agentApprovalAction: 'Run: npm test',
+  agentApproveBtn: '✓ Approve',
+  agentDenyBtn: '✗ Deny',
+  agentDeniedMsg: '❌ Agent loop denied. Returning to planning phase.',
+} as const;
+
+export const MISSION_LOG = {
+  title: 'MISSION LOG',
 } as const;

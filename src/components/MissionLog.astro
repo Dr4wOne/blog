@@ -1,4 +1,6 @@
 ---
+import { MISSION_LOG } from '../constants/labels';
+
 interface Props {
   parts: { number: number; title: string; id: string }[];
 }
@@ -8,7 +10,7 @@ const { parts } = Astro.props;
 
 <nav class="mission-log-sticky">
   <div class="mission-log-header">
-    <div class="hud-label">MISSION LOG</div>
+    <div class="hud-label">{MISSION_LOG.title}</div>
   </div>
   <ol class="mission-log-list">
     {parts.map((part) => (

@@ -1,4 +1,6 @@
 ---
+import { TABLE_OF_CONTENTS } from '../constants/labels';
+
 interface Part {
   number: number;
   title: string;
@@ -13,7 +15,7 @@ const { parts } = Astro.props;
 ---
 
 <nav class="toc">
-  <h2 class="toc-title">Contents</h2>
+  <h2 class="toc-title">{TABLE_OF_CONTENTS.title}</h2>
   <ul class="toc-list">
     {parts.map((part) => (
       <li key={part.id}>

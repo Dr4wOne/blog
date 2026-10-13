@@ -1,5 +1,5 @@
 ---
-/* Footer for article pages with links back to main site */
+import { FOOTER } from '../constants/labels';
 ---
 
 <footer class="article-footer">
@@ -7,39 +7,39 @@
 
   <div class="footer-content">
     <div class="footer-section">
-      <h3>Explore More</h3>
+      <h3>{FOOTER.exploreMore}</h3>
       <nav class="footer-links">
         <a href="https://dr4w.io" target="_blank" rel="noopener noreferrer">
-          Daniel Baumann's Main Site
+          {FOOTER.mainSite}
         </a>
         <a href="https://dr4w.io#about" target="_blank" rel="noopener noreferrer">
-          About
+          {FOOTER.about}
         </a>
         <a href="https://dr4w.io#projects" target="_blank" rel="noopener noreferrer">
-          Projects
+          {FOOTER.projects}
         </a>
         <a href="https://dr4w.io#ai-agents" target="_blank" rel="noopener noreferrer">
-          AI & Agents
+          {FOOTER.aiAgents}
         </a>
       </nav>
     </div>
 
     <div class="footer-section">
-      <h3>Signal Log</h3>
+      <h3>{FOOTER.signalLog}</h3>
       <nav class="footer-links">
         <a href="/">
-          Blog Home
+          {FOOTER.blogHome}
         </a>
         <a href="/archive">
-          All Articles
+          {FOOTER.allArticles}
         </a>
       </nav>
     </div>
   </div>
 
   <div class="footer-meta">
-    <p>Signal Log — Technical essays on AI, systems, and engineering</p>
-    <p><small>© 2026 Daniel Baumann</small></p>
+    <p>{FOOTER.footerTagline}</p>
+    <p><small>{FOOTER.footerCopyright}</small></p>
   </div>
 </footer>
 
