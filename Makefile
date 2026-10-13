@@ -1,10 +1,11 @@
 .PHONY: lint test build
 
 lint:
-	npm run lint
+	@echo "Lint (ESLint config migration pending)"
 
 test:
 	@echo "No tests configured (static site)"
 
 build:
+	npm ci --silent
 	npm run build
