@@ -1,1 +1,46 @@
-@import "tailwindcss";
+/* Import design system first */
+@import './design-system.css';
+
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital@0;1&family=JetBrains+Mono:wght@400;700&family=Space+Mono:wght@400;700&family=Pixelify+Sans&display=swap');
+
+/* Page wrapper */
+main {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0;
+}
+
+article {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+}
+
+/* Base element resets */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* ScrollBehavior for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Utility for skipping animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

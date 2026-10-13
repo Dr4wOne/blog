@@ -1,0 +1,47 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const allPosts = await getCollection('blog');
+const posts = allPosts
+  .filter(p => !p.data.draft)
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+
+const postsByYear: Record<number, any[]> = {};
+posts.forEach(post => {
+  const year = new Date(post.data.date).getFullYear();
+  if (!postsByYear[year]) {
+    postsByYear[year] = [];
+  }
+  postsByYear[year].push(post);
+});
+
+const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
+---
+
+<BaseLayout title="Archive" description="All blog posts">
+  <section>
+    <h1>Archive</h1>
+    {years.length > 0 ? (
+      <div style="margin: 2rem 0;">
+        {years.map(year => (
+          <div key={year} style="margin-bottom: 2rem;">
+            <h2 style="color: var(--accent); margin-bottom: 1rem;">{year}</h2>
+            <ul style="list-style: none; padding: 0;">
+              {postsByYear[year].map(post => (
+                <li style="margin-bottom: 0.75rem;">
+                  <a href={`/${post.slug}`}>{post.data.title}</a>
+                  <span style="color: var(--fg-secondary); font-size: 14px; margin-left: 0.5rem;">
+                    ({new Date(post.data.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p>No posts yet.</p>
+    )}
+  </section>
+</BaseLayout>

@@ -1,0 +1,72 @@
+name: deploy
+# Sandbox: every push to main (after CI passed on the PR).
+# Prod: manual run, and the "prod" environment requires a human reviewer to approve.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Where to deploy
+        type: choice
+        options: [sandbox, prod]
+        default: sandbox
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.event.inputs.target || 'sandbox' }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.target || 'sandbox' }}
+    env:
+      TARGET: ${{ github.event.inputs.target || 'sandbox' }}
+      PROJECT: ${{ github.event.repository.name }}
+      BASE_DOMAIN: ${{ vars.BASE_DOMAIN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prod only from main
+        if: env.TARGET == 'prod' && github.ref != 'refs/heads/main'
+        run: echo "prod deploys come from main only" && exit 1
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Quality gate
+        run: |
+          [ -f package.json ] && npm ci || true
+          for t in lint test build; do
+            if grep -qE "^${t}:" Makefile 2>/dev/null; then make "$t"; fi
+          done
+          npm run build
+      - name: Cloudflare Pages
+        run: |
+          set -euo pipefail
+          cfg=""; for f in wrangler.toml wrangler.jsonc wrangler.json; do [ -f "$f" ] && cfg="$f" && break; done
+          [ -n "$cfg" ] || { echo "no wrangler config; skipping"; exit 0; }
+          if grep -q pages_build_output_dir "$cfg"; then
+            out="$(sed -n -E 's/^[[:space:]]*pages_build_output_dir[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' "$cfg" | head -n1)"
+            name="$PROJECT-sbx"; branch=sandbox; [ "$TARGET" = prod ] && { name="$PROJECT"; branch=main; }
+            npx --yes wrangler pages project create "$name" --production-branch main || true
+            npx --yes wrangler pages deploy "$out" --project-name "$name" --branch "$branch"
+            host="$PROJECT-sbx.$BASE_DOMAIN"; [ "$TARGET" = prod ] && host="$PROJECT.$BASE_DOMAIN"
+            curl -sS -X POST -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" \
+              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$name/domains" \
+              --data "{\"name\":\"$host\"}" >/dev/null || true
+            curl -sS -X POST -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" \
+              "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records" \
+              --data "{\"type\":\"CNAME\",\"name\":\"$host\",\"content\":\"$name.pages.dev\",\"proxied\":true}" >/dev/null || true
+          fi
+      - name: Smoke test
+        run: |
+          host="$PROJECT-sbx.$BASE_DOMAIN"; [ "$TARGET" = prod ] && host="$PROJECT.$BASE_DOMAIN"
+          for i in 1 2 3 4 5 6; do
+            code="$(curl -s -o /dev/null -w '%{http_code}' "https://$host/" || true)"
+            echo "attempt $i: HTTP $code"; [ "$code" = 200 ] && exit 0; sleep 10
+          done
+          echo "::warning::$host did not return 200 (DNS or certificate may still be propagating)"

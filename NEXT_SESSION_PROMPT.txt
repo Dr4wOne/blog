@@ -1,0 +1,98 @@
+================================================================================
+COPY & PASTE THIS INTO THE NEXT CLAUDE CODE WINDOW
+================================================================================
+
+# DR4W Blog — Phase D (Sandbox Deploy) — Context Window Continuation
+
+**Project:** DR4W Blog (SIGNAL LOG)
+**Location:** /home/danielbaumann/workspace/agents/agents_workspace/agents_pipeline/projects/blog
+**Status:** Phase C Complete (Design Polish + Diagram Redesign)
+**Last Update:** 2026-10-13 — Diagrams redesigned for pedagogical clarity
+
+## What Was Just Completed
+
+Session Oct 13 completed Phase C (Design Polish):
+
+✅ Color system migration: Red theme → Purple (#6C63FF) / Cyan (#00D9FF) / Orange (#FF6B35)
+✅ Background effects: Grid pattern, floating orbs, 4-corner fading images, hero accent
+✅ Homepage redesign: Featured article card, corner images, article grid, CTA section
+✅ Article layout: TableOfContents, ArticleFooter, FadingBackgroundImages, proper z-index
+✅ SVG Diagram redesign (pedagogical clarity):
+   - D1.1 (Autocomplete): Step-by-step text growth example
+   - D1.2 (Three Phases): Visual flow (pre-training → fine-tuning → alignment)
+   - D1.3 (Tokenizer): LEGO brick analogy, rare vs. common words
+   - D5.1 (Context Window): Assembly diagram with context engineering insight
+✅ Build succeeds, all pages render, dev server running on localhost:4321
+
+## What to Do Next (Phase D: Sandbox Deploy)
+
+**Option 1: Continue where we left off**
+1. Start dev server: `npm run dev`
+2. Verify diagrams look good in browser at 360/768/1440px
+3. Deploy to sandbox: `scripts/deploy.sh sandbox blog` (from parent directory)
+4. Smoke test sandbox: `curl https://blog-sbx.dr4w.io/transmission`
+5. Report findings and wait for approval
+
+**Option 2: Jump to production gate**
+(only if sandbox testing passes and is approved by Daniel)
+
+## Key Files Changed in Phase C
+
+- src/styles/design-system.css — New color palette, grid bg, floating orbs
+- src/components/Diagrams.astro — D1/D2/D3/D5 completely redesigned
+- src/pages/index.astro — Redesigned homepage with featured article
+- src/layouts/SignalTransmission.astro — New components (TOC, Footer, FadingBG)
+- src/components/Hero.astro — Updated colors, fading sprite accent
+- src/components/CornerFadingImages.astro — Fixed opacity (was invisible, now visible)
+- src/components/TableOfContents.astro — New component (replaces MissionLog)
+- src/components/ArticleFooter.astro — New component (site references)
+- public/favicon.svg — Purple dr4w branding
+
+## Session Notes & Fixes
+
+Full details in: /home/danielbaumann/.claude/projects/.../memory/blog_design_polish.md
+
+Issues fixed:
+1. Reference images invisible → opacity increased from 0.03-0.07 to 0.08-0.20
+2. Main blog links broken → hardcoded featured article card linking to /transmission
+3. Diagrams too dark/unclear → redesigned with light background (#F5F5F7) + concrete examples + key insights
+
+## Quick Start
+
+```bash
+cd /home/danielbaumann/workspace/agents/agents_workspace/agents_pipeline/projects/blog
+
+# Start dev server
+npm run dev
+# Server on http://localhost:4321
+
+# Or deploy to sandbox
+cd ..  # parent directory
+scripts/deploy.sh sandbox blog
+# Check: https://blog-sbx.dr4w.io
+```
+
+## Key References
+
+- CURRENT_STATE.md — Full Phase C completion status
+- PHASE_D_RESUMPTION.md — Detailed next steps for Phase D
+- REDESIGN_PLAN.md — Original design brief
+- docs/PLAN.md — Technical planning
+
+## Design System Quick Reference
+
+Colors: #6C63FF (purple), #00D9FF (cyan), #FF6B35 (orange)
+Fonts: Space Grotesk (headings), Inter (body), JetBrains Mono (code)
+Components: Glass cards, light diagram backgrounds, fading overlays
+Diagrams: All SVG, light #F5F5F7 background, high contrast
+
+## Status
+
+Dev server: Ready to test at http://localhost:4321
+Build: ✓ No errors
+Pages: index, transmission, archive, [slug] all render
+Next: Visual browser test → Sandbox deploy → Prod gate
+
+================================================================================
+END PROMPT
+================================================================================

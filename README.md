@@ -1,63 +1,58 @@
-# blog — dr4w.io
+# dr4w Blog
 
-A personal blog built with Astro, React, and Tailwind CSS.
+A fast, static blog on Astro + Cloudflare.
 
-## Getting started
-
-### Install dependencies
+## Quick Start
 
 ```bash
+# Install dependencies
 npm install
-```
 
-### Development server
+# Start dev server
+npm run dev          # http://localhost:5173
 
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-### Build for production
-
-```bash
+# Build for production
 npm run build
+
+# Preview production build
 npm run preview
 ```
 
-### Run tests
+## Structure
 
-```bash
-npm test
-```
+- `src/content/blog/` — Blog posts in Markdown
+- `src/pages/` — Home, archive, dynamic post pages
+- `src/layouts/` — Page templates
+- `dist/` — Built static HTML (production)
 
-## Stack
+## First Article
 
-- **Astro 5.0** — Static site generator
-- **React 18** — UI components
-- **TypeScript** — Type-safe development
-- **Tailwind CSS** — Utility-first styling
-- **Vitest** — Fast unit testing
+**"AI From the Ground Up"** is live at `/1-ai-from-the-ground/`. Topics:
+- What is an LLM?
+- Tokenization
+- Embeddings & vectors
+- Transformers & attention
+- Inference, context, prompting
+- Agents
+- Harnesses
+- Tooling
 
-## Project structure
+## Adding New Posts
 
-```
-src/
-  components/     React components
-  layouts/        Astro layouts
-  pages/          Astro pages (routes)
-  styles/         Global CSS
-  content/        Blog posts (Markdown)
-  utils/          Utilities and helpers
-  data/           Constants and configuration
-public/           Static assets
-dist/             Build output (generated)
-```
+1. Create folder: `src/content/blog/N-post-title/`
+2. Copy `_template.md` or create `index.md`
+3. Add YAML front matter (title, date, author, tags, etc.)
+4. Write Markdown
+5. Run `npm run dev` to preview
+6. Push to git; CI auto-deploys
 
-## Deployment
+## Status
 
-Deployed to Cloudflare Workers.
+✅ Build: Working
+✅ Home page: Generated
+✅ Archive page: Generated
+✅ First article: Live at `/1-ai-from-the-ground/`
+⏳ Design: Dark theme active (light theme coming soon)
+⏳ Images: Not yet added to article
+⏳ Deployment: Ready for sandbox
 
-```bash
-npm run deploy
-```

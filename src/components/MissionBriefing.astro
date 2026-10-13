@@ -1,0 +1,108 @@
+---
+/* Mission briefing: comic-p01-intro as horizontal scrollable strip */
+---
+
+<section class="mission-briefing">
+  <div class="briefing-header">
+    <h2>MISSION BRIEFING</h2>
+    <p>Year 2194. The war ended. But the protocol remained. A reactivated infiltrator unit awakens to a human distress signal: <em>"…if anyone can hear this… we are still here…"</em></p>
+  </div>
+  
+  <div class="comic-strip-scroll">
+    <img 
+      src="/assets/comic-p01-intro.webp" 
+      alt="Comic: Year 2194, Iron Hunt protocol, DR4W unit inactive, distress signal, awakening sequence"
+      data-pixelated
+      loading="lazy"
+    />
+  </div>
+  
+  <div class="briefing-promise">
+    <p><strong>No math required.</strong> By the end you'll understand:</p>
+    <ul>
+      <li>What an LLM actually is (and isn't)</li>
+      <li>How it gets turned into an agent that acts in the world</li>
+      <li>The tooling around it (harnesses, rules, workflows, MCP)</li>
+      <li>Why context, tokens, and temperature matter</li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .mission-briefing {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--panel) 0%, rgba(34, 199, 176, 0.05) 100%);
+    border: 2px dashed var(--signal);
+    border-radius: 2px;
+  }
+  
+  .briefing-header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .briefing-header h2 {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    border: none;
+    padding: 0;
+    color: var(--signal);
+  }
+  
+  .briefing-header p {
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  
+  .briefing-header em {
+    color: var(--signal);
+    font-style: italic;
+  }
+  
+  .comic-strip-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 1rem 0;
+    margin: 1.5rem 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .comic-strip-scroll img {
+    display: block;
+    margin: 0;
+    min-width: 100%;
+    height: auto;
+  }
+  
+  .briefing-promise {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px dashed var(--signal);
+  }
+  
+  .briefing-promise strong {
+    color: var(--signal);
+  }
+  
+  .briefing-promise ul {
+    margin: 1rem 0 0;
+    padding-left: 1.5rem;
+  }
+  
+  .briefing-promise li {
+    margin: 0.5rem 0;
+    color: var(--text);
+  }
+  
+  @media (max-width: 768px) {
+    .mission-briefing {
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    
+    .briefing-header p {
+      font-size: 0.95rem;
+    }
+  }
+</style>
