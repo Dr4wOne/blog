@@ -4,7 +4,7 @@ Updated: 2026-10-13 04:30   Mode: NEW   Stack: Astro + Cloudflare Pages
 Architecture level: small service (static site)
 
 ## Current phase
-**3 Rewrite to standard** (✅ COMPLETE - 100% refactored to SOLID/Clean Code standards)
+**4 Sandbox deploy** (🔄 IN PROGRESS - GitHub Actions CI/CD configured, deployment wrangler-ready)
 
 ## Status
 | Phase | State | Notes |
@@ -13,10 +13,37 @@ Architecture level: small service (static site)
 | 1 Plan | ✅ done | 8-part article structure, diagrams, color system |
 | 2 POC | ✅ done | All 8 parts rendering locally at localhost:4321 |
 | 3 Rewrite | ✅ done | All components refactored to use constants; zero hardcoded values; build passes |
-| 4 Sandbox deploy | ⏳ pending | After Phase 3 refactoring complete |
+| 4 Sandbox deploy | 🔄 in progress | GitHub Actions + wrangler configured; auto-deploy to blog-sbx.dr4w.io ready |
 | 5 Online verification | ⏳ pending | Smoke test against blog-sbx.dr4w.io |
 | 6 Prod gate | ⏳ pending | Review + approval before prod |
 | 7 Report | ⏳ pending | Final delivery report |
+
+## Phase 4 Deployment Summary (In Progress)
+
+**What's been set up:**
+- ✅ GitHub repository created: `https://github.com/Dr4wOne/blog`
+- ✅ SSH remote configured (more reliable than HTTPS in this environment)
+- ✅ `main` branch protected with status checks
+- ✅ `wrangler.toml` created with Cloudflare Pages configuration
+- ✅ `Makefile` created for CI/CD quality gates (lint, test, build)
+- ✅ CI/CD workflows in `.github/workflows/`:
+  - `ci.yml` — runs on PR and push to main
+  - `deploy.yml` — auto-deploys to sandbox, manual dispatch for prod
+- ✅ GitHub environments created (`sandbox`, `prod`)
+- ✅ Cloudflare secrets set at environment level
+- ✅ GitHub variables set (`BASE_DOMAIN`, `AWS_REGION`)
+- ✅ GitHub setup documentation created (`docs/GITHUB_SETUP.md`)
+
+**What's ready:**
+- Deployment pipeline fully configured
+- Build succeeds with zero warnings
+- All code pushed to GitHub main branch
+- CI/CD workflows configured for auto-deployment
+
+**Next steps:**
+1. Monitor latest GitHub Actions run for successful deployment
+2. Verify site is live at https://blog-sbx.dr4w.io
+3. Run Phase 5 (online verification) with smoke tests
 
 ## Phase 3 Refactoring Summary (Complete)
 **All hardcoded values extracted to constants; SOLID + Clean Code applied.**
