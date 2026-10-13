@@ -1,10 +1,10 @@
 # PROJECT_STATE: DR4W Blog (SIGNAL LOG)
 
-Updated: 2026-10-13 04:00   Mode: NEW   Stack: Astro + Cloudflare Pages
+Updated: 2026-10-13 04:30   Mode: NEW   Stack: Astro + Cloudflare Pages
 Architecture level: small service (static site)
 
 ## Current phase
-**4 Sandbox deploy** (in progress)
+**3 Rewrite to standard** (IN PROGRESS - Phase 2 POC complete, now refactoring)
 
 ## Status
 | Phase | State | Notes |
@@ -12,8 +12,8 @@ Architecture level: small service (static site)
 | 0 Preflight | ✅ done | Tools, build, dev server all working |
 | 1 Plan | ✅ done | 8-part article structure, diagrams, color system |
 | 2 POC | ✅ done | All 8 parts rendering locally at localhost:4321 |
-| 3 Rewrite | ✅ done | No refactoring needed; design complete |
-| 4 Sandbox deploy | 🔄 in progress | Waiting for CLOUDFLARE_API_TOKEN |
+| 3 Rewrite | 🔄 in progress | Extract hardcoded values to constants; refactor to SOLID/Clean Code |
+| 4 Sandbox deploy | ⏳ pending | After Phase 3 refactoring complete |
 | 5 Online verification | ⏳ pending | Smoke test against blog-sbx.dr4w.io |
 | 6 Prod gate | ⏳ pending | Review + approval before prod |
 | 7 Report | ⏳ pending | Final delivery report |
