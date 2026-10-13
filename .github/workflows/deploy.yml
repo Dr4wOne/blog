@@ -13,6 +13,7 @@ on:
         default: sandbox
 
 permissions:
+  id-token: write # OIDC to AWS
   contents: read
 
 concurrency:
@@ -27,6 +28,7 @@ jobs:
       TARGET: ${{ github.event.inputs.target || 'sandbox' }}
       PROJECT: ${{ github.event.repository.name }}
       BASE_DOMAIN: ${{ vars.BASE_DOMAIN }}
+      AWS_REGION: ${{ vars.AWS_REGION }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
@@ -37,14 +39,36 @@ jobs:
         run: echo "prod deploys come from main only" && exit 1
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
+      - uses: hashicorp/setup-terraform@v3
+        if: hashFiles('infra/*.tf') != ''
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: hashFiles('infra/*.tf') != ''
+        with:
+          role-to-assume: ${{ env.TARGET == 'prod' && vars.AWS_ROLE_PROD || vars.AWS_ROLE_SANDBOX }}
+          aws-region: ${{ vars.AWS_REGION }}
       - name: Quality gate
         run: |
           [ -f package.json ] && npm ci || true
           for t in lint test build; do
             if grep -qE "^${t}:" Makefile 2>/dev/null; then make "$t"; fi
           done
-          npm run build
-      - name: Cloudflare Pages
+      - name: Terraform
+        if: hashFiles('infra/*.tf') != ''
+        run: |
+          set -euo pipefail
+          host="$PROJECT-sbx.$BASE_DOMAIN"; [ "$TARGET" = prod ] && host="$PROJECT.$BASE_DOMAIN"
+          terraform -chdir=infra init -input=false \
+            -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
+            -backend-config="key=$PROJECT/$TARGET.tfstate" \
+            -backend-config="region=$AWS_REGION" \
+            -backend-config="use_lockfile=true"
+          vars=(-var "project=$PROJECT" -var "env=$TARGET" -var "region=$AWS_REGION")
+          if grep -qs 'variable "permissions_boundary_arn"' infra/*.tf; then
+            vars+=(-var "permissions_boundary_arn=${{ vars.AGENT_BOUNDARY_POLICY_ARN }}")
+          fi
+          terraform -chdir=infra plan -input=false -out=tfplan "${vars[@]}"
+          terraform -chdir=infra apply -input=false -auto-approve tfplan
+      - name: Cloudflare Workers or Pages
         run: |
           set -euo pipefail
           cfg=""; for f in wrangler.toml wrangler.jsonc wrangler.json; do [ -f "$f" ] && cfg="$f" && break; done
@@ -61,6 +85,9 @@ jobs:
             curl -sS -X POST -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" \
               "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records" \
               --data "{\"type\":\"CNAME\",\"name\":\"$host\",\"content\":\"$name.pages.dev\",\"proxied\":true}" >/dev/null || true
+          else
+            env_name=sandbox; [ "$TARGET" = prod ] && env_name=production
+            npx --yes wrangler deploy --env "$env_name"
           fi
       - name: Smoke test
         run: |
