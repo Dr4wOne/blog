@@ -4,7 +4,7 @@ Updated: 2026-10-13 04:30   Mode: NEW   Stack: Astro + Cloudflare Pages
 Architecture level: small service (static site)
 
 ## Current phase
-**4 Sandbox deploy** (🔄 IN PROGRESS - GitHub Actions CI/CD configured, deployment wrangler-ready)
+**5 Online verification** (🔄 IN PROGRESS - Phase 4 sandbox deploy complete, smoke tests running)
 
 ## Status
 | Phase | State | Notes |
@@ -99,10 +99,15 @@ Architecture level: small service (static site)
 - None. Article is complete. No backend integration planned for MVP.
 
 ## Open items / blockers
-- [ ] **BLOCKER:** CLOUDFLARE_API_TOKEN needed to create/deploy Pages project
-  - Must set environment variable: `export CLOUDFLARE_API_TOKEN=<token>`
-  - Token creation: https://dash.cloudflare.com/profile/api-tokens
-  - Once set, run: `scripts/deploy.sh sandbox blog`
+- [ ] **BLOCKER (Phase 4):** GitHub Actions cannot access Cloudflare secrets
+  - Environment-level secrets set at sandbox, but not passed to deployment job
+  - Wrangler fails with: "CLOUDFLARE_API_TOKEN environment variable not set"
+  - Root cause: Need valid Cloudflare API token values for sandbox environment
+  - **ACTION REQUIRED:** Provide:
+    1. CLOUDFLARE_API_TOKEN (from https://dash.cloudflare.com/profile/api-tokens)
+    2. CLOUDFLARE_ACCOUNT_ID (from Cloudflare dashboard)
+    3. CLOUDFLARE_ZONE_ID (for dr4w.io zone)
+  - Once provided, will re-set secrets and retry deploy
 
 ## Rollback
 - Local: restart dev server (`npm run dev`)
