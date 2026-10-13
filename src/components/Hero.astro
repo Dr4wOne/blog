@@ -1,4 +1,6 @@
 ---
+import { LAYOUT, BREAKPOINTS } from '../constants/layout';
+
 interface Props {
   title: string;
   subtitle: string;
@@ -9,7 +11,6 @@ const { title, subtitle, readingTime } = Astro.props;
 ---
 
 <section class="hero">
-  <!-- Subtle hero accent (faded game sprite) -->
   <div class="hero-accent">
     <img
       src="/assets/sprite-hero-dark.webp"
@@ -28,11 +29,22 @@ const { title, subtitle, readingTime } = Astro.props;
   </div>
 </section>
 
-<style>
+<style define:vars={{
+  heroAccentSize: '600px',
+  heroAccentOpacity: '0.05',
+  heroAccentBlur: '20px',
+  h1FontSize: '3rem',
+  h1LineHeight: '1.1',
+  subtitleFontSize: '1.2rem',
+  metaFontSize: '0.95rem',
+  heroTopPadding: '4rem',
+  heroBottomPadding: '3rem',
+  heroMarginBottom: '3rem',
+}}>
   .hero {
-    padding: 4rem 0 3rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    margin-bottom: 3rem;
+    padding: var(--heroTopPadding) 0 var(--heroBottomPadding);
+    border-bottom: 1px solid rgba(255, 255, 255, var(--heroAccentOpacity));
+    margin-bottom: var(--heroMarginBottom);
     position: relative;
     overflow: hidden;
   }
@@ -41,11 +53,11 @@ const { title, subtitle, readingTime } = Astro.props;
     position: absolute;
     top: -20%;
     right: -10%;
-    width: 600px;
-    height: 600px;
-    opacity: 0.05;
+    width: var(--heroAccentSize);
+    height: var(--heroAccentSize);
+    opacity: var(--heroAccentOpacity);
     pointer-events: none;
-    filter: blur(20px);
+    filter: blur(var(--heroAccentBlur));
   }
 
   .hero-accent img {
@@ -63,12 +75,12 @@ const { title, subtitle, readingTime } = Astro.props;
 
   h1 {
     margin: 0 0 1.5rem;
-    font-size: 3rem;
-    line-height: 1.1;
+    font-size: var(--h1FontSize);
+    line-height: var(--h1LineHeight);
   }
 
   .subtitle {
-    font-size: 1.2rem;
+    font-size: var(--subtitleFontSize);
     color: var(--text-muted);
     line-height: 1.6;
     margin: 0 0 1.5rem;
@@ -80,7 +92,7 @@ const { title, subtitle, readingTime } = Astro.props;
     align-items: center;
     gap: 1rem;
     margin-top: 1.5rem;
-    font-size: 0.95rem;
+    font-size: var(--metaFontSize);
     color: var(--text-muted);
   }
 
