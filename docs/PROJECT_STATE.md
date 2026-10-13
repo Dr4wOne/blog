@@ -91,11 +91,12 @@ Architecture level: small service (static site)
 - 2026-10-13: Centralized constants in src/constants/ — single source of truth for all UI values, colors, text, spacing
 
 ## Environments
-| Env | URL | Hosting | Resources | Cost/month |
-|---|---|---|---|---|
-| local | localhost:4321 | dev server | — | $0 |
-| sandbox | blog-sbx.dr4w.io | Cloudflare Pages | Pages project | ~$0 (free tier) |
-| prod | blog.dr4w.io | Cloudflare Pages | Pages project | ~$0 (free tier) |
+| Env | URL | Status | Hosting | Resources | Cost/month |
+|---|---|---|---|---|---|
+| local | localhost:4321 | ✅ working | dev server | — | $0 |
+| sandbox | https://b3291982.blog-sbx.pages.dev | ✅ working | Cloudflare Pages | Pages project | ~$0 (free tier) |
+| sandbox custom | blog-sbx.dr4w.io | ⚠️ DNS routes but returns empty shell | Cloudflare Pages | Pages project | ~$0 (free tier) |
+| prod | blog.dr4w.io | ⏳ not deployed yet | Cloudflare Pages | Pages project | ~$0 (free tier) |
 
 ## Test evidence
 - **Phase 2 (local):** `npm run dev` → page renders at localhost:4321 with all 8 parts + diagrams ✅
