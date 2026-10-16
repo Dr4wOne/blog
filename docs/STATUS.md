@@ -27,16 +27,16 @@ Update this file with `/handoff` at the end of every session.
 ## Known issues
 | Item | Impact | Where |
 |---|---|---|
-| Article LCP is 1.2–1.35 s in Lighthouse's **simulated** throttling (target < 1.0 s); 0.90 s with real packet-level throttling | The `lighthouse` judge reports it as a fail for long articles; readers are not affected | [judges.md](judges.md) → Known limit |
 | `card-rows`, `size-count` and `still-page` warnings from the taste-skill gate (not fails) | Cosmetic: figures and widgets add font sizes; the home page has little motion by design | `src/components/figures/` |
 | Prototype archive: p03 article and p06 home each keep one gate FAIL | Archive only; the chosen design passes | [prototypes/README.md](../prototypes/README.md) |
 
 ## Recent decisions
-1. [0008 English only](decisions/0008-english-only.md)
-2. [0007 The landing page reads `feed.json` at build time](decisions/0007-landing-feed.md)
-3. [0006 Design rules from taste-skill, pinned to a commit](decisions/0006-taste-skill.md)
-4. [0005 A clean editorial design replaces the "signal log" theme](decisions/0005-editorial-design.md) (Essay chosen 2026-10-15)
-5. [0004 Cloudflare Workers static assets, deployed like dr4w](decisions/0004-workers-static-assets.md)
-6. [0003 No preview or sandbox environment](decisions/0003-no-sandbox.md)
-7. [0002 URLs use issue numbers](decisions/0002-issue-number-urls.md)
-8. [0001 The blog stays its own repo](decisions/0001-own-repo.md)
+1. [0009 Article LCP is judged with real throttling](decisions/0009-article-lcp-measurement.md)
+2. [0008 English only](decisions/0008-english-only.md)
+3. [0007 The landing page reads `feed.json` at build time](decisions/0007-landing-feed.md)
+4. [0006 Design rules from taste-skill, pinned to a commit](decisions/0006-taste-skill.md)
+5. [0005 A clean editorial design replaces the "signal log" theme](decisions/0005-editorial-design.md) (Essay chosen 2026-10-15)
+6. [0004 Cloudflare Workers static assets, deployed like dr4w](decisions/0004-workers-static-assets.md)
+7. [0003 No preview or sandbox environment](decisions/0003-no-sandbox.md)
+8. [0002 URLs use issue numbers](decisions/0002-issue-number-urls.md)
+9. [0001 The blog stays its own repo](decisions/0001-own-repo.md)

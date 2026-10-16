@@ -12,5 +12,6 @@ One file per decision. Format: Context · Decision · Consequences · Status.
 | 0006 | [Design rules from taste-skill, pinned to a commit](0006-taste-skill.md) | 2026-10-15 | Accepted |
 | 0007 | [The landing page reads `feed.json` at build time](0007-landing-feed.md) | 2026-10-15 | Accepted |
 | 0008 | [English only](0008-english-only.md) | 2026-10-15 | Accepted |
+| 0009 | [Article LCP is judged with real throttling](0009-article-lcp-measurement.md) | 2026-10-16 | Accepted |
 
 New decision: copy the shape of any file, take the next number, link it from `docs/STATUS.md`.

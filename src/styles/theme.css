@@ -363,3 +363,12 @@ h1 {
 .page p {
   margin: 0 0 1.15em;
 }
+
+/* Long articles: skip layout and paint of blocks far below the screen until they approach it.
+   Keeps the first paint fast on slow phones; sizes are remembered once rendered (auto). */
+.prose > :is(.fig, .widget, .footnotes, table),
+.prose > p:nth-of-type(n + 6),
+.prose > :is(ul, ol):nth-of-type(n + 3) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 12rem;
+}

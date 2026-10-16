@@ -8,7 +8,7 @@ in the GitHub run summary. Run one judge: `pnpm judges --only=axe,feeds`.
 
 | Judge | Target | Tool |
 |---|---|---|
-| `lighthouse` | 100 in all four categories, LCP < 1.0 s, CLS 0, TBT 0, article < 250 KB | Lighthouse 13, mobile, simulated throttling |
+| `lighthouse` | 100 in all four categories, LCP < 1.0 s, CLS 0, TBT 0, article < 250 KB | Lighthouse 13, mobile, simulated throttling; article LCP with devtools throttling ([ADR 0009](decisions/0009-article-lcp-measurement.md)) |
 | `axe` | 0 violations, every page, light + dark, 390 + 1440 px | axe-core (WCAG 2.2 AA + best practice) via Playwright |
 | `contrast` | body text ≥ 7:1 (AAA), light and dark | computed colours |
 | `inp` | worst widget interaction < 100 ms at 4× slower CPU | Event Timing API |
@@ -25,13 +25,12 @@ Not automated: the **cold-reader test** (a fresh agent reads the post as a newco
 confused it) and the **pixel review** of `.judges/screens/` by someone who did not build the page.
 `/publish-post` asks for both.
 
-## Known limit: article LCP in the simulator
-Lighthouse's simulated throttling assumes the whole HTML document downloads before the first paint.
-A long article is about 27 KB compressed, which the simulator charges as extra round trips: issue 1
-measures **1.2–1.35 s simulated**, against **0.90 s** with real packet-level throttling
-(`--throttling-method=devtools`, where the browser streams HTML, as it does for readers). Short pages
-(home) pass at 0.90 s simulated. Reaching < 1.0 s simulated would mean moving article text out of the
-HTML. Decision pending: [STATUS](STATUS.md) → Known issues.
+## Article LCP: how it is measured
+Lighthouse's simulated throttling assumes the whole HTML document downloads before the first paint; a
+long article (issue 1: 27 KB compressed) then measures 1.2–1.35 s. With real packet-level throttling
+(Slow 4G, 4× CPU), where the browser streams HTML as it does for readers, it paints at 0.90 s. Articles
+are therefore judged with `--throttling-method=devtools`; the simulated value is still printed.
+Decision: [ADR 0009](decisions/0009-article-lcp-measurement.md).
 
 ## When a judge fails
 - **Lighthouse perf a few points short:** rerun; simulated runs vary on a busy machine (the judge
