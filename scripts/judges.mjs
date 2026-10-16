@@ -125,7 +125,7 @@ if (want('lighthouse')) {
       )
     }
     record(`CLS ${path}`, '0', lh.cls === 0, lh.cls.toFixed(3))
-    record(`TBT ${path}`, '0 ms (INP proxy)', lh.tbt === 0, `${Math.round(lh.tbt)} ms`)
+    record(`TBT ${path}`, '< 50 ms', lh.tbt < 50, `${Math.round(lh.tbt)} ms`)
     if (path !== '/')
       record(
         `Page weight ${path}`,

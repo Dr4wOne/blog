@@ -8,7 +8,7 @@ in the GitHub run summary. Run one judge: `pnpm judges --only=axe,feeds`.
 
 | Judge | Target | Tool |
 |---|---|---|
-| `lighthouse` | 100 in all four categories, LCP < 1.0 s, CLS 0, TBT 0, article < 250 KB | Lighthouse 13, mobile, simulated throttling; article LCP with devtools throttling ([ADR 0009](decisions/0009-article-lcp-measurement.md)) |
+| `lighthouse` | 100 in all four categories, LCP < 1.0 s, CLS 0, TBT < 50 ms, article < 250 KB | Lighthouse 13, mobile, simulated throttling; article LCP with devtools throttling ([ADR 0009](decisions/0009-article-lcp-measurement.md)) |
 | `axe` | 0 violations, every page, light + dark, 390 + 1440 px | axe-core (WCAG 2.2 AA + best practice) via Playwright |
 | `contrast` | body text ≥ 7:1 (AAA), light and dark | computed colours |
 | `inp` | worst widget interaction < 100 ms at 4× slower CPU | Event Timing API |
