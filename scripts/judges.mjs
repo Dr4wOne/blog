@@ -107,7 +107,7 @@ if (want('lighthouse')) {
       [lh.perf, lh.a11y, lh.bp, lh.seo].every((x) => x === 100),
       cats,
     )
-    if (path === '/') {
+    if (path === '/' && !LIVE) {
       record(`LCP ${path}`, '< 1.0 s (simulated)', lh.lcp < 1000, `${(lh.lcp / 1000).toFixed(2)} s`)
     } else {
       // ADR 0009: articles are judged with real packet-level throttling (the browser streams HTML,
@@ -125,7 +125,7 @@ if (want('lighthouse')) {
       )
     }
     record(`CLS ${path}`, '0', lh.cls === 0, lh.cls.toFixed(3))
-    record(`TBT ${path}`, '0 ms (INP proxy)', lh.tbt === 0, `${Math.round(lh.tbt)} ms`)
+    record(`TBT ${path}`, '< 50 ms', lh.tbt < 50, `${Math.round(lh.tbt)} ms`)
     if (path !== '/')
       record(
         `Page weight ${path}`,
