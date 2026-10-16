@@ -21,9 +21,9 @@ Light and dark follow the reader's system setting (no toggle, so the home page n
 
 ## Type
 One family: **Source Serif 4** (self-hosted, variable weight, subset at build: 400–700 upright, 400 italic,
-about 35 KB). It loads with `font-display: optional` and no preload: on a fast connection it shows from
-the first paint; on a slow phone the first page uses the metric-matched serif fallback (no layout shift,
-text at once) and later pages use the cached font. Code uses the system monospace. Five steps only:
+about 35 KB). The upright face is preloaded and uses `font-display: optional`: it shows from the first
+paint, and if it ever arrives late the metric-matched fallback stays for that page (no layout shift).
+Don't remove the preload: without it most first visits render in the fallback. Code uses the system monospace. Five steps only:
 
 | Step | Size | Use |
 |---|---|---|
