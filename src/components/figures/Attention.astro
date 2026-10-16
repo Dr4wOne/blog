@@ -1,7 +1,7 @@
 ---
 import Figure from './Figure.astro'
 
-// Illustrative weights for one attention head while processing "it" (they sum to 100).
+// Illustrative attention scores for one head while processing "it" (they sum to 100).
 const words = [
   ['I', 3],
   ['took', 2],
@@ -17,7 +17,7 @@ const TX = 300
 const TY = 152
 ---
 
-<Figure caption="Attention while the model processes “it”. Each line’s thickness is how much the model draws on that word (in one “attention head”, explained below). The weights are illustrative; a real model runs many heads in every layer, and each token can only look at tokens before it.">
+<Figure caption="Attention while the model processes “it”. Each line’s thickness is how much the model draws on that word (in one “attention head”, explained below). The scores are illustrative; a real model runs many heads in every layer, and each token can only look at tokens before it.">
   <svg viewBox="0 0 420 304" role="img" aria-labelledby="f-att-t f-att-d">
     <title id="f-att-t">One attention head resolving “it”</title>
     <desc id="f-att-d">{`For the sentence “I took the dog to the vet because it”, the word “it” draws most on “dog” (${words[3][1]} percent), then “vet” (${words[6][1]} percent), and little on the other words.`}</desc>

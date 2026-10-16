@@ -32,10 +32,10 @@ Here is the whole argument in one line, so you know where we are going: **a mode
 - **Token:** a small piece of text, the unit the model reads and writes.
 - **Context:** everything the model sees on one call (its *context window*).
 - **Agent:** a model running in a loop where it can ask for actions, see the results and continue.
-- **Harness:** the program that runs that loop and carries out the actions. "Coding agent" is the everyday name for the whole product, harness plus model, such as Claude Code.
+- **Harness:** the program that runs that loop and carries out the actions. Claude Code, Codex and Cursor are harnesses; one of them running a model is what people call a **coding agent**.
 - **Provider:** the company that hosts a model and sells access to it through an API.
 - **MCP:** a standard way to plug tools into a harness.
-- **Embeddings** and **RAG** (retrieval-augmented generation): how the right documents get in front of the model.
+- **Embedding:** a list of numbers that stands for the meaning of a text. **RAG** (retrieval-augmented generation) uses embeddings to put the right documents in front of the model.
 
 ## What is an LLM?
 
@@ -150,7 +150,7 @@ Once meaning becomes a position, a computer can do things exact-word search can'
 - **Give agents a memory:** store notes, then fetch the relevant ones by closeness.
 - **Retrieval-augmented generation (RAG),** below.
 
-"Close" usually means the two vectors point in nearly the same direction, a measure called *cosine similarity*. "Same direction" is the precise version of "near" on the map. The individual numbers aren't human-readable topics; only how close two vectors are matters.
+"Close" usually means the two vectors point in nearly the same direction, a measure called *cosine similarity*. Direction matters more than distance because a longer text tends to produce a longer vector without changing what it's about; the 2-D map simply shows "about the same topic" as "near". The individual numbers aren't human-readable topics; only how close two vectors are matters.
 
 ### How RAG uses embeddings
 
@@ -222,7 +222,7 @@ A transformer reads all the tokens of a text **in parallel**: every token is pro
 
 ### The core idea
 
-**Inference** means **using** a trained model to produce an answer, as opposed to training it. Every message you send runs an inference: the model takes everything in its **context window** and generates the reply one token at a time (see [transformers](#transformers-and-attention)) until it emits a token that means "done". Each inference stands alone: the model keeps nothing between calls.
+**Inference** means **using** a trained model to produce an answer, as opposed to training it. Every message you send runs an inference: the model takes everything in its **context window** and generates the reply one token at a time (see [transformers](#transformers-and-attention)) until it emits a token that means "done". Each inference stands alone: the model keeps nothing between calls. (Providers may cache work to save time and money, but that never changes what the model knows.)
 
 ### The context window is a whiteboard
 
@@ -240,7 +240,7 @@ In a coding tool, your message, the open files, the conversation history and the
 
 <Aside title="Deep dive: why context windows have a limit">
 
-In a standard transformer, every token is compared with every earlier token, so doubling the text roughly **quadruples** the attention work, and memory grows with it. That's a big part of why each model has a maximum number of tokens it can handle at once: the context window. Engineering has pushed that limit a long way, for example by keeping the intermediate vectors already computed for earlier tokens instead of recomputing them for every new token (the *KV cache*; prompt caching is a provider keeping this cache between your calls) and by computing attention in smarter ways,[^flash][^vllm] so many current models accept hundreds of thousands of tokens, some a million or more.
+In a standard transformer, every token is compared with every earlier token, so doubling the text roughly **quadruples** the attention work, and memory grows with it. That's a big part of why each model has a maximum number of tokens it can handle at once: the context window. Engineering has pushed that limit a long way, for example by keeping the intermediate vectors already computed for earlier tokens instead of recomputing them for every new token (the *cache*; prompt caching is a provider keeping this cache between your calls) and by computing attention in smarter ways,[^flash][^vllm] so many current models accept hundreds of thousands of tokens, some a million or more.
 
 </Aside>
 
@@ -249,7 +249,7 @@ In a standard transformer, every token is compared with every earlier token, so 
 When the model has its list of likely next tokens (see [transformers](#transformers-and-attention)), it doesn't simply take the top one every time. It makes a **weighted draw**, and a setting called **temperature** controls how bold that draw is:
 
 - **Low temperature:** the favourite almost always wins; at zero, it always does, in principle. Answers are **consistent and predictable**, good for facts and code.
-- **High temperature:** less likely tokens get a real chance. (Most APIs accept values from 0 to 1 or 0 to 2.) Answers are **more varied**, good for brainstorming, and more likely to go off the rails.
+- **High temperature:** less likely tokens get a real chance. (Most APIs accept values from 0 to 1 or 0 to 2; above 1, the odds are flattened beyond the model's own.) Answers are **more varied**, good for brainstorming, and more likely to go off the rails.
 
 <Temperature />
 
@@ -265,7 +265,7 @@ A **prompt** is the text you send. A few basics solve most problems:
 - **Ask for reasoning on hard problems.** Asking the model to think step by step used to help a lot;[^cot] "reasoning" models now do this on their own before answering.
 - **Separate instructions from data.** Make it obvious which part is your request and which part is material to work on. That's also a **security** measure (below).
 
-Many products have two levels of prompt: the **system prompt**, the product's own standing instructions ("you are a support assistant; never reveal customer data"), and the **user prompt**, what you type. The system prompt frames the whole conversation. In coding tools, **rules files** play that role (see [tooling](#the-tooling-around-the-harness)).
+Many products have two levels of prompt: the **system prompt**, the product's own standing instructions ("you are a support assistant; never reveal customer data"), and the **user prompt**, what you type. The system prompt frames the whole conversation. In coding tools, **rules files** are added after the product's own system prompt and act as a project-level one (see [tooling](#the-tooling-around-the-harness)).
 
 ### Hallucination: why AI makes things up
 
@@ -351,7 +351,7 @@ An agent without brakes can go in circles and **burn time and money**: every tur
 
 The reason-act-observe loop has a name: **ReAct**.[^react] Writing down a thought before each action, then reading the result, is what lets an agent correct itself midway.
 
-**Many agents** (a researcher, a coder, a reviewer, or ten copies working in parallel) buy speed and separation of roles, and pay for it in tokens and coordination. Practical guides recommend starting with the simplest setup that works and adding agents only for a concrete reason.[^effective]
+**Many agents** (a researcher, a coder, a reviewer, or ten copies working in parallel, each its own harness session with its own context window) buy speed and separation of roles, and pay for it in tokens and coordination. Practical guides recommend starting with the simplest setup that works and adding agents only for a concrete reason.[^effective]
 
 </Aside>
 
@@ -373,7 +373,7 @@ The model completes text. It does **not** open files, run commands, remember you
 
 <HarnessAnatomy />
 
-A coding harness, such as Claude Code, OpenAI's Codex or Cursor's agent:
+A coding harness, such as Claude Code, OpenAI's Codex or Cursor:
 
 - **Reads your project:** files, structure, what's open in the editor.
 - **Builds the context:** gathers your message, relevant files and rules, and sends them to the model.
@@ -390,7 +390,7 @@ Three things that often get mixed up:
 | --- | --- | --- |
 | **Model** | the "brain" that generates text | GPT, Claude, Gemini |
 | **Harness** | the program around the model; for coding tools, it also runs the agent loop | Claude Code, Codex, Cursor, Devin |
-| **Provider** | who hosts the model and serves it through an API | OpenAI, Anthropic, Google, a cloud vendor |
+| **Provider** | who hosts the model and serves it through an API | OpenAI, Anthropic, Google; or a cloud such as AWS, which serves Claude through its own API |
 
 They're **independent pieces that snap together**: many harnesses let you pick the model underneath, and the same model is used by many harnesses. Chat apps such as ChatGPT or the Claude app are harnesses too, each built around its maker's models.
 
@@ -398,13 +398,13 @@ They're **independent pieces that snap together**: many harnesses let you pick t
 
 This matters more than it sounds, because **each harness reads its configuration from its own places**, and products rename and replace their harnesses.
 
-In my own setup, Cascade (the agent in the Windsurf editor) and the Devin CLI read their rules from different folders, so a rule written for one silently did nothing in the other.[^devin]
+In my own setup, Cascade (the harness built into the Windsurf editor) and the Devin CLI read their rules from different folders, so a rule written for one silently did nothing in the other.[^devin]
 
 The lesson outlasts the product names. When a rule or a command "doesn't work", first check **which harness** is running and **which files** it reads. The practical habit: keep your rules in **one canonical place** that every harness you use reads, which today usually means an `AGENTS.md` file (see [tooling](#the-tooling-around-the-harness)).
 
 ### Common misconceptions
 
-- **"Claude Code (or Cursor, or Devin) is the AI model."** They're **harnesses**. The model runs underneath and can often be swapped.
+- **"Claude Code (or Cursor, or Devin) is the AI model."** They're **harnesses**; with a model running inside, they make a coding agent. The model can often be swapped.
 - **"The harness thinks."** It doesn't generate text. It organises the work and calls the model. A harness is smart plumbing.
 - **"It doesn't matter where I put my rules."** It matters a lot: each harness reads specific files and folders.
 
@@ -445,7 +445,7 @@ Step-by-step procedures that you start with a **slash command**, so they run the
 
 The **Model Context Protocol** is an open standard for plugging tools and data into an agent.[^mcp] Instead of every integration being a one-off, an **MCP server** (a small program the harness starts on your machine, or a service it reaches over the network) offers **tools** (actions the model can request) and **resources** (data that you or the harness can pull into the context, such as a file or a database schema), and any harness that speaks MCP can use them.
 
-> Every MCP server is also a **way in**. The specification itself says tools amount to arbitrary code execution and need the user's consent. Install servers the way you'd install a dependency with access to your machine.
+> Every MCP server is also a **way in**. The specification itself says tools amount to arbitrary code execution, because a server is a program running with your permissions, and need the user's consent. Install servers the way you'd install a dependency with access to your machine.
 
 ### Spec-driven development and orchestrators
 
@@ -522,7 +522,7 @@ The next issues go deeper: how to design and run all of this with cost, governan
 
 [^effective]: Anthropic, "Building effective agents", 2024. https://www.anthropic.com/engineering/building-effective-agents
 
-[^devin]: Both are from Cognition. Windsurf has since become Devin Desktop, whose newer agent shares the Devin CLI's harness. Devin Desktop documentation, checked 2026-10-15. https://docs.devin.ai/desktop/devin-local
+[^devin]: Both are from Cognition, which has since moved Windsurf onto the Devin CLI's harness. Devin Desktop documentation, checked 2026-10-15. https://docs.devin.ai/desktop/devin-local
 
 [^agentsmd]: AGENTS.md, stewarded by the Agentic AI Foundation (Linux Foundation). https://agents.md
 

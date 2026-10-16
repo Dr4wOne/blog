@@ -63,5 +63,6 @@
 - **Figures and widgets.** All 11 diagrams were redrawn as accessible SVG. The tokenizer is now a real (toy)
   BPE trained on the blog. The temperature widget uses a real softmax and shares its numbers with the
   forward-pass figure. The agent stepper includes an approval step. All three work without JavaScript.
-- **Cold-reader tests.** Four rounds with fresh readers took the findings from 31 to one blocker (agent vs
-  harness), which was then fixed. The fifth round is in [STATUS](STATUS.md).
+- **Cold-reader tests.** Five rounds, each with a fresh reader who knew nothing about LLMs: 31 findings, then 25, 29,
+  one blocker (agent vs harness) and finally **no blockers**, with all six core concepts explained back correctly.
+  Every finding of every round was fixed or answered in the text.
