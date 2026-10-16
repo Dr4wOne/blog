@@ -1,0 +1,38 @@
+---
+import { SITE } from '../../components/data.ts'
+import Page from '../../components/Page.astro'
+import type { HomeProps } from '../../components/types.ts'
+import { fonts } from './fonts.ts'
+import './theme.css'
+
+const { issues, base } = Astro.props as HomeProps
+const [latest, ...rest] = issues
+---
+
+<Page title={`${SITE.name}: writing by ${SITE.author}`} description={SITE.tagline} fonts={fonts} theme="magazine">
+  <header class="site-header">
+    <a class="wordmark" href={`${base}/`}>dr4w</a>
+    <nav aria-label="Site"><a href="#issues">Issues</a><a href={SITE.home}>About</a></nav>
+  </header>
+  <main id="main">
+    {
+      latest && (
+        <a class="cover" href={`${base}${latest.post.path}`}>
+          <span class="cover-num" aria-hidden="true">{latest.post.issue}</span>
+          <div class="cover-text">
+            <h1 class="cover-title">{latest.post.data.title}</h1>
+            <span class="cover-kicker">Issue {latest.post.issue}, {latest.date}</span>
+            <span class="cover-dek">{latest.post.data.summary}</span>
+            <span class="cover-cta">Read the issue · {latest.minutes} minutes</span>
+          </div>
+        </a>
+      )
+    }
+    <section id="issues" class="shelf" aria-labelledby="issues-h">
+      <h2 id="issues-h">The archive</h2>
+      <p class="shelf-intro">{SITE.tagline} Written by {SITE.author}, one long issue at a time.</p>
+      <ol reversed>{[latest, ...rest].filter(Boolean).map((i) => <li><a href={`${base}${i!.post.path}`}><strong>Issue {i!.post.issue}</strong> {i!.post.data.title}</a></li>)}</ol>
+    </section>
+  </main>
+  <footer class="site-footer"><p>{SITE.author} · <a href={SITE.home}>dr4w.io</a></p></footer>
+</Page>

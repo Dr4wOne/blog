@@ -1,0 +1,42 @@
+---
+import { SITE } from '../../components/data.ts'
+import Page from '../../components/Page.astro'
+import type { HomeProps } from '../../components/types.ts'
+import { fonts } from './fonts.ts'
+import './theme.css'
+
+const { issues, base } = Astro.props as HomeProps
+---
+
+<Page title={`${SITE.name}: writing by ${SITE.author}`} description={SITE.tagline} fonts={fonts} theme="index">
+  <header class="site-header frame"><a class="wordmark" href={`${base}/`}>dr4w</a><p>Writing by {SITE.author}. <a href={SITE.home}>About</a></p></header>
+  <main id="main" class="frame">
+    <h1 class="visually-hidden">Every issue, with its sections</h1>
+    <ol class="toc-home" reversed>
+      {
+        issues.map((i) => (
+          <li class="issue">
+            <p class="n" aria-hidden="true">{i.post.issue}</p>
+            <div class="issue-body">
+              <h2>
+                <a href={`${base}${i.post.path}`}>{i.post.data.title}</a>
+              </h2>
+              <p class="issue-meta">
+                Issue {i.post.issue} · {i.date} · {i.minutes} min
+              </p>
+              <p class="issue-sum">{i.post.data.summary}</p>
+              <ol class="sections">
+                {i.toc.map((h) => (
+                  <li>
+                    <a href={`${base}${i.post.path}#${h.slug}`}>{h.text}</a>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </main>
+  <footer class="site-footer frame"><p>{SITE.author} · <a href={SITE.home}>dr4w.io</a></p></footer>
+</Page>

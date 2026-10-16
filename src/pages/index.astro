@@ -1,459 +1,68 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import CornerFadingImages from '../components/CornerFadingImages.astro';
+import Base from '../layouts/Base.astro'
+import { dateFormat, readingMinutes } from '../lib/article.ts'
+import { publishedPosts } from '../lib/posts.ts'
+import { SITE } from '../site.ts'
 
-const allPosts = await getCollection('blog');
-const posts = allPosts
-  .filter(p => !p.data.draft)
-  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
-
-const featuredPosts = posts.slice(0, 6);
+const posts = await publishedPosts()
+const [latest] = posts
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Blog',
+  name: SITE.title,
+  url: `${SITE.url}/`,
+  description: SITE.description,
+  inLanguage: 'en',
+  author: {
+    '@type': 'Person',
+    name: SITE.author.name,
+    url: SITE.author.url,
+    jobTitle: SITE.author.jobTitle,
+  },
+}
 ---
 
-<BaseLayout title="Signal Log — DR4W" description="Technical essays on AI, systems, and engineering">
-  <!-- Corner fading images -->
-  <CornerFadingImages />
-
-  <div class="blog-hero">
-    <!-- Hero accent image (fading) -->
-    <div class="hero-accent">
-      <img
-        src="/assets/sprite-hero-dark.webp"
-        alt=""
-        role="presentation"
-      />
-    </div>
-    <div class="hero-content">
-      <h1>Signal Log</h1>
-      <p class="hero-subtitle">
-        Essays on AI, large language models, agents, harnesses, and the infrastructure that makes them work.
+<Base title="" description={SITE.description} kind="home" jsonLd={jsonLd}>
+  <div class="home">
+    <section class="intro" aria-labelledby="intro-h">
+      <h1 id="intro-h">Notes from Daniel</h1>
+      <p>
+        I’m Daniel Baumann, a software engineer. This is where I write things down properly: how things work, what I’m
+        building, what I’m learning, and whatever else is worth the time to think through.
       </p>
-      <p class="hero-description">
-        A guided exploration of how modern AI systems are built—from tokenization and transformers to agents and the tooling that powers real-world development.
-      </p>
-      <div class="hero-meta">
-        <span>Exploring AI from first principles</span>
-        <span>•</span>
-        <span><a href="https://dr4w.io" target="_blank" rel="noopener noreferrer">Main site</a></span>
-      </div>
-    </div>
-  </div>
-
-  <section class="articles-section">
-    <div class="section-header">
-      <h2>Featured Articles</h2>
-      <p>Latest essays on AI and systems thinking</p>
-    </div>
-
-    <div class="articles-grid">
-      <!-- Featured article: Transmission -->
-      <article class="article-card featured">
-        <div class="featured-badge">Featured</div>
-        <div class="article-header">
-          <h3>
-            <a href="/transmission">AI From the Ground Up: LLMs, Agents, Harnesses and the Tooling Around Them</a>
-          </h3>
-        </div>
-
-        <p class="article-meta">
-          <span class="author">Daniel Baumann</span>
-          <span class="separator">•</span>
-          <span class="date">Oct 15, 2026</span>
-          <span class="separator">•</span>
-          <span class="reading-time">20 min</span>
-        </p>
-
-        <p class="article-summary">
-          A guided tour, with no math, from what an LLM actually is to the agents and tooling people use to get real work done with it.
-        </p>
-
-        <div class="article-tags">
-          <span class="tag">AI</span>
-          <span class="tag">LLMs</span>
-          <span class="tag">Agents</span>
-          <span class="tag">Systems</span>
-        </div>
-
-        <a href="/transmission" class="read-more">
-          Read article →
-        </a>
-      </article>
-
-      {featuredPosts.map(post => (
-        <article class="article-card">
-          <div class="article-header">
-            <h3>
-              <a href={`/${post.slug}`}>{post.data.title}</a>
-            </h3>
-          </div>
-
-          <p class="article-meta">
-            <span class="author">{post.data.author}</span>
-            <span class="separator">•</span>
-            <span class="date">
-              {new Date(post.data.date).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-              })}
-            </span>
-            <span class="separator">•</span>
-            <span class="reading-time">{post.data.readingTime || 5} min</span>
+    </section>
+    {
+      latest && (
+        <article class="latest" aria-labelledby="latest-h">
+          <h2 class="latest-title" id="latest-h">
+            <a href={latest.path}>{latest.data.title}</a>
+          </h2>
+          <p class="issue-line">
+            Latest: Issue {latest.issue} · <time datetime={latest.published.toISOString().slice(0, 10)}>{dateFormat.format(latest.published)}</time> ·{' '}
+            {readingMinutes(latest.body ?? '')} min read
           </p>
-
-          <p class="article-summary">
-            {post.data.summary || post.data.description}
-          </p>
-
-          <div class="article-tags">
-            {post.data.tags.map(tag => (
-              <span class="tag">{tag}</span>
-            ))}
-          </div>
-
-          <a href={`/${post.slug}`} class="read-more">
-            Read article →
+          <p class="latest-summary">{latest.data.summary}</p>
+          <a class="read" href={latest.path}>
+            Read issue {latest.issue}
           </a>
         </article>
-      ))}
-    </div>
-
-    {posts.length > featuredPosts.length && (
-      <div class="view-all">
-        <a href="/archive" class="view-all-link">
-          View all {posts.length} articles →
-        </a>
-      </div>
-    )}
-  </section>
-
-  <section class="cta-section">
-    <div class="cta-content">
-      <h2>More about Daniel</h2>
-      <p>Check out the main site for background, projects, and ways to get in touch.</p>
-      <a href="https://dr4w.io" target="_blank" rel="noopener noreferrer" class="cta-button">
-        Visit dr4w.io →
-      </a>
-    </div>
-  </section>
-</BaseLayout>
-
-<style>
-  .blog-hero {
-    padding: 4rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    margin-bottom: 4rem;
-    position: relative;
-    z-index: 2;
-    overflow: hidden;
-  }
-
-  .hero-accent {
-    position: absolute;
-    top: -15%;
-    right: -5%;
-    width: 500px;
-    height: 500px;
-    opacity: 0.06;
-    pointer-events: none;
-    filter: blur(25px);
-    z-index: 0;
-  }
-
-  .hero-accent img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    image-rendering: pixelated;
-  }
-
-  .hero-content {
-    max-width: 72ch;
-    position: relative;
-    z-index: 1;
-  }
-
-  .blog-hero h1 {
-    font-size: 3.5rem;
-    margin: 0 0 1rem;
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    line-height: 1.1;
-  }
-
-  .hero-subtitle {
-    font-size: 1.5rem;
-    color: var(--text-muted);
-    margin: 0 0 1.5rem;
-    line-height: 1.6;
-    max-width: 60ch;
-  }
-
-  .hero-description {
-    font-size: 1.05rem;
-    color: var(--text);
-    margin: 0 0 1.5rem;
-    line-height: 1.7;
-    max-width: 65ch;
-  }
-
-  .hero-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.95rem;
-    color: var(--text-muted);
-  }
-
-  .hero-meta a {
-    color: var(--accent);
-    text-decoration: none;
-    border-bottom: 1px solid var(--accent);
-    transition: opacity 0.2s;
-  }
-
-  .hero-meta a:hover {
-    opacity: 0.8;
-  }
-
-  .articles-section {
-    margin: 4rem 0;
-    position: relative;
-    z-index: 2;
-  }
-
-  .section-header {
-    margin-bottom: 3rem;
-  }
-
-  .section-header h2 {
-    font-size: 2rem;
-    color: var(--primary);
-    margin: 0 0 0.5rem;
-  }
-
-  .section-header p {
-    font-size: 1.05rem;
-    color: var(--text-muted);
-    margin: 0;
-  }
-
-  .articles-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 2rem;
-    margin: 2rem 0;
-  }
-
-  .article-card {
-    background: rgba(26, 26, 38, 0.6);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 2rem;
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    position: relative;
-  }
-
-  .article-card.featured {
-    border: 1px solid rgba(108, 99, 255, 0.3);
-    background: rgba(108, 99, 255, 0.05);
-    grid-column: 1 / -1;
-  }
-
-  .article-card:hover {
-    border-color: rgba(108, 99, 255, 0.2);
-    background: rgba(26, 26, 38, 0.8);
-    transform: translateY(-4px);
-  }
-
-  .article-card.featured:hover {
-    border-color: rgba(108, 99, 255, 0.5);
-    background: rgba(108, 99, 255, 0.1);
-  }
-
-  .featured-badge {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: linear-gradient(135deg, #6C63FF, #00D9FF);
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .article-header h3 {
-    margin: 0 0 1rem;
-    font-size: 1.25rem;
-  }
-
-  .article-header a {
-    color: var(--text);
-    text-decoration: none;
-    border: none;
-    transition: color 0.2s;
-  }
-
-  .article-header a:hover {
-    color: var(--accent);
-  }
-
-  .article-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 1rem;
-  }
-
-  .author,
-  .date,
-  .reading-time {
-    display: inline;
-  }
-
-  .separator {
-    color: var(--text-dim);
-  }
-
-  .article-summary {
-    flex: 1;
-    font-size: 0.95rem;
-    color: var(--text);
-    line-height: 1.6;
-    margin: 0 0 1rem;
-  }
-
-  .article-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .tag {
-    display: inline-block;
-    background: rgba(108, 99, 255, 0.1);
-    color: var(--primary);
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-family: var(--font-code);
-    border: 1px solid rgba(108, 99, 255, 0.2);
-  }
-
-  .read-more {
-    display: inline-block;
-    color: var(--accent);
-    text-decoration: none;
-    border: none;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    font-size: 0.95rem;
-  }
-
-  .read-more:hover {
-    padding-left: 0.5rem;
-  }
-
-  .view-all {
-    text-align: center;
-    margin-top: 3rem;
-    padding: 2rem;
-  }
-
-  .view-all-link {
-    display: inline-block;
-    padding: 1rem 1.5rem;
-    background: rgba(108, 99, 255, 0.1);
-    border: 1px solid rgba(108, 99, 255, 0.3);
-    border-radius: 8px;
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.2s ease;
-  }
-
-  .view-all-link:hover {
-    border-color: var(--primary);
-    background: rgba(108, 99, 255, 0.15);
-    transform: translateY(-2px);
-  }
-
-  .cta-section {
-    margin: 4rem 0;
-    padding: 3rem;
-    background: rgba(26, 26, 38, 0.6);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-left: 3px solid var(--primary);
-    border-radius: 12px;
-    text-align: center;
-    position: relative;
-    z-index: 2;
-  }
-
-  .cta-content h2 {
-    font-size: 1.75rem;
-    color: var(--primary);
-    margin: 0 0 1rem;
-  }
-
-  .cta-content p {
-    font-size: 1.05rem;
-    color: var(--text);
-    margin: 0 0 1.5rem;
-  }
-
-  .cta-button {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.2s ease;
-  }
-
-  .cta-button:hover {
-    background: var(--primary-soft);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
-  }
-
-  @media (max-width: 768px) {
-    .blog-hero {
-      padding: 2rem 0;
-      margin-bottom: 2rem;
+      )
     }
-
-    .blog-hero h1 {
-      font-size: 2.25rem;
-    }
-
-    .hero-subtitle {
-      font-size: 1.2rem;
-    }
-
-    .articles-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .cta-section {
-      padding: 1.5rem;
-    }
-  }
-</style>
+    <section id="issues" class="index" aria-labelledby="issues-h">
+      <h2 id="issues-h">All issues</h2>
+      <ol>
+        {
+          posts.map((p) => (
+            <li>
+              <span class="n">No. {p.issue}</span>
+              <a href={p.path}>{p.data.title}</a>
+              <time class="when" datetime={p.published.toISOString().slice(0, 10)}>
+                {dateFormat.format(p.published)}
+              </time>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+  </div>
+</Base>

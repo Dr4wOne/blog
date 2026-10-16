@@ -1,0 +1,890 @@
+{
+  "p01": {
+    "pages": {
+      "home": {
+        "lighthouse": {
+          "performance": 99,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1201.0547,
+          "cls": 0.05695193056071315,
+          "tbt": 0,
+          "bytes": 73214
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["still-page"],
+          "messages": [
+            "WARN still-page: Little motion: 13 element(s) moved while the page loaded and scrolled."
+          ]
+        }
+      },
+      "article": {
+        "lighthouse": {
+          "performance": 100,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1500.5043,
+          "cls": 0.005609038057353982,
+          "tbt": 0,
+          "bytes": 131458
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["card-rows", "size-count"],
+          "messages": [
+            "WARN card-rows: 2 rows of identical boxed cards.",
+            "WARN size-count: 11 different font sizes (12, 13, 14, 15, 16, 17, 18, 20, 24, 36, 80)."
+          ]
+        }
+      }
+    },
+    "palette": {
+      "light": {
+        "tokens": {
+          "bg": "#fafafa",
+          "surface": "#efeff0",
+          "ink": "#17171a",
+          "muted": "#55545a",
+          "accent": "#1b4d89",
+          "accent-ink": "#fff",
+          "link": "#1b4d89"
+        },
+        "ink": 17.1,
+        "muted": 7.2,
+        "link": 8.1,
+        "inkOnSurface": 15.6,
+        "onAccent": null
+      },
+      "dark": {
+        "tokens": {
+          "bg": "#0a0a0f",
+          "surface": "#16161d",
+          "ink": "#ebe9e4",
+          "muted": "#a8a6a1",
+          "accent": "#9cbcf2",
+          "accent-ink": "#0a0a0f",
+          "link": "#9cbcf2"
+        },
+        "ink": 16.3,
+        "muted": 8.1,
+        "link": 10.2,
+        "inkOnSurface": 14.8,
+        "onAccent": 10.2
+      }
+    }
+  },
+  "p02": {
+    "pages": {
+      "home": {
+        "lighthouse": {
+          "performance": 100,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 900.6053999999999,
+          "cls": 0.0004371110068593675,
+          "tbt": 0,
+          "bytes": 36934
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["still-page"],
+          "messages": [
+            "WARN still-page: Little motion: 13 element(s) moved while the page loaded and scrolled."
+          ]
+        }
+      },
+      "article": {
+        "lighthouse": {
+          "performance": 100,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1500.7844,
+          "cls": 0.01976269259384022,
+          "tbt": 0,
+          "bytes": 129093
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["card-rows", "size-count"],
+          "messages": [
+            "WARN card-rows: 2 rows of identical boxed cards.",
+            "WARN size-count: 13 different font sizes (12, 13, 14, 15, 16, 17, 18, 19, 22, 26, 50, 137, 346)."
+          ]
+        }
+      }
+    },
+    "palette": {
+      "light": {
+        "tokens": {
+          "bg": "#fff",
+          "surface": "#f0f0ee",
+          "ink": "#0d0d0d",
+          "muted": "#4d4d4d",
+          "accent": "#c8201a",
+          "accent-ink": "#fff",
+          "link": "#0d0d0d"
+        },
+        "ink": null,
+        "muted": null,
+        "link": null,
+        "inkOnSurface": 17,
+        "onAccent": null
+      },
+      "dark": {
+        "tokens": {
+          "bg": "#0a0a0f",
+          "surface": "#17171c",
+          "ink": "#f2f2f0",
+          "muted": "#b4b4b0",
+          "accent": "#ff5a4f",
+          "accent-ink": "#0a0a0f",
+          "link": "#f2f2f0"
+        },
+        "ink": 17.6,
+        "muted": 9.5,
+        "link": 17.6,
+        "inkOnSurface": 15.9,
+        "onAccent": 6.4
+      }
+    }
+  },
+  "p03": {
+    "pages": {
+      "home": {
+        "lighthouse": {
+          "performance": 100,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1200.5438,
+          "cls": 0,
+          "tbt": 0,
+          "bytes": 53239
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": [],
+          "messages": []
+        }
+      },
+      "article": {
+        "lighthouse": {
+          "performance": 100,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1500.5377,
+          "cls": 0.01045722640889535,
+          "tbt": 0,
+          "bytes": 111298
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": ["empty-screens"],
+          "warn": ["size-count", "measure"],
+          "messages": [
+            "WARN size-count: 12 different font sizes (12, 13, 14, 15, 16, 17, 18, 19, 20, 24, 42, 84).",
+            "FAIL empty-screens: 2 of 12 desktop screens are almost empty ground (under 20% of the screen holds text, a picture or a colour field): screens 5, 11.",
+            "WARN measure: Longest paragraph runs about 92 characters per line."
+          ]
+        }
+      }
+    },
+    "palette": {
+      "light": {
+        "tokens": {
+          "bg": "#f6f7f5",
+          "surface": "#e9ece8",
+          "ink": "#1b2420",
+          "muted": "#4c5752",
+          "accent": "#0e6b68",
+          "accent-ink": "#fff",
+          "link": "#0e5a57"
+        },
+        "ink": 14.8,
+        "muted": 7,
+        "link": 7.5,
+        "inkOnSurface": 13.4,
+        "onAccent": null
+      },
+      "dark": {
+        "tokens": {
+          "bg": "#0c0f0e",
+          "surface": "#161b19",
+          "ink": "#e5ebe7",
+          "muted": "#a3ada8",
+          "accent": "#5ec8c2",
+          "accent-ink": "#0c0f0e",
+          "link": "#7fd6d0"
+        },
+        "ink": 15.9,
+        "muted": 8.3,
+        "link": 11.4,
+        "inkOnSurface": 14.4,
+        "onAccent": 9.6
+      }
+    }
+  },
+  "p04": {
+    "pages": {
+      "home": {
+        "lighthouse": {
+          "performance": 100,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1350.5836,
+          "cls": 0.007948528818569577,
+          "tbt": 0,
+          "bytes": 98402
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["still-page"],
+          "messages": [
+            "WARN still-page: Little motion: 10 element(s) moved while the page loaded and scrolled."
+          ]
+        }
+      },
+      "article": {
+        "lighthouse": {
+          "performance": 98,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1951.2433,
+          "cls": 0.01523333381877333,
+          "tbt": 0,
+          "bytes": 188679
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["card-rows", "font-count", "size-count"],
+          "messages": [
+            "WARN card-rows: 2 rows of identical boxed cards.",
+            "WARN font-count: 3 typefaces in use (Source Serif 4-2f078702a33d561d, Fraunces-b9dc275bed345f64, JetBrains Mono-b28d5dd3d951704f).",
+            "WARN size-count: 17 different font sizes (12, 13, 14, 15, 16, 17, 18, 19, 21, 23, 24, 25, 28, 30, 52, 108, 480)."
+          ]
+        }
+      }
+    },
+    "palette": {
+      "light": {
+        "tokens": {
+          "bg": "#fff",
+          "surface": "#f0f0f1",
+          "ink": "#141414",
+          "muted": "#555352",
+          "accent": "#8c1c2b",
+          "accent-ink": "#fff",
+          "link": "#8c1c2b"
+        },
+        "ink": null,
+        "muted": null,
+        "link": null,
+        "inkOnSurface": 16.2,
+        "onAccent": null
+      },
+      "dark": {
+        "tokens": {
+          "bg": "#0a0a0f",
+          "surface": "#17161c",
+          "ink": "#efedea",
+          "muted": "#b0aca8",
+          "accent": "#f08a98",
+          "accent-ink": "#0a0a0f",
+          "link": "#f5a3ae"
+        },
+        "ink": 16.9,
+        "muted": 8.8,
+        "link": 10.1,
+        "inkOnSurface": 15.4,
+        "onAccent": 8.3
+      }
+    }
+  },
+  "p05": {
+    "pages": {
+      "home": {
+        "lighthouse": {
+          "performance": 100,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 900.6405,
+          "cls": 0.0005060302129493881,
+          "tbt": 0,
+          "bytes": 22382
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["still-page"],
+          "messages": [
+            "WARN still-page: Little motion: 11 element(s) moved while the page loaded and scrolled."
+          ]
+        }
+      },
+      "article": {
+        "lighthouse": {
+          "performance": 96,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1500.5819,
+          "cls": 0.1133962541280795,
+          "tbt": 0,
+          "bytes": 98981
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["size-count"],
+          "messages": [
+            "WARN size-count: 13 different font sizes (12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 24, 44, 96)."
+          ]
+        }
+      }
+    },
+    "palette": {
+      "light": {
+        "tokens": {
+          "bg": "#fff",
+          "surface": "#f2f2f2",
+          "ink": "#0b0b0b",
+          "muted": "#4a4a4a",
+          "accent": "#0b0b0b",
+          "accent-ink": "#fff",
+          "link": "#006b85"
+        },
+        "ink": null,
+        "muted": null,
+        "link": null,
+        "inkOnSurface": 17.6,
+        "onAccent": null
+      },
+      "dark": {
+        "tokens": {
+          "bg": "#0a0a0f",
+          "surface": "#18181d",
+          "ink": "#f4f4f4",
+          "muted": "#b5b5b9",
+          "accent": "#f4f4f4",
+          "accent-ink": "#0a0a0f",
+          "link": "#00d9ff"
+        },
+        "ink": 18,
+        "muted": 9.7,
+        "link": 11.6,
+        "inkOnSurface": 16.1,
+        "onAccent": 18
+      }
+    }
+  },
+  "p06": {
+    "pages": {
+      "home": {
+        "lighthouse": {
+          "performance": 100,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1200.5451,
+          "cls": 0.002427943936539308,
+          "tbt": 0,
+          "bytes": 70332
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": ["headline-lines"],
+          "warn": [],
+          "messages": [
+            "FAIL headline-lines: 1 headline(s) wrap past two lines at 1440px: \"Notes on Building with AI\" → 3 lines (5 words, 110.4px)"
+          ]
+        }
+      },
+      "article": {
+        "lighthouse": {
+          "performance": 100,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1500.9313000000002,
+          "cls": 0.005421271233478813,
+          "tbt": 0,
+          "bytes": 128388
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["card-rows", "size-count"],
+          "messages": [
+            "WARN card-rows: 2 rows of identical boxed cards.",
+            "WARN size-count: 13 different font sizes (12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 26, 38, 76)."
+          ]
+        }
+      }
+    },
+    "palette": {
+      "light": {
+        "tokens": {
+          "bg": "#fcfcfc",
+          "surface": "#f0f0f0",
+          "ink": "#1d1c1a",
+          "muted": "#55524d",
+          "accent": "#6b2d1f",
+          "accent-ink": "#fff",
+          "link": "#1d1c1a"
+        },
+        "ink": 16.6,
+        "muted": 7.6,
+        "link": 16.6,
+        "inkOnSurface": 14.9,
+        "onAccent": null
+      },
+      "dark": {
+        "tokens": {
+          "bg": "#0a0a0f",
+          "surface": "#17171c",
+          "ink": "#e8e4da",
+          "muted": "#b1aca2",
+          "accent": "#e3a08f",
+          "accent-ink": "#0a0a0f",
+          "link": "#e8e4da"
+        },
+        "ink": 15.6,
+        "muted": 8.7,
+        "link": 15.6,
+        "inkOnSurface": 14.1,
+        "onAccent": 9.1
+      }
+    }
+  },
+  "p07": {
+    "pages": {
+      "home": {
+        "lighthouse": {
+          "performance": 100,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1200.5651,
+          "cls": 0.02479924799957033,
+          "tbt": 0,
+          "bytes": 69819
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["still-page"],
+          "messages": [
+            "WARN still-page: Little motion: 11 element(s) moved while the page loaded and scrolled."
+          ]
+        }
+      },
+      "article": {
+        "lighthouse": {
+          "performance": 98,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1800.5159,
+          "cls": 0.01991484224363468,
+          "tbt": 0,
+          "bytes": 164619
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["card-rows", "font-count", "size-count"],
+          "messages": [
+            "WARN card-rows: 2 rows of identical boxed cards.",
+            "WARN font-count: 3 typefaces in use (Literata-daf70680ef2c99b0, Inter-1bda92056d0167dc, JetBrains Mono-b28d5dd3d951704f).",
+            "WARN size-count: 10 different font sizes (12, 13, 14, 15, 16, 17, 18, 22, 31, 97)."
+          ]
+        }
+      }
+    },
+    "palette": {
+      "light": {
+        "tokens": {
+          "bg": "#fff",
+          "surface": "#f3f4f6",
+          "ink": "#111318",
+          "muted": "#4b5060",
+          "accent": "#0b4f8a",
+          "accent-ink": "#fff",
+          "link": "#0b4f8a"
+        },
+        "ink": null,
+        "muted": null,
+        "link": null,
+        "inkOnSurface": 16.9,
+        "onAccent": null
+      },
+      "dark": {
+        "tokens": {
+          "bg": "#0a0a0f",
+          "surface": "#161820",
+          "ink": "#e8eaf0",
+          "muted": "#a8adbd",
+          "accent": "#8cc2f5",
+          "accent-ink": "#0a0a0f",
+          "link": "#8cc2f5"
+        },
+        "ink": 16.4,
+        "muted": 8.8,
+        "link": 10.5,
+        "inkOnSurface": 14.7,
+        "onAccent": 10.5
+      }
+    }
+  },
+  "p08": {
+    "pages": {
+      "home": {
+        "lighthouse": {
+          "performance": 100,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1350.5581,
+          "cls": 0,
+          "tbt": 0,
+          "bytes": 82590
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["still-page"],
+          "messages": [
+            "WARN still-page: Little motion: 13 element(s) moved while the page loaded and scrolled."
+          ]
+        }
+      },
+      "article": {
+        "lighthouse": {
+          "performance": 99,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1650.8717,
+          "cls": 0.000775726010994614,
+          "tbt": 0,
+          "bytes": 140795
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["card-rows", "size-count"],
+          "messages": [
+            "WARN card-rows: 2 rows of identical boxed cards.",
+            "WARN size-count: 12 different font sizes (12, 14, 15, 16, 17, 18, 19, 21, 22, 27, 44, 92)."
+          ]
+        }
+      }
+    },
+    "palette": {
+      "light": {
+        "tokens": {
+          "bg": "#eef0ec",
+          "surface": "#e2e6e0",
+          "ink": "#1d2a23",
+          "muted": "#4a5750",
+          "accent": "#2c5a43",
+          "accent-ink": "#f4f4f0",
+          "link": "#2c5a43"
+        },
+        "ink": 13,
+        "muted": 6.6,
+        "link": 6.9,
+        "inkOnSurface": 11.8,
+        "onAccent": 7.2
+      },
+      "dark": {
+        "tokens": {
+          "bg": "#111412",
+          "surface": "#1a1f1c",
+          "ink": "#e4e8e2",
+          "muted": "#a7b0aa",
+          "accent": "#9fd1b5",
+          "accent-ink": "#111412",
+          "link": "#a9d9be"
+        },
+        "ink": 15,
+        "muted": 8.3,
+        "link": 11.8,
+        "inkOnSurface": 13.5,
+        "onAccent": 10.8
+      }
+    }
+  },
+  "p09": {
+    "pages": {
+      "home": {
+        "lighthouse": {
+          "performance": 100,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1050.5729,
+          "cls": 0.02275411483143376,
+          "tbt": 0,
+          "bytes": 48420
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["still-page"],
+          "messages": [
+            "WARN still-page: Little motion: 14 element(s) moved while the page loaded and scrolled."
+          ]
+        }
+      },
+      "article": {
+        "lighthouse": {
+          "performance": 97,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1650.7142,
+          "cls": 0.08509902696466777,
+          "tbt": 0,
+          "bytes": 137653
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["font-count", "size-count"],
+          "messages": [
+            "WARN font-count: 3 typefaces in use (Inter-1bda92056d0167dc, Space Grotesk-bca149b9a746e95c, JetBrains Mono-b28d5dd3d951704f).",
+            "WARN size-count: 13 different font sizes (12, 13, 14, 15, 16, 17, 18, 19, 21, 25, 48, 112, 245)."
+          ]
+        }
+      }
+    },
+    "palette": {
+      "light": {
+        "tokens": {
+          "bg": "#f7f7fa",
+          "surface": "#ececf2",
+          "ink": "#0a0a0f",
+          "muted": "#4c4b5c",
+          "accent": "#4a40d4",
+          "accent-ink": "#fff",
+          "link": "#3f35c4"
+        },
+        "ink": 18.5,
+        "muted": 8,
+        "link": 7.8,
+        "inkOnSurface": 16.8,
+        "onAccent": null
+      },
+      "dark": {
+        "tokens": {
+          "bg": "#0a0a0f",
+          "surface": "#14141c",
+          "ink": "#ecebf4",
+          "muted": "#a8a6ba",
+          "accent": "#8f89ff",
+          "accent-ink": "#0a0a0f",
+          "link": "#aba6ff"
+        },
+        "ink": 16.7,
+        "muted": 8.3,
+        "link": 9.1,
+        "inkOnSurface": 15.5,
+        "onAccent": 6.8
+      }
+    }
+  },
+  "p10": {
+    "pages": {
+      "home": {
+        "lighthouse": {
+          "performance": 100,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 900.6190999999999,
+          "cls": 0,
+          "tbt": 0,
+          "bytes": 26130
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": [],
+          "messages": []
+        }
+      },
+      "article": {
+        "lighthouse": {
+          "performance": 100,
+          "accessibility": 100,
+          "bestPractices": 100,
+          "seo": 100,
+          "lcp": 1500.6262,
+          "cls": 0.006548540268903467,
+          "tbt": 0,
+          "bytes": 106464
+        },
+        "axe": {
+          "light-390": [],
+          "light-1440": [],
+          "dark-390": [],
+          "dark-1440": []
+        },
+        "taste": {
+          "fail": [],
+          "warn": ["card-rows", "size-count"],
+          "messages": [
+            "WARN card-rows: 2 rows of identical boxed cards.",
+            "WARN size-count: 10 different font sizes (12, 13, 14, 15, 16, 17, 18, 21, 22, 54)."
+          ]
+        }
+      }
+    },
+    "palette": {
+      "light": {
+        "tokens": {
+          "bg": "#fff",
+          "surface": "#f2f3f1",
+          "ink": "#121412",
+          "muted": "#4d524d",
+          "accent": "#0b6b36",
+          "accent-ink": "#fff",
+          "link": "#0b6b36"
+        },
+        "ink": null,
+        "muted": null,
+        "link": null,
+        "inkOnSurface": 16.6,
+        "onAccent": null
+      },
+      "dark": {
+        "tokens": {
+          "bg": "#0a0a0f",
+          "surface": "#16171b",
+          "ink": "#eceeea",
+          "muted": "#abb0aa",
+          "accent": "#6fd39b",
+          "accent-ink": "#0a0a0f",
+          "link": "#7fdca7"
+        },
+        "ink": 16.9,
+        "muted": 9,
+        "link": 11.9,
+        "inkOnSurface": 15.3,
+        "onAccent": 10.8
+      }
+    }
+  }
+}

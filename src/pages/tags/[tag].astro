@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro'
+import { dateFormat } from '../../lib/article.ts'
+import { type Post, publishedPosts } from '../../lib/posts.ts'
+
+export async function getStaticPaths() {
+  const posts = await publishedPosts()
+  const tags = [...new Set(posts.flatMap((p) => p.data.tags))]
+  return tags.map((tag) => ({
+    params: { tag },
+    props: { tag, posts: posts.filter((p) => p.data.tags.includes(tag)) },
+  }))
+}
+const { tag, posts } = Astro.props as { tag: string; posts: Post[] }
+---
+
+<Base title={`Tagged “${tag}”`} description={`Issues tagged ${tag}.`}>
+  <div class="column page index">
+    <h1>Tagged “{tag}”</h1>
+    <ol>
+      {
+        posts.map((p) => (
+          <li>
+            <span class="n">No. {p.issue}</span>
+            <a href={p.path}>{p.data.title}</a>
+            <time class="when" datetime={p.published.toISOString().slice(0, 10)}>
+              {dateFormat.format(p.published)}
+            </time>
+          </li>
+        ))
+      }
+    </ol>
+    <p><a href="/#issues">All issues</a></p>
+  </div>
+</Base>

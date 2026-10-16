@@ -1,0 +1,8 @@
+---
+import { homeData } from '../../components/data.ts'
+import Home from '../../themes/p03/Home.astro'
+
+const issues = await homeData()
+---
+
+<Home issues={issues} base="/p03" />

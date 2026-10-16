@@ -1,0 +1,41 @@
+---
+import ArticleBody from '../../../../src/components/ArticleBody.astro'
+import { SITE } from '../../components/data.ts'
+import Page from '../../components/Page.astro'
+import Toc from '../../components/Toc.astro'
+import type { ArticleProps } from '../../components/types.ts'
+import { fonts } from './fonts.ts'
+import './theme.css'
+
+const { post, toc, minutes, date, base } = Astro.props as ArticleProps
+const words = [
+  'Zero',
+  'One',
+  'Two',
+  'Three',
+  'Four',
+  'Five',
+  'Six',
+  'Seven',
+  'Eight',
+  'Nine',
+  'Ten',
+]
+---
+
+<Page title={`${post.data.title} · ${SITE.name}`} description={post.data.summary} fonts={fonts} theme="book" islands>
+  <header class="running"><a href={`${base}/`}>dr4w</a><span>{post.data.title}</span></header>
+  <main id="main" class="book">
+    <article>
+      <header class="chapter">
+        <h1>{post.data.title}</h1>
+        <p class="ch">Issue {words[post.issue] ?? post.issue}</p>
+        <p class="sub">{post.data.summary}</p>
+        <p class="author">{SITE.author} · <time datetime={post.published.toISOString().slice(0, 10)}>{date}</time> · {minutes} minutes</p>
+      </header>
+      <Toc headings={toc} label="Contents" />
+      <div class="prose"><ArticleBody post={post} /></div>
+    </article>
+  </main>
+  <footer class="colophon"><p>Set in EB Garamond. {SITE.author}, <a href={SITE.home}>dr4w.io</a>. <a href={`${base}/`}>Contents</a></p></footer>
+</Page>

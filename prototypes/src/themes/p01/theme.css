@@ -1,0 +1,253 @@
+/* Essay: one serif column, notes in the margin. */
+:root {
+  --bg: #fafafa;
+  --surface: #efeff0;
+  --surface-2: #e3e3e6;
+  --ink: #17171a;
+  --muted: #55545a;
+  --accent: #1b4d89;
+  --accent-ink: #ffffff;
+  --link: #1b4d89;
+  --line: #d6d4cd;
+  --line-strong: #6b6a70;
+  --font-text: var(--font-source-serif);
+  --font-display: var(--font-text);
+  --font-code: var(--font-jetbrains);
+  --step-small: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
+  --step-body: clamp(1.125rem, 1.08rem + 0.2vw, 1.25rem);
+  --step-lead: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --step-head: clamp(1.625rem, 1.3rem + 1.4vw, 2.25rem);
+  --step-display: clamp(2.6rem, 1.6rem + 4.6vw, 5rem);
+  --leading: 1.62;
+  --measure: 35rem;
+  --margin: 15rem;
+  --radius: 2px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0a0f;
+    --surface: #16161d;
+    --surface-2: #22222b;
+    --ink: #ebe9e4;
+    --muted: #a8a6a1;
+    --accent: #9cbcf2;
+    --accent-ink: #0a0a0f;
+    --link: #9cbcf2;
+    --line: #2c2c36;
+    --line-strong: #8a8994;
+  }
+}
+body {
+  font-variation-settings: "opsz" 20;
+}
+.site-header,
+.site-footer,
+main {
+  width: min(100% - 2.5rem, var(--measure) + var(--margin) + 3.5rem);
+  margin-inline: auto;
+}
+.site-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1.5rem 0;
+}
+.wordmark {
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  color: var(--ink);
+}
+.site-header nav {
+  display: flex;
+  gap: 1.25rem;
+  font-size: var(--step-small);
+}
+.site-header nav a {
+  color: var(--ink);
+}
+.site-footer {
+  padding-block: 4rem 3rem;
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+.site-footer a {
+  color: var(--ink);
+}
+.essay,
+.home {
+  max-width: var(--measure);
+}
+.opener {
+  padding-block: clamp(3rem, 8vw, 6.5rem) 2.5rem;
+}
+.issue-line {
+  margin: 1.25rem 0 0;
+  font-size: var(--step-small);
+  color: var(--muted);
+  font-variant-numeric: oldstyle-nums;
+}
+h1 {
+  margin: 0;
+  font-size: var(--step-display);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  font-variation-settings: "opsz" 60;
+}
+.dek {
+  margin: 1.5rem 0 0;
+  font-size: var(--step-lead);
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.byline {
+  margin: 1.25rem 0 0;
+  font-size: var(--step-small);
+}
+.toc {
+  margin-bottom: 3rem;
+  font-size: var(--step-small);
+}
+.toc-label {
+  margin: 0 0 0.5rem;
+  font-weight: 650;
+}
+.toc ol {
+  margin: 0;
+  padding-left: 1.3em;
+  columns: 2 14rem;
+  column-gap: 2rem;
+}
+.toc li {
+  break-inside: avoid;
+  margin-bottom: 0.3rem;
+}
+.toc a {
+  color: var(--ink);
+}
+.prose > :where(p, ul, ol, blockquote, table) {
+  margin: 0 0 1.15em;
+}
+.prose h2 {
+  margin: 3.5em 0 0.9em;
+  font-size: var(--step-head);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  font-variation-settings: "opsz" 40;
+}
+.prose h3 {
+  margin: 2.2em 0 0.6em;
+  font-size: var(--step-lead);
+  font-weight: 600;
+  line-height: 1.25;
+}
+.prose li {
+  margin-bottom: 0.45em;
+}
+.prose blockquote {
+  margin-inline: 0;
+  padding-left: 1.25rem;
+  box-shadow: inset 4px 0 0 var(--accent);
+  font-style: italic;
+}
+.prose blockquote strong {
+  font-style: normal;
+}
+.prose .fig,
+.prose .widget {
+  margin: 2.5rem 0;
+  clear: right;
+}
+/* Margin notes: deep dives float into the right margin on wide screens. */
+.aside {
+  margin: 2rem 0;
+  padding: 1.1rem 1.25rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+@media (min-width: 72rem) {
+  .aside {
+    float: right;
+    clear: right;
+    width: var(--margin);
+    margin: 0.3rem calc(-1 * (var(--margin) + 3.5rem)) 1.5rem 0;
+    padding: 0;
+    background: none;
+    font-size: 0.9375rem;
+    color: var(--ink);
+  }
+  .aside-title {
+    font-style: italic;
+    font-weight: 600;
+  }
+}
+.footnotes {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  box-shadow: inset 0 4px 0 var(--surface-2);
+  clear: both;
+}
+.footnotes::before {
+  content: "Notes";
+  display: block;
+  margin-bottom: 1rem;
+  font-weight: 650;
+  font-size: var(--step-body);
+}
+/* Home */
+.home-intro {
+  margin: clamp(3rem, 8vw, 6rem) 0 3rem;
+  font-size: var(--step-lead);
+  font-style: italic;
+  line-height: 1.45;
+}
+.latest-title {
+  font-size: var(--step-display);
+}
+.latest-title a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.latest-title a:hover {
+  text-decoration: underline;
+}
+.latest-summary {
+  font-size: var(--step-lead);
+  line-height: 1.45;
+}
+.read {
+  font-weight: 600;
+}
+.index {
+  margin-top: 5rem;
+}
+.index h2 {
+  font-size: var(--step-small);
+  font-weight: 650;
+  margin: 0 0 1rem;
+}
+.index ol {
+  margin: 0;
+  padding-left: 1.6em;
+}
+.index li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  padding-block: 0.6rem;
+}
+.index li::marker {
+  color: var(--muted);
+}
+.when {
+  color: var(--muted);
+  font-size: var(--step-small);
+}

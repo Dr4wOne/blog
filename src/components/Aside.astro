@@ -1,0 +1,12 @@
+---
+// A "deep dive": optional detail a reader can skip. Themes place it inline or in the margin.
+interface Props {
+  title: string
+}
+const { title } = Astro.props
+---
+
+<aside class="aside" aria-label={title}>
+  <p class="aside-title">{title}</p>
+  <slot />
+</aside>

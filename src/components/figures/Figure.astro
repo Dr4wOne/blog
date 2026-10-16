@@ -1,0 +1,13 @@
+---
+// Accessible figure: the SVG slot gets role="img" + title/desc from the child; caption is visible text.
+interface Props {
+  caption: string
+  size?: 'body' | 'wide'
+}
+const { caption, size = 'body' } = Astro.props
+---
+
+<figure class="fig" data-size={size}>
+  <div class="fig-art"><slot /></div>
+  <figcaption><span class="fig-n">Figure</span> {caption}</figcaption>
+</figure>

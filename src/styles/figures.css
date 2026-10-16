@@ -1,0 +1,90 @@
+/* Figures and widgets read only these tokens; each theme sets them. */
+.fig {
+  counter-increment: figure;
+  margin: 0;
+}
+.fig-art svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: var(--fig-max, 34rem);
+  margin-inline: auto;
+  font-family: var(--fig-font, inherit);
+  font-size: 14px;
+  overflow: visible;
+}
+.fig-n::after {
+  content: " " counter(figure) ".";
+}
+.fig svg text {
+  fill: var(--fig-ink);
+}
+.fig svg .t-muted {
+  fill: var(--fig-muted);
+}
+.fig svg .t-accent {
+  fill: var(--fig-accent-text, var(--fig-accent));
+}
+.fig svg .t-on-accent {
+  fill: var(--fig-on-accent);
+}
+.fig svg .t-strong {
+  font-weight: 650;
+}
+.fig svg .t-small {
+  font-size: 12px;
+}
+.fig svg .t-large {
+  font-size: 16px;
+}
+.fig svg .t-mono {
+  font-family: var(--font-code, ui-monospace, monospace);
+  font-size: 13px;
+}
+.fig svg .box {
+  fill: var(--fig-surface);
+  stroke: var(--fig-stroke-color, none);
+  stroke-width: var(--fig-stroke, 0);
+}
+.fig svg .box-accent {
+  fill: var(--fig-accent);
+}
+.fig svg .box-ground {
+  fill: var(--fig-ground, transparent);
+  stroke: var(--fig-line);
+  stroke-width: 1.5;
+}
+.fig svg .wire {
+  fill: none;
+  stroke: var(--fig-line);
+  stroke-width: 1.75;
+}
+.fig svg .wire-accent {
+  fill: none;
+  stroke: var(--fig-accent);
+  stroke-width: 2;
+}
+.fig svg .dash {
+  stroke-dasharray: 5 5;
+}
+.fig svg .dot {
+  fill: var(--fig-ink);
+}
+.fig svg .dot-accent {
+  fill: var(--fig-accent);
+}
+.fig svg .head {
+  fill: var(--fig-line);
+}
+.fig svg .head-accent {
+  fill: var(--fig-accent);
+}
+.fig svg [rx] {
+  rx: var(--fig-radius, 6px);
+}
+.fig svg .box-alt {
+  fill: var(--fig-surface-2, var(--fig-surface));
+}
+.fig svg .bar {
+  fill: var(--fig-line);
+}

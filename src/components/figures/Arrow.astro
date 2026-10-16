@@ -1,0 +1,12 @@
+---
+// One arrowhead marker per SVG (ids must be unique on the page).
+interface Props {
+  id: string
+  accent?: boolean
+}
+const { id, accent = false } = Astro.props
+---
+
+<marker id={id} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0 0 L10 5 L0 10 z" class={accent ? 'head-accent' : 'head'}></path>
+</marker>

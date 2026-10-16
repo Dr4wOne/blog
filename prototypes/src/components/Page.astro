@@ -1,0 +1,40 @@
+---
+import '../../../src/styles/base.css'
+import '../../../src/styles/figures.css'
+import { Font } from 'astro:assets'
+
+interface Props {
+  title: string
+  description: string
+  fonts: { v: string; preload?: boolean }[]
+  kind?: 'home' | 'article'
+  theme: string
+  islands?: boolean
+}
+const {
+  title,
+  description,
+  fonts,
+  theme,
+  islands = false,
+  kind = islands ? 'article' : 'home',
+} = Astro.props
+---
+
+<!doctype html>
+<html lang="en" data-theme={theme}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="color-scheme" content="light dark" />
+    {fonts.map((f) => <Font cssVariable={f.v as never} preload={f.preload ? [{ style: 'normal' }] : false} />)}
+  </head>
+  <body data-page={kind}>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <slot />
+    {islands && <script>import '../../../src/scripts/islands.ts'</script>}
+  </body>
+</html>

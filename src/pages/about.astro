@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro'
+import { SITE } from '../site.ts'
+---
+
+<Base title="About" description="Who writes this blog, and how it works.">
+  <div class="column page">
+    <h1>About</h1>
+    <p>
+      I’m {SITE.author.name}, a software engineer. My work, experience and contact details are on
+      <a href={SITE.author.url}>dr4w.io</a>.
+    </p>
+    <p>
+      This blog is where I take the time to write things down properly, on any topic. Every post is an issue, numbered in
+      order; its address never changes. Technical claims link to their sources, and corrections are dated at the top of the
+      post.
+    </p>
+    <p>
+      Follow along with <a href="/rss.xml">RSS</a> or <a href="/feed.json">JSON Feed</a>. The site is open source:
+      <a href="https://github.com/Dr4wOne/blog">github.com/Dr4wOne/blog</a>.
+    </p>
+  </div>
+</Base>

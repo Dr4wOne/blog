@@ -1,0 +1,31 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+---
+
+<Figure caption="The agent loop. The model decides; the harness acts and reports back; the loop ends when the goal is met or a limit is hit.">
+  <svg viewBox="0 0 420 372" role="img" aria-labelledby="f-agent-t f-agent-d">
+    <title id="f-agent-t">Reason, act, observe</title>
+    <desc id="f-agent-d">A goal enters the loop. The model reasons about the next step, asks for a tool call, the harness runs the tool, and the model observes the result before reasoning again. The loop stops when the goal is met, a step or budget limit is reached, or the agent asks a human.</desc>
+    <defs><Arrow id="f-agent-a" /><Arrow id="f-agent-aa" accent /></defs>
+    <rect x="96" y="0" width="228" height="40" rx="20" class="box-accent" />
+    <text x="210" y="25" text-anchor="middle" class="t-on-accent t-strong">Goal: make the test pass</text>
+    <path d="M210 42 V84" class="wire" marker-end="url(#f-agent-a)" />
+    <rect x="140" y="86" width="140" height="56" rx="6" class="box" />
+    <text x="210" y="110" text-anchor="middle" class="t-strong">Reason</text>
+    <text x="210" y="129" text-anchor="middle" class="t-small t-muted">model picks a step</text>
+    <rect x="252" y="226" width="168" height="56" rx="6" class="box" />
+    <text x="336" y="250" text-anchor="middle" class="t-strong">Act</text>
+    <text x="336" y="269" text-anchor="middle" class="t-small t-muted">harness runs the tool</text>
+    <rect x="0" y="226" width="168" height="56" rx="6" class="box" />
+    <text x="84" y="250" text-anchor="middle" class="t-strong">Observe</text>
+    <text x="84" y="269" text-anchor="middle" class="t-small t-muted">result goes back in</text>
+    <path d="M282 120 C336 130 340 180 338 222" class="wire-accent" marker-end="url(#f-agent-aa)" />
+    <path d="M250 262 H172" class="wire-accent" marker-end="url(#f-agent-aa)" />
+    <path d="M84 224 C82 180 90 130 136 120" class="wire-accent" marker-end="url(#f-agent-aa)" />
+    <text x="340" y="170" class="t-small t-muted">tool call</text>
+    <text x="0" y="316" class="t-small"><tspan class="t-strong">Stops when</tspan> the goal is met, a step or budget limit is hit,</text>
+    <text x="0" y="336" class="t-small">or the agent needs a human, for example to approve</text>
+    <text x="0" y="356" class="t-small">a risky command.</text>
+  </svg>
+</Figure>

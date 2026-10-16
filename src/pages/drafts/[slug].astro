@@ -1,0 +1,24 @@
+---
+// Drafts are only served by `pnpm dev` (draftPosts() is empty in builds), at /drafts/<slug>/.
+import { render } from 'astro:content'
+import ArticleBody from '../../components/ArticleBody.astro'
+import Base from '../../layouts/Base.astro'
+import { draftPosts } from '../../lib/posts.ts'
+
+export async function getStaticPaths() {
+  return (await draftPosts()).map((post) => ({ params: { slug: post.data.slug }, props: { post } }))
+}
+const { post } = Astro.props
+await render(post)
+---
+
+<Base title={`Draft: ${post.data.title}`} description={post.data.summary} islands kind="article" noindex>
+  <article class="column">
+    <header class="opener">
+      <h1>{post.data.title}</h1>
+      <p class="issue-line">Draft, not published · only visible in pnpm dev</p>
+      <p class="dek">{post.data.summary}</p>
+    </header>
+    <div class="prose"><ArticleBody post={post as never} /></div>
+  </article>
+</Base>

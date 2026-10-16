@@ -1,0 +1,44 @@
+---
+import { SITE } from '../../components/data.ts'
+import Page from '../../components/Page.astro'
+import type { HomeProps } from '../../components/types.ts'
+import { fonts } from './fonts.ts'
+import './theme.css'
+
+const { issues, base } = Astro.props as HomeProps
+const [latest] = issues
+---
+
+<Page title={`${SITE.name}: writing by ${SITE.author}`} description={SITE.tagline} fonts={fonts} theme="notebook">
+  <header class="site-header">
+    <a class="wordmark" href={`${base}/`}>dr4w <span>notebook</span></a>
+    <nav aria-label="Site"><a href="#issues">Issues</a><a href={SITE.home}>About</a></nav>
+  </header>
+  <main id="main" class="page">
+    <div class="margin-col"><p class="note">An engineer’s working notes, written up properly.</p></div>
+    <div class="main-col">
+      <h1 class="home-title">Working notes on AI.</h1>
+      <p class="lede">How AI systems work, and how to build with them. By {SITE.author}: long-form, illustrated, checked against sources.</p>
+      {
+        latest && (
+          <article class="latest">
+            <h2>
+              <a href={`${base}${latest.post.path}`}>{latest.post.data.title}</a>
+            </h2>
+            <p class="kicker">Issue {latest.post.issue} · {latest.date}</p>
+            <p>{latest.post.data.summary}</p>
+            <ol class="mini-toc">{latest.toc.map((h) => <li>{h.text}</li>)}</ol>
+            <a class="button" href={`${base}${latest.post.path}`}>
+              Read issue {latest.post.issue}
+            </a>
+          </article>
+        )
+      }
+      <section id="issues" aria-labelledby="issues-h" class="index">
+        <h2 id="issues-h">Every issue</h2>
+        <ol reversed>{issues.map((i) => <li><a href={`${base}${i.post.path}`}>{i.post.data.title}</a> <span class="when">{i.date}</span></li>)}</ol>
+      </section>
+    </div>
+  </main>
+  <footer class="site-footer"><p>{SITE.author} · <a href={SITE.home}>dr4w.io</a></p></footer>
+</Page>

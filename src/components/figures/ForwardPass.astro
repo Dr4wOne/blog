@@ -1,0 +1,49 @@
+---
+import { CANDIDATES, probabilities } from '../../lib/temperature.ts'
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+// The same scores the temperature widget uses, at temperature 1.
+const p = probabilities(1)
+const bars = CANDIDATES.slice(0, 4).map(
+  ([w], i) => [w, Math.round((p[i] as number) * 100)] as const,
+)
+---
+
+<Figure caption="One step of generation inside a transformer. In principle the whole pass runs again for every new token; in practice, work already done for earlier tokens is kept and reused.">
+  <svg viewBox="0 0 420 470" role="img" aria-labelledby="f-fwd-t f-fwd-d">
+    <title id="f-fwd-t">From text to the next token</title>
+    <desc id="f-fwd-d">The text so far is split into tokens and IDs. Each ID becomes a vector carrying meaning and position. The vectors pass through dozens of stacked attention and feed-forward layers. The top produces a probability for every token in the vocabulary, for example {bars.map(([w, n]) => `${w} ${n} percent`).join(', ')}. One token is picked, appended, and the loop repeats.</desc>
+    <defs><Arrow id="f-fwd-a" /><Arrow id="f-fwd-aa" accent /></defs>
+    <rect x="44" y="0" width="376" height="40" rx="6" class="box" />
+    <text x="60" y="25"><tspan class="t-muted">Text so far:</tspan> The cat sat on the</text>
+    <path d="M232 42 V62" class="wire" marker-end="url(#f-fwd-a)" />
+    <rect x="44" y="64" width="376" height="40" rx="6" class="box" />
+    <text x="60" y="89">Split into tokens, look up their IDs</text>
+    <path d="M232 106 V126" class="wire" marker-end="url(#f-fwd-a)" />
+    <rect x="44" y="128" width="376" height="40" rx="6" class="box" />
+    <text x="60" y="153">Each ID becomes a vector: meaning + position</text>
+    <path d="M232 170 V190" class="wire" marker-end="url(#f-fwd-a)" />
+    <rect x="56" y="192" width="364" height="64" rx="6" class="box box-alt" />
+    <rect x="50" y="198" width="364" height="64" rx="6" class="box box-alt" />
+    <rect x="44" y="204" width="364" height="64" rx="6" class="box" />
+    <text x="60" y="230" class="t-strong">Attention + feed-forward layer</text>
+    <text x="60" y="252" class="t-small t-muted">stacked dozens of times; each token looks at earlier ones</text>
+    <path d="M232 270 V290" class="wire" marker-end="url(#f-fwd-a)" />
+    <rect x="44" y="292" width="376" height="114" rx="6" class="box" />
+    <text x="60" y="314" class="t-small t-muted">A probability for every token in the vocabulary</text>
+    {
+      bars.map(([w, p], i) => (
+        <g>
+          <text x="112" y={338 + i * 20} text-anchor="end">{w}</text>
+          <rect x="120" y={327 + i * 20} width={p * 6} height="14" rx="2" class={i === 0 ? 'box-accent' : 'bar'} />
+          <text x={128 + p * 6} y={338 + i * 20} class="t-small t-muted">{p}%</text>
+        </g>
+      ))
+    }
+    <path d="M232 408 V426" class="wire" marker-end="url(#f-fwd-a)" />
+    <rect x="44" y="428" width="376" height="40" rx="20" class="box-accent" />
+    <text x="232" y="453" text-anchor="middle" class="t-on-accent t-strong">Pick one, append it, run again</text>
+    <path d="M42 448 H14 V20 H40" class="wire-accent dash" marker-end="url(#f-fwd-aa)" />
+  </svg>
+</Figure>

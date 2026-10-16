@@ -1,0 +1,302 @@
+/* Longform magazine: a cover-sized issue number, drop cap, pull quotes, full-bleed figures. */
+:root {
+  --bg: #ffffff;
+  --surface: #f0f0f1;
+  --surface-2: #e2e2e4;
+  --ink: #141414;
+  --muted: #555352;
+  --accent: #8c1c2b;
+  --accent-ink: #ffffff;
+  --link: #8c1c2b;
+  --line: #d8d6d2;
+  --line-strong: #6a6866;
+  --font-text: var(--font-source-serif);
+  --font-display: var(--font-fraunces);
+  --font-code: var(--font-jetbrains);
+  --step-small: 0.9375rem;
+  --step-body: clamp(1.125rem, 1.07rem + 0.25vw, 1.3125rem);
+  --step-lead: clamp(1.3rem, 1.1rem + 0.9vw, 1.75rem);
+  --step-head: clamp(1.9rem, 1.3rem + 2.4vw, 3.25rem);
+  --step-display: clamp(2.75rem, 1.2rem + 6.4vw, 6.75rem);
+  --leading: 1.62;
+  --measure: 37rem;
+  --radius: 0;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0a0f;
+    --surface: #17161c;
+    --surface-2: #24222a;
+    --ink: #efedea;
+    --muted: #b0aca8;
+    --accent: #f08a98;
+    --accent-ink: #0a0a0f;
+    --link: #f5a3ae;
+    --line: #2f2d35;
+    --line-strong: #9d9a97;
+  }
+}
+html {
+  overflow-x: clip;
+}
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 1.25rem clamp(1.25rem, 4vw, 3rem);
+}
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+.site-header nav {
+  display: flex;
+  gap: 1.25rem;
+}
+.opener {
+  display: grid;
+  align-items: end;
+  gap: 1rem 3rem;
+  padding: clamp(2rem, 6vw, 5rem) clamp(1.25rem, 4vw, 3rem) clamp(2.5rem, 6vw, 5rem);
+  background: var(--surface);
+}
+.opener-num {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(9rem, 38vw, 30rem);
+  font-weight: 300;
+  line-height: 0.75;
+  letter-spacing: -0.06em;
+  color: var(--accent);
+  font-variation-settings: "opsz" 144;
+}
+@media (min-width: 60rem) {
+  .opener {
+    grid-template-columns: auto minmax(0, 44rem);
+    min-height: 34rem;
+  }
+}
+.kicker {
+  margin: 1rem 0 0;
+  font-size: var(--step-small);
+  font-weight: 600;
+}
+h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--step-display);
+  font-weight: 650;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  font-variation-settings: "opsz" 144;
+}
+.dek {
+  margin: 1.25rem 0 0;
+  font-size: clamp(1.2rem, 1.1rem + 0.5vw, 1.45rem);
+  font-style: italic;
+  line-height: 1.35;
+  max-width: 34ch;
+}
+.byline {
+  margin: 1.25rem 0 0;
+  font-size: var(--step-small);
+}
+.column {
+  width: min(100% - 2.5rem, var(--measure));
+  margin-inline: auto;
+  padding-top: 3rem;
+}
+.toc {
+  font-size: var(--step-small);
+  margin-bottom: 3rem;
+}
+.toc-label {
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+}
+.toc ol {
+  margin: 0;
+  padding-left: 1.3em;
+}
+.prose > :where(p, ul, ol, table) {
+  margin: 0 0 1.15em;
+}
+.prose > p:first-of-type::first-letter {
+  float: left;
+  margin: 0.06em 0.08em -0.1em 0;
+  font-family: var(--font-display);
+  font-size: 4.6em;
+  font-weight: 700;
+  line-height: 0.82;
+  color: var(--accent);
+}
+.prose h2 {
+  margin: 6rem 0 1.25rem;
+  font-family: var(--font-display);
+  font-size: var(--step-head);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  font-variation-settings: "opsz" 100;
+}
+.prose h3 {
+  margin: 2.25rem 0 0.6rem;
+  font-family: var(--font-display);
+  font-size: var(--step-lead);
+  font-weight: 650;
+  line-height: 1.2;
+}
+/* Pull quotes: the analogies, set large and wider than the column. */
+.prose blockquote {
+  margin: 2.5rem 0;
+  font-family: var(--font-display);
+  font-size: var(--step-lead);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.32;
+  color: var(--ink);
+}
+@media (min-width: 70rem) {
+  .prose blockquote {
+    margin-inline: -6rem;
+    font-size: 1.875rem;
+  }
+}
+.prose blockquote p {
+  margin: 0;
+}
+.prose blockquote strong {
+  font-weight: 650;
+}
+/* Figures run the full width of the page on a field of colour. */
+.prose .fig {
+  margin: 3rem calc(50% - 50vw);
+  padding: clamp(2rem, 5vw, 4rem) max(1.25rem, calc(50vw - 50%));
+  background: var(--surface);
+  --fig-max: 40rem;
+}
+.prose .fig figcaption {
+  max-width: 40rem;
+  margin-inline: auto;
+}
+.prose .widget {
+  margin: 3rem 0;
+}
+.aside {
+  margin: 2rem 0;
+  padding: 1.25rem 1.4rem;
+  background: var(--surface);
+  font-family: var(--font-text);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.aside-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+@media (min-width: 76rem) {
+  .aside {
+    float: right;
+    clear: right;
+    width: 19rem;
+    margin: 0.4rem -11rem 5rem 2rem;
+  }
+}
+.prose .heading,
+.prose .fig {
+  clear: both;
+}
+.footnotes {
+  clear: both;
+  margin-top: 4rem;
+}
+.footnotes::before {
+  content: "Sources";
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: var(--step-lead);
+  margin-bottom: 0.75rem;
+}
+.cover {
+  display: grid;
+  align-items: end;
+  gap: 1rem 3rem;
+  padding: clamp(2rem, 6vw, 5rem) clamp(1.25rem, 4vw, 3rem);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+}
+@media (min-width: 60rem) {
+  .cover {
+    grid-template-columns: auto minmax(0, 44rem);
+    min-height: 38rem;
+  }
+}
+.cover-num {
+  font-family: var(--font-display);
+  font-size: clamp(10rem, 40vw, 32rem);
+  font-weight: 300;
+  line-height: 0.75;
+  letter-spacing: -0.06em;
+  color: var(--accent);
+  font-variation-settings: "opsz" 144;
+}
+.cover-text {
+  display: grid;
+  gap: 1rem;
+}
+.cover-kicker {
+  font-size: var(--step-small);
+  font-weight: 600;
+}
+.cover-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--step-display);
+  font-weight: 650;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+.cover-dek {
+  font-size: clamp(1.2rem, 1.1rem + 0.5vw, 1.45rem);
+  max-width: 34ch;
+  font-style: italic;
+  line-height: 1.35;
+}
+.cover-cta {
+  justify-self: start;
+  margin-top: 0.5rem;
+  padding: 0.85rem 1.5rem;
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 600;
+  transition: transform 0.15s ease-out;
+}
+.cover:hover .cover-cta {
+  transform: translateY(-2px);
+}
+.shelf {
+  width: min(100% - 2.5rem, var(--measure));
+  margin: 4rem auto;
+}
+.shelf h2 {
+  font-family: var(--font-display);
+  font-size: var(--step-head);
+  margin: 0 0 1rem;
+}
+.shelf ol {
+  padding-left: 0;
+  list-style: none;
+}
+.shelf li {
+  padding-block: 0.75rem;
+  font-size: var(--step-lead);
+}
+.site-footer {
+  padding: 3rem clamp(1.25rem, 4vw, 3rem);
+  font-size: var(--step-small);
+}

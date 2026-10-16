@@ -1,0 +1,264 @@
+/* Book: Garamond, a running head, chapter openers and print proportions (text block on a 2:3 page). */
+:root {
+  --bg: #fcfcfc;
+  --surface: #f0f0f0;
+  --surface-2: #e3e3e3;
+  --ink: #1d1c1a;
+  --muted: #55524d;
+  --accent: #6b2d1f;
+  --accent-ink: #ffffff;
+  --link: #1d1c1a;
+  --line: #d6d3cc;
+  --line-strong: #6a665f;
+  --font-text: var(--font-garamond);
+  --font-display: var(--font-text);
+  --font-code: var(--font-jetbrains);
+  --step-small: 1rem;
+  --step-body: clamp(1.1875rem, 1.12rem + 0.3vw, 1.375rem);
+  --step-lead: clamp(1.35rem, 1.2rem + 0.6vw, 1.65rem);
+  --step-head: clamp(1.75rem, 1.4rem + 1.4vw, 2.4rem);
+  --step-display: clamp(2.6rem, 1.6rem + 4.2vw, 4.75rem);
+  --leading: 1.55;
+  --measure: 33rem;
+  --radius: 0;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0a0f;
+    --surface: #17171c;
+    --surface-2: #24242a;
+    --ink: #e8e4da;
+    --muted: #b1aca2;
+    --accent: #e3a08f;
+    --accent-ink: #0a0a0f;
+    --link: #e8e4da;
+    --line: #2f2e34;
+    --line-strong: #9e9a91;
+  }
+}
+body {
+  font-variant-numeric: oldstyle-nums;
+}
+.running {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  width: min(100% - 2.5rem, var(--measure) + 8rem);
+  margin-inline: auto;
+  padding: 0.9rem 0;
+  background: var(--bg);
+  font-style: italic;
+  font-size: 1rem;
+}
+.running a {
+  font-style: normal;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--ink);
+}
+.running span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--muted);
+}
+.book {
+  width: min(100% - 2.5rem, var(--measure));
+  margin-inline: auto;
+}
+.chapter,
+.title-page {
+  padding-block: clamp(4rem, 14vw, 10rem) 3rem;
+  text-align: center;
+}
+.title-page {
+  margin-inline: calc(50% - 50vw);
+  padding-inline: max(1.25rem, calc(50vw - 50%));
+  min-height: 70vh;
+  display: grid;
+  align-content: center;
+  background: var(--surface);
+}
+.title-page h1 {
+  font-size: clamp(3rem, 1.5rem + 6vw, 7rem);
+}
+html {
+  overflow-x: clip;
+}
+.ch {
+  margin: 1.5rem 0 0;
+  font-style: italic;
+  font-size: var(--step-lead);
+  color: var(--accent);
+}
+h1 {
+  margin: 0;
+  font-size: var(--step-display);
+  font-weight: 500;
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+}
+.sub {
+  margin: 1.5rem auto 0;
+  max-width: 28ch;
+  font-size: var(--step-lead);
+  font-style: italic;
+  line-height: 1.35;
+}
+.author {
+  margin: 2rem 0 0;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+.toc {
+  margin: 1rem 0 4rem;
+}
+.toc-label {
+  margin: 0 0 0.75rem;
+  font-style: italic;
+  text-align: center;
+}
+.toc ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: center;
+}
+.toc li {
+  margin-bottom: 0.3rem;
+}
+.toc a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.toc a:hover {
+  text-decoration: underline;
+}
+/* Book paragraphs: indented, not spaced. */
+.prose > p {
+  margin: 0;
+}
+.prose > p + p {
+  text-indent: 1.4em;
+}
+.prose > :where(ul, ol, table) {
+  margin: 0.8em 0;
+}
+.prose li {
+  margin-bottom: 0.25em;
+}
+.prose h2 {
+  margin: 4.5rem 0 1.5rem;
+  font-size: var(--step-head);
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.15;
+  text-align: center;
+}
+.prose h3 {
+  margin: 2.25rem 0 0.6rem;
+  font-size: var(--step-body);
+  font-weight: 600;
+}
+.prose blockquote {
+  margin: 1.25rem 1.5em;
+  font-size: 0.97em;
+}
+.prose blockquote p {
+  margin: 0;
+}
+.prose .fig,
+.prose .widget {
+  margin: 2.75rem 0;
+}
+.prose .fig figcaption {
+  font-style: italic;
+  text-align: center;
+}
+.aside {
+  margin: 1.75rem 0;
+  padding: 0 1.5em;
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.aside-title {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--accent);
+}
+.footnotes {
+  margin-top: 4rem;
+  font-size: 0.95rem;
+}
+.footnotes::before {
+  content: "Notes";
+  display: block;
+  margin-bottom: 1rem;
+  font-style: italic;
+  font-size: var(--step-lead);
+  text-align: center;
+}
+.contents h2 {
+  font-style: italic;
+  font-weight: 500;
+  text-align: center;
+  font-size: var(--step-lead);
+}
+.contents ol {
+  margin: 0 0 4rem;
+  padding: 0;
+  list-style: none;
+}
+.contents li {
+  padding-block: 1.25rem;
+}
+.contents a {
+  display: grid;
+  gap: 0.3rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+.contents .ch {
+  margin: 0;
+  font-size: 1rem;
+}
+.contents .tt {
+  font-size: var(--step-head);
+  line-height: 1.1;
+}
+.contents a:hover .tt {
+  text-decoration: underline;
+}
+.contents .parts {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 1.05rem;
+  columns: 2 14rem;
+  column-gap: 2rem;
+}
+.contents .parts li {
+  padding: 0.15rem 0;
+  break-inside: avoid;
+}
+.contents .parts a {
+  display: inline;
+}
+.contents p {
+  margin: 0.5rem 0 0;
+  font-style: italic;
+}
+.colophon {
+  width: min(100% - 2.5rem, var(--measure));
+  margin: 4rem auto 3rem;
+  font-style: italic;
+  text-align: center;
+  font-size: 1rem;
+  color: var(--muted);
+}
+.colophon a {
+  color: var(--ink);
+}

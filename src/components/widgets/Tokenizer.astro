@@ -1,0 +1,23 @@
+---
+import { encode } from '../../lib/bpe.ts'
+import { MERGE_COUNT, merges } from '../../lib/bpe-model.ts'
+
+const SAMPLE = 'Tokenizers split unbelievably rare words into more pieces than common ones.'
+const tokens = encode(SAMPLE, merges)
+---
+
+<section class="widget" data-widget="tokenizer" aria-labelledby="w-tok-title">
+  <p class="widget-title" id="w-tok-title">Try it: a toy tokenizer</p>
+  <p class="widget-lede">
+    Not a real model's tokenizer: a toy one, built with the method just described from the text of this blog alone (a far simpler process than training the model), so its vocabulary is single characters
+    plus about {MERGE_COUNT} longer pieces it learned by merging. Production models have 100,000 or more pieces,
+    learned from far more text. That tiny vocabulary is why even ordinary words split here.
+  </p>
+  <label class="widget-label" for="w-tok-in">Text to split</label>
+  <textarea id="w-tok-in" class="widget-input" rows="3" readonly spellcheck="false">{SAMPLE}</textarea>
+  <p class="widget-stats" aria-live="polite">
+    <span data-count>{tokens.length}</span> tokens from <span data-chars>{SAMPLE.length}</span> characters
+  </p>
+  <ol class="token-list" aria-label="Tokens">{tokens.map((t) => <li>{t.replaceAll(' ', '·')}</li>)}</ol>
+  <p class="widget-note" data-nojs>Turn on JavaScript to type your own text.</p>
+</section>

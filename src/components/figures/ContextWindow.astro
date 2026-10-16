@@ -1,0 +1,42 @@
+---
+import Figure from './Figure.astro'
+
+// Illustrative shares of one context window in a coding agent session.
+const parts = [
+  { label: 'System prompt', note: 'the product’s own instructions', h: 30 },
+  { label: 'Rules files', note: 'the project’s standing instructions', h: 26 },
+  { label: 'Tool definitions', note: 'actions the model may request', h: 34 },
+  { label: 'Conversation so far', note: 'every message and tool result', h: 84 },
+  { label: 'Files and retrieved text', note: 'documents added for this task', h: 58 },
+  { label: 'Your latest message', note: '', h: 20, accent: true },
+  { label: 'Room for the answer', note: 'output tokens count too', h: 40, free: true },
+]
+let y = 8
+const segs = parts.map((p) => {
+  const s = { ...p, y }
+  y += p.h + 3
+  return s
+})
+const H = y + 6
+---
+
+<Figure caption="Everything the model can use on one call shares a single, fixed-size context window, measured in tokens. Proportions are illustrative.">
+  <svg viewBox={`0 0 420 ${H}`} role="img" aria-labelledby="f-ctx-t f-ctx-d">
+    <title id="f-ctx-t">What fills a context window</title>
+    <desc id="f-ctx-d">{`From top to bottom: ${parts.map((p) => p.label + (p.note ? ` (${p.note})` : '')).join(', ')}.`}</desc>
+    {
+      segs.map((s) => (
+        <g>
+          <rect x="0" y={s.y} width="110" height={s.h} rx="3" class={s.accent ? 'box-accent' : s.free ? 'box-ground dash' : 'box'} />
+          <path d={`M114 ${s.y + s.h / 2} H134`} class="wire" />
+          <text x="142" y={s.y + s.h / 2 + (s.note ? -2 : 5)} class={s.accent ? 't-strong t-accent' : 't-strong'}>{s.label}</text>
+          {s.note && (
+            <text x="142" y={s.y + s.h / 2 + 14} class="t-small t-muted">
+              {s.note}
+            </text>
+          )}
+        </g>
+      ))
+    }
+  </svg>
+</Figure>

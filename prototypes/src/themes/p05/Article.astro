@@ -1,0 +1,29 @@
+---
+import ArticleBody from '../../../../src/components/ArticleBody.astro'
+import { SITE } from '../../components/data.ts'
+import Page from '../../components/Page.astro'
+import Toc from '../../components/Toc.astro'
+import type { ArticleProps } from '../../components/types.ts'
+import { fonts } from './fonts.ts'
+import './theme.css'
+
+const { post, toc, minutes, date, base } = Astro.props as ArticleProps
+---
+
+<Page title={`${post.data.title} · ${SITE.name}`} description={post.data.summary} fonts={fonts} theme="mono" islands>
+  <header class="site-header wrap">
+    <a class="wordmark" href={`${base}/`}>dr4w<span class="dot">.</span></a>
+    <nav aria-label="Site"><a href={`${base}/#issues`}>Issues</a><a href={SITE.home}>dr4w.io</a></nav>
+  </header>
+  <main id="main" class="wrap layout">
+    <aside class="side" aria-label="Contents"><Toc headings={toc} label="Contents" /></aside>
+    <article class="main">
+      <h1>{post.data.title}</h1>
+      <p class="meta">Issue {post.issue} · <time datetime={post.published.toISOString().slice(0, 10)}>{date}</time> · {minutes} min read</p>
+      <p class="sum">{post.data.summary}</p>
+      <p class="byline">By <a href={SITE.home}>{SITE.author}</a></p>
+      <div class="prose"><ArticleBody post={post} /></div>
+    </article>
+  </main>
+  <footer class="site-footer wrap"><p>{SITE.author} · <a href={SITE.home}>dr4w.io</a> · <a href={`${base}/`}>All issues</a></p></footer>
+</Page>
