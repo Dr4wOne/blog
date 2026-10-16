@@ -366,9 +366,14 @@ h1 {
 
 /* Long articles: skip layout and paint of blocks far below the screen until they approach it.
    Keeps the first paint fast on slow phones; sizes are remembered once rendered (auto). */
-.prose > :is(.fig, .widget, .footnotes, table),
+.prose > :is(.fig, table),
 .prose > p:nth-of-type(n + 6),
 .prose > :is(ul, ol):nth-of-type(n + 3) {
   content-visibility: auto;
   contain-intrinsic-size: auto 12rem;
+}
+
+.article-end > p a {
+  display: inline-block;
+  padding-block: 0.5rem;
 }
