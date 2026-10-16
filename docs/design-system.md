@@ -20,8 +20,10 @@ highlights; nothing else is coloured. No gradients, shadows, glass, hairline box
 Light and dark follow the reader's system setting (no toggle, so the home page needs no JavaScript).
 
 ## Type
-One family: **Source Serif 4** (self-hosted, variable weight, subset at build). Code uses the system
-monospace. Five steps only:
+One family: **Source Serif 4** (self-hosted, variable weight, subset at build: 400–700 upright, 400 italic,
+about 35 KB). It loads with `font-display: optional` and no preload: on a fast connection it shows from
+the first paint; on a slow phone the first page uses the metric-matched serif fallback (no layout shift,
+text at once) and later pages use the cached font. Code uses the system monospace. Five steps only:
 
 | Step | Size | Use |
 |---|---|---|

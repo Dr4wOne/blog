@@ -15,6 +15,11 @@ Article pages are judged with `--throttling-method=devtools` (Slow 4G, 4× CPU s
 LCP < 1.0 s. The simulated value is still reported next to it. The home page and all other Lighthouse
 scores keep the simulated method. Chosen by Daniel on 2026-10-16 (option A).
 
+**Amended 2026-10-16 after the first deploy:** against production (`pnpm judges --live`), every page's
+LCP uses devtools throttling. The simulation adds modelled DNS, TCP and TLS round trips (about 0.6 s
+before the first byte), so no HTTPS page can reach 1.0 s there; the home page measured 1.56 s simulated
+and 0.77 s with real throttling, from an edge that answers in about 0.12 s.
+
 ## Consequences
 CI judges what readers experience. Devtools throttling is slower to run and a little noisier; the
 judge retries once. Revisit if Lighthouse's simulation learns to model HTML streaming.

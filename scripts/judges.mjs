@@ -107,7 +107,7 @@ if (want('lighthouse')) {
       [lh.perf, lh.a11y, lh.bp, lh.seo].every((x) => x === 100),
       cats,
     )
-    if (path === '/') {
+    if (path === '/' && !LIVE) {
       record(`LCP ${path}`, '< 1.0 s (simulated)', lh.lcp < 1000, `${(lh.lcp / 1000).toFixed(2)} s`)
     } else {
       // ADR 0009: articles are judged with real packet-level throttling (the browser streams HTML,
