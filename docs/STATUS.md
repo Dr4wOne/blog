@@ -1,28 +1,26 @@
 # Status
 
-**Last updated:** 2026-10-16 · branch `feat/relaunch` (not merged yet)
+**Last updated:** 2026-10-16 · `main` live on https://blog.dr4w.io
 Update this file with `/handoff` at the end of every session.
 
 ## Live
 | What | URL | Since |
 |---|---|---|
-| Blog (Essay design, issue 1) | https://blog.dr4w.io — **not live yet**: waiting for the cutover ([cutover.md](cutover.md)) | — |
-| Old sandbox (to retire) | `b3291982.blog-sbx.pages.dev` | 2026-10-13 |
+| Blog (Essay design) | https://blog.dr4w.io | 2026-10-16 |
+| Writing section on the landing page (rebuilds on every blog deploy) | https://dr4w.io/#writing | 2026-10-16 |
+| Old sandbox, to retire | `b3291982.blog-sbx.pages.dev` | 2026-10-13 |
 
 ## Issues
 | No. | Title | Published |
 |---|---|---|
 | 1 | [AI From the Ground Up](../src/content/posts/ai-from-the-ground-up/index.mdx) | 2026-10-15 |
 
-## In progress
-- Relaunch PR from `feat/relaunch`: new site, Essay design, dr4w-style pipeline, judges, docs.
-- Landing page: three Writing-section options on `Dr4wOne/dr4w-landpage` branch `feat/writing-section`,
-  waiting for a pick (G3).
-
 ## Next up
-1. Create the two tokens and the `production` environment ([cutover.md](cutover.md) §1–2), then merge the relaunch PR.
-2. Verify live with `pnpm judges --live https://blog.dr4w.io`, then retire `blog-sbx` (separate "go").
-3. Pick a landing Writing option; launch it through the landing repo's deploy.
+1. Exclude `blog.dr4w.io` from Cloudflare Web Analytics' automatic setup: the injected beacon is blocked by
+   the CSP, logs a console error and holds Best Practices at 92 (the only failing live judge).
+2. Retire the sandbox on a "go": [cutover.md](cutover.md) §5 (Pages project `blog-sbx`, its DNS record,
+   GitHub environments `sandbox` and `prod`, variables `AWS_REGION` and `BASE_DOMAIN`).
+3. Write issue 2: `pnpm post:new <slug> "<title>"` ([guides/new-post.md](guides/new-post.md)).
 
 ## Known issues
 | Item | Impact | Where |
