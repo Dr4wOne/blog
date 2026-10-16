@@ -1,0 +1,13 @@
+---
+import { render } from 'astro:content'
+import type { Post } from '../lib/posts.ts'
+import H2 from './H2.astro'
+import H3 from './H3.astro'
+
+interface Props {
+  post: Post
+}
+const { Content } = await render(Astro.props.post)
+---
+
+<Content components={{ h2: H2, h3: H3 }} />

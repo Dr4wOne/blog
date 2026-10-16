@@ -1,0 +1,14 @@
+// Cloudflare Worker for the blog: static assets only (no script). Deployed by .github/workflows/deploy.yml.
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "dr4w-blog",
+  "compatibility_date": "2026-10-15",
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  // Only ever a subdomain: the dr4w.io apex belongs to the landpage repo.
+  "routes": [{ "pattern": "blog.dr4w.io", "custom_domain": true }],
+  "workers_dev": false
+}

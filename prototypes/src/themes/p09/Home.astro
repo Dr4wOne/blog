@@ -1,0 +1,35 @@
+---
+import { SITE } from '../../components/data.ts'
+import Page from '../../components/Page.astro'
+import type { HomeProps } from '../../components/types.ts'
+import { fonts } from './fonts.ts'
+import './theme.css'
+
+const { issues, base } = Astro.props as HomeProps
+const [latest] = issues
+---
+
+<Page title={`${SITE.name}: writing by ${SITE.author}`} description={SITE.tagline} fonts={fonts} theme="dark">
+  <header class="site-header wide"><a class="wordmark" href={SITE.home}>dr4w<span>.</span>io</a><nav aria-label="Site"><a href={`${base}/`} aria-current="page">Writing</a><a href={SITE.home}>About</a></nav></header>
+  <main id="main" class="wide">
+    <section class="hero">
+      <h1>Writing</h1>
+      <p class="hero-sub">{SITE.author} on how AI systems work, and how to build with them. Long issues, real sources, working diagrams.</p>
+    </section>
+    {
+      latest && (
+        <a class="latest" href={`${base}${latest.post.path}`}>
+          <span class="l-title">{latest.post.data.title}</span>
+          <span class="l-meta">Issue {latest.post.issue} · {latest.date} · {latest.minutes} min</span>
+          <span class="l-sum">{latest.post.data.summary}</span>
+          <span class="l-toc">{latest.toc.slice(0, 8).map((h) => <span>{h.text}</span>)}</span>
+        </a>
+      )
+    }
+    <section id="issues" class="all" aria-labelledby="all-h">
+      <h2 id="all-h">All issues</h2>
+      <ol reversed>{issues.map((i) => <li><a href={`${base}${i.post.path}`}>{i.post.data.title}</a><span>{i.date}</span></li>)}</ol>
+    </section>
+  </main>
+  <footer class="site-footer wide"><p class="big">dr4w<span>.</span>io</p><p>{SITE.author} · <a href={SITE.home}>Back to the main site</a></p></footer>
+</Page>

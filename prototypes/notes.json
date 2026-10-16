@@ -1,0 +1,197 @@
+{
+  "lighthouse": "13.4",
+  "judged": "2026-10-15",
+  "protos": [
+    {
+      "id": "p01",
+      "name": "Essay",
+      "rationale": [
+        "One serif column at about 68 characters, the way long essays are read on paper.",
+        "Deep dives float into the right margin on wide screens (Tufte-style sidenotes) and sit inline on phones.",
+        "Nothing competes with the text: no cards, one quiet blue for links."
+      ],
+      "type": "Source Serif 4 (text and display), JetBrains Mono (code only)",
+      "brand": "Dark mode uses the landing page's #0A0A0F ground; same dr4w wordmark and author link.",
+      "skills": ["design-taste-frontend", "minimalist-ui", "full-output-enforcement"],
+      "dials": {
+        "variance": 3,
+        "motion": 2,
+        "density": 3
+      },
+      "weakest": "The quietest home page of the ten; with only one issue it relies on the writing to hold attention."
+    },
+    {
+      "id": "p02",
+      "name": "Swiss grid",
+      "rationale": [
+        "A strict 12-column grid with one grotesk; hierarchy comes from scale and position, not decoration.",
+        "Huge tight headlines, a sticky contents rail on the left, thick black rules as section markers.",
+        "Ends on a full-width wordmark, like a poster."
+      ],
+      "type": "Schibsted Grotesk (everything), JetBrains Mono (code only)",
+      "brand": "Black/white with one red; dark mode on #0A0A0F; the oversized dr4w wordmark echoes the landing hero name.",
+      "skills": [
+        "design-taste-frontend",
+        "industrial-brutalist-ui (toned down)",
+        "full-output-enforcement"
+      ],
+      "dials": {
+        "variance": 5,
+        "motion": 2,
+        "density": 3
+      },
+      "weakest": "Huge grotesk headlines make long section titles wrap; titles must stay short."
+    },
+    {
+      "id": "p03",
+      "name": "Engineer's notebook",
+      "rationale": [
+        "A humanist sans with a thick red margin rule, like a lab notebook.",
+        "Deep dives become annotations in the left margin, beside the paragraph they belong to.",
+        "Feels like working notes written up properly: friendly, technical, unpretentious."
+      ],
+      "type": "Hanken Grotesk (text and headings), JetBrains Mono (code only)",
+      "brand": "Teal accent sits next to the landing page's cyan; dark mode keeps the near-black ground.",
+      "skills": ["design-taste-frontend", "minimalist-ui", "full-output-enforcement"],
+      "dials": {
+        "variance": 4,
+        "motion": 2,
+        "density": 3
+      },
+      "weakest": "Margin annotations need a wide screen; below 62 rem they become ordinary boxes."
+    },
+    {
+      "id": "p04",
+      "name": "Longform magazine",
+      "rationale": [
+        "A cover-sized issue number opens each issue, then a drop cap and a serif column.",
+        "Analogies become pull quotes that break out of the column; every figure runs full-bleed on a colour field.",
+        "Deep dives are boxed sidebars hanging into the right margin."
+      ],
+      "type": "Fraunces (display), Source Serif 4 (text), JetBrains Mono (code only)",
+      "brand": "The issue number plays the role the name plays on dr4w.io's hero; dark mode on #0A0A0F.",
+      "skills": ["design-taste-frontend", "high-end-visual-design", "full-output-enforcement"],
+      "dials": {
+        "variance": 6,
+        "motion": 2,
+        "density": 3
+      },
+      "weakest": "Three typefaces (display, text, code) and full-bleed figures make it the heaviest to maintain."
+    },
+    {
+      "id": "p05",
+      "name": "Monochrome + one accent",
+      "rationale": [
+        "Black and white only; the dr4w cyan appears on links and focus rings and nowhere else.",
+        "A sticky contents column on desktop, heavy sans headlines, analogies set as inverted black blocks.",
+        "Figures render in pure ink, so the diagrams read like technical drawings."
+      ],
+      "type": "Public Sans (everything), JetBrains Mono (code only)",
+      "brand": "Uses the landing page's exact cyan (#00D9FF on dark) as its only colour, and the dr4w. wordmark with a cyan dot.",
+      "skills": ["design-taste-frontend", "minimalist-ui", "full-output-enforcement"],
+      "dials": {
+        "variance": 3,
+        "motion": 2,
+        "density": 3
+      },
+      "weakest": "Monochrome figures lose the one highlight colour that helps diagrams read."
+    },
+    {
+      "id": "p06",
+      "name": "Book",
+      "rationale": [
+        "Garamond, indented paragraphs instead of spaced ones, a sticky italic running head with the issue title.",
+        "Each issue opens like a chapter, centred; the home page is a title page and a contents list.",
+        "Print proportions: a narrow text block and generous margins."
+      ],
+      "type": "EB Garamond (everything), JetBrains Mono (code only)",
+      "brand": "Weakest visual tie to dr4w.io by design; shares the dark ground and the wordmark only.",
+      "skills": ["design-taste-frontend", "minimalist-ui", "full-output-enforcement"],
+      "dials": {
+        "variance": 3,
+        "motion": 2,
+        "density": 3
+      },
+      "weakest": "Centred openings and indented paragraphs read as print; the home page is sparse until there are many issues."
+    },
+    {
+      "id": "p07",
+      "name": "Research paper",
+      "rationale": [
+        "Figure-first: diagrams run wider than the text with their captions beside them on large screens.",
+        "Opens with title, author, an abstract and keywords; deep dives are boxes, as in a journal; notes become References.",
+        "A serif for reading and a sans for every interface label and figure."
+      ],
+      "type": "Literata (text), Inter (labels, figures, UI), JetBrains Mono (code only)",
+      "brand": "Inter is the landing page's body face; dark mode on #0A0A0F.",
+      "skills": ["design-taste-frontend", "minimalist-ui", "full-output-enforcement"],
+      "dials": {
+        "variance": 4,
+        "motion": 2,
+        "density": 3
+      },
+      "weakest": "The abstract and boxed asides make it feel formal; figure captions beside figures need 72 rem."
+    },
+    {
+      "id": "p08",
+      "name": "Warm paper",
+      "rationale": [
+        "A soft stone-grey ground with deep green ink: warm without the beige-and-orange cliché.",
+        "Relaxed leading, rounded surfaces, a collapsible contents box; everything at reading pace.",
+        "The calmest of the ten."
+      ],
+      "type": "Newsreader (everything), JetBrains Mono (code only)",
+      "brand": "Deliberately quieter than dr4w.io; connects through the wordmark and the author link.",
+      "skills": ["design-taste-frontend", "high-end-visual-design", "full-output-enforcement"],
+      "dials": {
+        "variance": 4,
+        "motion": 2,
+        "density": 3
+      },
+      "weakest": "Soft contrast on surfaces and rounded panels can read as generic; weakest tie to the dr4w brand."
+    },
+    {
+      "id": "p09",
+      "name": "Dark-first editorial",
+      "rationale": [
+        "Continuity with dr4w.io: the same #0A0A0F ground, Space Grotesk headlines, Inter text and the violet accent, set for long reading.",
+        "A sticky 'on this page' rail, figures on raised surfaces, a giant 'Writing' masthead.",
+        "Light mode is the variant, not the default."
+      ],
+      "type": "Space Grotesk (headings), Inter (text), JetBrains Mono (code only)",
+      "brand": "Strongest link: same ground, fonts, violet accent and the dr4w.io wordmark with a coloured dot.",
+      "skills": ["design-taste-frontend", "minimalist-ui", "full-output-enforcement"],
+      "dials": {
+        "variance": 5,
+        "motion": 2,
+        "density": 3
+      },
+      "weakest": "Uses the violet the design gate flags as an AI-site tell (allowed only as the brand colour)."
+    },
+    {
+      "id": "p10",
+      "name": "Index-first",
+      "rationale": [
+        "The home page is the table of contents: each issue's huge number, title, summary and every section, linked.",
+        "Article pages are deliberately quiet: modest title, narrow column, no chrome.",
+        "Scales well as issues accumulate."
+      ],
+      "type": "Instrument Sans (everything), JetBrains Mono (code only)",
+      "brand": "Big numerals mirror the issue-number URLs; dark mode on #0A0A0F; green accent is its own.",
+      "skills": ["design-taste-frontend", "minimalist-ui", "full-output-enforcement"],
+      "dials": {
+        "variance": 6,
+        "motion": 2,
+        "density": 3
+      },
+      "weakest": "Article pages are deliberately plain; the design shines only once there are several issues."
+    }
+  ],
+  "rankingBy": "Chosen at gate G1 by Daniel Baumann on 2026-10-15. The other nine are kept as a reference.",
+  "ranking": [
+    {
+      "name": "Essay (p01): chosen",
+      "reason": "One serif column with margin notes; Lighthouse 100 on every category, 0 axe violations, 0 taste-skill FAIL. Became the site; rules in docs/design-system.md."
+    }
+  ]
+}

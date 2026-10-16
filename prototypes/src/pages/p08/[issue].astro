@@ -1,0 +1,15 @@
+---
+import { publishedPosts } from '../../../../src/lib/posts.ts'
+import { issueData } from '../../components/data.ts'
+import Article from '../../themes/p08/Article.astro'
+
+export async function getStaticPaths() {
+  return (await publishedPosts()).map((post) => ({
+    params: { issue: post.path.slice(1, -1) },
+    props: { post },
+  }))
+}
+const data = await issueData(Astro.props.post)
+---
+
+<Article {...data} base="/p08" />

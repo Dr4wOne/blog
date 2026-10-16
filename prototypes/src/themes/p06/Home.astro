@@ -1,0 +1,51 @@
+---
+import { SITE } from '../../components/data.ts'
+import Page from '../../components/Page.astro'
+import type { HomeProps } from '../../components/types.ts'
+import { fonts } from './fonts.ts'
+import './theme.css'
+
+const { issues, base } = Astro.props as HomeProps
+const words = [
+  'Zero',
+  'One',
+  'Two',
+  'Three',
+  'Four',
+  'Five',
+  'Six',
+  'Seven',
+  'Eight',
+  'Nine',
+  'Ten',
+]
+---
+
+<Page title={`${SITE.name}: writing by ${SITE.author}`} description={SITE.tagline} fonts={fonts} theme="book">
+  <header class="running"><a href={`${base}/`}>dr4w</a><span>Writing by {SITE.author}</span></header>
+  <main id="main" class="book">
+    <section class="title-page" aria-labelledby="home-h">
+      <h1 id="home-h">Notes on Building with AI</h1>
+      <p class="sub">{SITE.tagline}</p>
+      <p class="author">{SITE.author}</p>
+    </section>
+    <section id="issues" class="contents" aria-labelledby="contents-h">
+      <h2 id="contents-h">Contents</h2>
+      <ol>
+        {
+          issues.map((i) => (
+            <li>
+              <a href={`${base}${i.post.path}`}>
+                <span class="tt">{i.post.data.title}</span>
+                <span class="ch">Issue {words[i.post.issue] ?? i.post.issue}</span>
+              </a>
+              <p>{i.post.data.summary}</p>
+              <ol class="parts">{i.toc.map((h) => <li><a href={`${base}${i.post.path}#${h.slug}`}>{h.text}</a></li>)}</ol>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+  </main>
+  <footer class="colophon"><p>Set in EB Garamond. {SITE.author}, <a href={SITE.home}>dr4w.io</a>.</p></footer>
+</Page>

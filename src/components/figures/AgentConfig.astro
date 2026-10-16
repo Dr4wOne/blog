@@ -1,0 +1,35 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+const inputs = [
+  { title: 'Rules', note: 'always loaded: AGENTS.md, CLAUDE.md' },
+  { title: 'Skills', note: 'loaded when the task needs them' },
+  { title: 'Commands', note: 'procedures you trigger: /review' },
+  { title: 'MCP servers', note: 'extra tools and data sources' },
+]
+---
+
+<Figure caption="How teams configure a harness. Each piece is a file or a connection the harness reads; the model only ever sees the result in its context.">
+  <svg viewBox="0 0 420 300" role="img" aria-labelledby="f-cfg-t f-cfg-d">
+    <title id="f-cfg-t">Rules, skills, commands and MCP feed the harness</title>
+    <desc id="f-cfg-d">Four inputs feed the harness: rules, always loaded; skills, loaded when needed; commands, triggered by you; and MCP servers, which add tools and data. The harness turns them into context and tools for the model.</desc>
+    <defs><Arrow id="f-cfg-a" /></defs>
+    {
+      inputs.map((p, i) => {
+        const y = i * 72
+        return (
+          <g>
+            <rect x="0" y={y} width="262" height="60" rx="6" class="box" />
+            <text x="14" y={y + 25} class="t-strong">{p.title}</text>
+            <text x="14" y={y + 45} class="t-small">{p.note}</text>
+            <path d={`M264 ${y + 30} C286 ${y + 30} 286 144 304 144`} class="wire" marker-end="url(#f-cfg-a)" />
+          </g>
+        )
+      })
+    }
+    <rect x="308" y="96" width="112" height="96" rx="6" class="box-accent" />
+    <text x="364" y="138" text-anchor="middle" class="t-on-accent t-strong">Harness</text>
+    <text x="364" y="160" text-anchor="middle" class="t-on-accent t-small">context + tools</text>
+  </svg>
+</Figure>

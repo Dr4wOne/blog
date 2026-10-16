@@ -1,0 +1,40 @@
+---
+import { SITE } from '../../components/data.ts'
+import Page from '../../components/Page.astro'
+import type { HomeProps } from '../../components/types.ts'
+import { fonts } from './fonts.ts'
+import './theme.css'
+
+const { issues, base } = Astro.props as HomeProps
+---
+
+<Page title={`${SITE.name}: writing by ${SITE.author}`} description={SITE.tagline} fonts={fonts} theme="swiss">
+  <header class="site-header grid">
+    <a class="wordmark" href={`${base}/`}>dr4w</a>
+    <p class="site-desc">Writing by {SITE.author}</p>
+    <nav aria-label="Site"><a href="#issues">Issues</a><a href={SITE.home}>dr4w.io</a></nav>
+  </header>
+  <main id="main">
+    <section class="home-hero grid" aria-labelledby="home-h">
+      <h1 id="home-h">How AI systems work.</h1>
+    </section>
+    <section id="issues" class="issues grid" aria-labelledby="issues-h">
+      <h2 id="issues-h">Issues</h2>
+      <ol class="issue-rows">
+        {
+          issues.map((i) => (
+            <li>
+              <a href={`${base}${i.post.path}`}>
+                <span class="t">{i.post.data.title}</span>
+                <span class="num">Issue {i.post.issue}</span>
+                <span class="s">{i.post.data.summary}</span>
+                <span class="d">{i.date} · {i.minutes} min</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+  </main>
+  <footer class="site-footer grid"><p class="big">dr4w</p><p>{SITE.author} · <a href={SITE.home}>dr4w.io</a></p></footer>
+</Page>

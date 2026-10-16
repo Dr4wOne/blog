@@ -1,0 +1,52 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+const phases = [
+  {
+    title: 'Pre-training',
+    lines: [
+      'Predict the next token over trillions of tokens',
+      'of text and code. Result: a fluent base model.',
+    ],
+  },
+  {
+    title: 'Instruction tuning',
+    lines: [
+      'Learn from examples of a request followed by',
+      'a good answer, so it answers instead of rambling.',
+    ],
+  },
+  {
+    title: 'Learning from rewards',
+    lines: [
+      'Get rewarded for answers people or AI judges',
+      'prefer, and for answers that can be checked.',
+    ],
+  },
+]
+---
+
+<Figure caption="From raw text to assistant. Pre-training gives knowledge of language and the world; the later stages shape how the model behaves.">
+  <svg viewBox="0 0 420 364" role="img" aria-labelledby="f-train-t f-train-d">
+    <title id="f-train-t">Three training stages</title>
+    <desc id="f-train-d">Pre-training on huge amounts of text produces a base model. Instruction tuning teaches it to follow requests. Learning from rewards favours answers people prefer and answers that can be checked. The result is an assistant model.</desc>
+    <defs><Arrow id="f-train-a" /></defs>
+    {
+      phases.map((p, i) => {
+        const y = i * 104
+        return (
+          <g>
+            <rect x="0" y={y} width="420" height="78" rx="6" class="box" />
+            <text x="16" y={y + 27} class="t-strong t-large">{p.title}</text>
+            <text x="16" y={y + 49} class="t-small">{p.lines[0]}</text>
+            <text x="16" y={y + 66} class="t-small">{p.lines[1]}</text>
+            <path d={`M210 ${y + 80} V${y + 102}`} class="wire" marker-end="url(#f-train-a)" />
+          </g>
+        )
+      })
+    }
+    <rect x="90" y="316" width="240" height="44" rx="22" class="box-accent" />
+    <text x="210" y="343" text-anchor="middle" class="t-on-accent t-strong">An assistant model</text>
+  </svg>
+</Figure>

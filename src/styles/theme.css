@@ -1,0 +1,379 @@
+/* The Essay design (chosen at G1, 2026-10-15): one serif column, notes in the margin.
+   Rules for using it: docs/design-system.md. Every colour and size is a token below. */
+:root {
+  --bg: #fafafa;
+  --surface: #efeff0;
+  --surface-2: #e3e3e6;
+  --ink: #17171a;
+  --muted: #55545a;
+  --accent: #1b4d89;
+  --accent-ink: #ffffff;
+  --link: #1b4d89;
+  --line: #d6d4cd;
+  --line-strong: #6b6a70;
+  --font-text: var(--font-source-serif), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-text);
+  --font-code:
+    ui-monospace, "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
+  --step-small: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
+  --step-body: clamp(1.125rem, 1.08rem + 0.2vw, 1.25rem);
+  --step-lead: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --step-head: clamp(1.625rem, 1.3rem + 1.4vw, 2.25rem);
+  --step-display: clamp(2.6rem, 1.6rem + 4.6vw, 5rem);
+  --leading: 1.62;
+  --measure: 35rem;
+  --margin: 15rem;
+  --radius: 2px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0a0f;
+    --surface: #16161d;
+    --surface-2: #22222b;
+    --ink: #ebe9e4;
+    --muted: #a8a6a1;
+    --accent: #9cbcf2;
+    --accent-ink: #0a0a0f;
+    --link: #9cbcf2;
+    --line: #2c2c36;
+    --line-strong: #8a8994;
+  }
+}
+
+/* Frame: header, main and footer share one width; text sits in the left column, notes in the right. */
+.site-header,
+.site-footer,
+main {
+  width: min(100% - 2.5rem, var(--measure) + var(--margin) + 3.5rem);
+  margin-inline: auto;
+}
+.site-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1.5rem 0;
+}
+.wordmark {
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  color: var(--ink);
+}
+.site-header nav {
+  display: flex;
+  gap: 1.25rem;
+  font-size: var(--step-small);
+}
+.site-header nav a,
+.site-footer a {
+  color: var(--ink);
+}
+.site-footer {
+  padding-block: 5rem 3rem;
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+.column {
+  max-width: var(--measure);
+}
+
+/* Article opener */
+.opener {
+  padding-block: clamp(3rem, 8vw, 6.5rem) 2.5rem;
+}
+h1 {
+  margin: 0;
+  font-size: var(--step-display);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+.issue-line {
+  margin: 1.25rem 0 0;
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+.dek {
+  margin: 1.5rem 0 0;
+  font-size: var(--step-lead);
+  line-height: 1.4;
+}
+.byline {
+  margin: 1.25rem 0 0;
+  font-size: var(--step-small);
+}
+.toc {
+  margin-bottom: 3rem;
+  font-size: var(--step-small);
+}
+.toc-label {
+  margin: 0 0 0.5rem;
+  font-weight: 650;
+}
+.toc ol {
+  margin: 0;
+  padding-left: 1.3em;
+  columns: 2 14rem;
+  column-gap: 2rem;
+}
+.toc li {
+  break-inside: avoid;
+  margin-bottom: 0.3rem;
+}
+.toc a {
+  color: var(--ink);
+}
+
+/* Prose */
+.prose > :where(p, ul, ol, blockquote, table, pre) {
+  margin: 0 0 1.15em;
+}
+.prose h2 {
+  margin: 3.5em 0 0.9em;
+  font-size: var(--step-head);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+.prose h3 {
+  margin: 2.2em 0 0.6em;
+  font-size: var(--step-lead);
+  font-weight: 600;
+  line-height: 1.25;
+}
+.prose li {
+  margin-bottom: 0.45em;
+}
+.prose blockquote {
+  margin-inline: 0;
+  padding-left: 1.25rem;
+  box-shadow: inset 4px 0 0 var(--accent);
+  font-style: italic;
+}
+.prose blockquote strong {
+  font-style: normal;
+}
+.prose img {
+  height: auto;
+}
+.prose .fig,
+.prose .widget {
+  margin: 2.5rem 0;
+  clear: right;
+}
+
+/* Margin notes: deep dives float into the right margin on wide screens, inline on narrow ones. */
+.aside {
+  margin: 2rem 0;
+  padding: 1.1rem 1.25rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+@media (min-width: 72rem) {
+  .aside {
+    float: right;
+    clear: right;
+    width: var(--margin);
+    margin: 0.3rem calc(-1 * (var(--margin) + 3.5rem)) 1.5rem 0;
+    padding: 0;
+    background: none;
+    font-size: 0.9375rem;
+  }
+  .aside-title {
+    font-style: italic;
+    font-weight: 600;
+  }
+}
+.footnotes {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  box-shadow: inset 0 4px 0 var(--surface-2);
+  clear: both;
+}
+.footnotes::before {
+  content: "Notes";
+  display: block;
+  margin-bottom: 1rem;
+  font-weight: 650;
+  font-size: var(--step-body);
+}
+
+/* End of an article: tags, previous and next issue */
+.article-end {
+  clear: both;
+  margin-top: 4rem;
+  font-size: var(--step-small);
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0 0 2rem;
+  padding: 0;
+  list-style: none;
+}
+.pager {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 40rem) {
+  .pager {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.pager a {
+  display: block;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  border-radius: var(--radius);
+}
+.pager a:hover {
+  background: var(--surface-2);
+}
+.pager .dir {
+  display: block;
+  color: var(--muted);
+}
+.pager .next {
+  text-align: right;
+}
+
+/* Home: the frame's full width; the latest issue sits on a surface panel. */
+.home {
+  max-width: none;
+}
+.intro {
+  margin: clamp(3rem, 8vw, 6.5rem) 0 clamp(3rem, 6vw, 5rem);
+  max-width: 44rem;
+}
+.intro h1 {
+  font-size: clamp(3rem, 1.4rem + 6.4vw, 6.5rem);
+}
+.intro p {
+  margin: 1.75rem 0 0;
+  max-width: 36rem;
+  font-size: var(--step-lead);
+  line-height: 1.45;
+}
+.latest {
+  display: grid;
+  gap: 0.5rem 3rem;
+  padding: clamp(1.5rem, 4vw, 3.5rem);
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+@media (min-width: 56rem) {
+  .latest {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+    align-items: end;
+  }
+  .latest .issue-line,
+  .latest .latest-summary,
+  .latest .read {
+    grid-column: 2;
+  }
+  .latest-title {
+    grid-row: 1 / span 3;
+  }
+}
+.latest-title {
+  margin: 0;
+  font-size: clamp(2rem, 1.2rem + 3vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+.latest-title a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.latest-title a:hover {
+  text-decoration: underline;
+}
+.latest .issue-line {
+  margin: 0;
+}
+.latest-summary {
+  margin: 0.5rem 0 0;
+  font-size: var(--step-body);
+}
+.read {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-weight: 600;
+}
+.index {
+  margin-top: clamp(3.5rem, 7vw, 6rem);
+}
+.index h2,
+.page-title {
+  margin: 0 0 1rem;
+  font-size: var(--step-lead);
+  font-weight: 650;
+}
+.index ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.index li {
+  display: grid;
+  grid-template-columns: 3.25rem 1fr auto;
+  gap: 0.25rem 1rem;
+  align-items: baseline;
+  padding-block: 0.85rem;
+  font-size: var(--step-lead);
+}
+.index .n {
+  color: var(--muted);
+  font-size: var(--step-small);
+  font-variant-numeric: tabular-nums;
+}
+.when {
+  color: var(--muted);
+  font-size: var(--step-small);
+  white-space: nowrap;
+}
+@media (max-width: 30rem) {
+  .index li {
+    grid-template-columns: 2.5rem 1fr;
+  }
+  .index .when {
+    grid-column: 2;
+  }
+}
+
+/* Plain pages (about, tags, 404) */
+.page {
+  padding-top: clamp(3rem, 8vw, 6rem);
+}
+.page h1 {
+  font-size: var(--step-display);
+  margin-bottom: 1.5rem;
+}
+.page p {
+  margin: 0 0 1.15em;
+}
+
+/* Long articles: skip layout and paint of blocks far below the screen until they approach it.
+   Keeps the first paint fast on slow phones; sizes are remembered once rendered (auto). */
+.prose > :is(.fig, table),
+.prose > p:nth-of-type(n + 6),
+.prose > :is(ul, ol):nth-of-type(n + 3) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 12rem;
+}
+
+.article-end > p a {
+  display: inline-block;
+  padding-block: 0.5rem;
+}

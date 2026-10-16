@@ -1,0 +1,28 @@
+---
+import ArticleBody from '../../../../src/components/ArticleBody.astro'
+import { SITE } from '../../components/data.ts'
+import Page from '../../components/Page.astro'
+import Toc from '../../components/Toc.astro'
+import type { ArticleProps } from '../../components/types.ts'
+import { fonts } from './fonts.ts'
+import './theme.css'
+
+const { post, toc, minutes, date, base } = Astro.props as ArticleProps
+---
+
+<Page title={`${post.data.title} · ${SITE.name}`} description={post.data.summary} fonts={fonts} theme="warm" islands>
+  <header class="site-header"><a class="wordmark" href={`${base}/`}>dr4w</a><nav aria-label="Site"><a href={`${base}/#issues`}>Issues</a><a href={SITE.home}>About Daniel</a></nav></header>
+  <main id="main" class="col">
+    <article>
+      <header class="opener">
+        <h1>{post.data.title}</h1>
+        <p class="meta">Issue {post.issue} · <time datetime={post.published.toISOString().slice(0, 10)}>{date}</time> · {minutes} minutes</p>
+        <p class="dek">{post.data.summary}</p>
+        <p class="byline">Written by <a href={SITE.home}>{SITE.author}</a></p>
+      </header>
+      <details class="toc-wrap" open><summary>In this issue</summary><Toc headings={toc} label="Sections" /></details>
+      <div class="prose"><ArticleBody post={post} /></div>
+    </article>
+  </main>
+  <footer class="site-footer col"><p>{SITE.author} · <a href={SITE.home}>dr4w.io</a> · <a href={`${base}/`}>All issues</a></p></footer>
+</Page>

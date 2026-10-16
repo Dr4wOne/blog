@@ -1,0 +1,40 @@
+---
+import { SITE } from '../../components/data.ts'
+import Page from '../../components/Page.astro'
+import type { HomeProps } from '../../components/types.ts'
+import { fonts } from './fonts.ts'
+import './theme.css'
+
+const { issues, base } = Astro.props as HomeProps
+const [latest] = issues
+---
+
+<Page title={`${SITE.name}: writing by ${SITE.author}`} description={SITE.tagline} fonts={fonts} theme="mono">
+  <header class="site-header wrap">
+    <a class="wordmark" href={`${base}/`}>dr4w<span class="dot">.</span></a>
+    <nav aria-label="Site"><a href="#issues">Issues</a><a href={SITE.home}>dr4w.io</a></nav>
+  </header>
+  <main id="main" class="wrap">
+    <h1 class="home-title">Notes on how AI works</h1>
+    <p class="sum">By {SITE.author}. {SITE.tagline}</p>
+    {
+      latest && (
+        <article class="feature">
+          <h2>
+            <a href={`${base}${latest.post.path}`}>{latest.post.data.title}</a>
+          </h2>
+          <p class="meta">Issue {latest.post.issue} · {latest.date} · {latest.minutes} min</p>
+          <p class="sum">{latest.post.data.summary}</p>
+        </article>
+      )
+    }
+    <section id="issues" aria-labelledby="issues-h">
+      <h2 id="issues-h" class="label">All issues</h2>
+      <table class="issue-table">
+        <thead><tr><th scope="col">No.</th><th scope="col">Title</th><th scope="col">Published</th></tr></thead>
+        <tbody>{issues.map((i) => <tr><td>{i.post.issue}</td><td><a href={`${base}${i.post.path}`}>{i.post.data.title}</a></td><td>{i.date}</td></tr>)}</tbody>
+      </table>
+    </section>
+  </main>
+  <footer class="site-footer wrap"><p>{SITE.author} · <a href={SITE.home}>dr4w.io</a></p></footer>
+</Page>

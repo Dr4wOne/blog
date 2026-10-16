@@ -1,0 +1,44 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+const rows = [
+  { known: 'The cat sat', added: '', next: 'on' },
+  { known: 'The cat sat', added: ' on', next: 'the' },
+  { known: 'The cat sat on', added: ' the', next: 'mat' },
+]
+---
+
+<Figure caption="Generation is a loop. The model predicts one token, the token is appended to the text, and the longer text goes back in.">
+  <svg viewBox="0 0 420 284" role="img" aria-labelledby="f-auto-t f-auto-d">
+    <title id="f-auto-t">The next-token loop</title>
+    <desc id="f-auto-d">Three rounds. “The cat sat” goes into the model, which predicts “on”. “The cat sat on” goes in and the model predicts “the”. “The cat sat on the” goes in and the model predicts “mat”.</desc>
+    <defs><Arrow id="f-auto-a" /><Arrow id="f-auto-aa" accent /></defs>
+    <text x="0" y="12" class="t-small t-muted">Text so far</text>
+    <text x="385" y="12" text-anchor="middle" class="t-small t-muted">Next token</text>
+    {
+      rows.map((r, i) => {
+        const y = 24 + i * 88
+        return (
+          <g>
+            <rect x="0" y={y} width="196" height="44" rx="6" class="box" />
+            <text x="14" y={y + 27}>
+              {r.known}
+              <tspan class="t-accent t-strong">{r.added}</tspan>
+            </text>
+            <path d={`M198 ${y + 22} H236`} class="wire" marker-end="url(#f-auto-a)" />
+            <rect x="240" y={y + 4} width="76" height="36" rx="6" class="box" />
+            <text x="278" y={y + 27} text-anchor="middle" class="t-strong">model</text>
+            <path d={`M318 ${y + 22} H346`} class="wire" marker-end="url(#f-auto-a)" />
+            <rect x="350" y={y + 4} width="70" height="36" rx="6" class="box-accent" />
+            <text x="385" y={y + 27} text-anchor="middle" class="t-on-accent t-strong">{r.next}</text>
+            {i < rows.length - 1 && (
+              <path d={`M385 ${y + 42} V${y + 64} H150 V${y + 86}`} class="wire-accent dash" marker-end="url(#f-auto-aa)" />
+            )}
+          </g>
+        )
+      })
+    }
+    <text x="0" y="280" class="t-small t-muted">…and so on, until the model emits an end-of-answer token.</text>
+  </svg>
+</Figure>

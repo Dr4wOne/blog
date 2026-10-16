@@ -1,0 +1,44 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+const left = ['Your documents', 'Split into chunks', 'Embed each chunk', 'Vector index']
+const right = [
+  'Your question',
+  'Embed the question',
+  'Find nearest chunks',
+  'Prompt: question + chunks',
+  'Model writes the answer',
+]
+const Y = (i: number) => 30 + i * 70
+---
+
+<Figure caption="Retrieval-augmented generation (RAG). Documents are indexed once; each question pulls the closest chunks into the prompt.">
+  <svg viewBox="0 0 420 380" role="img" aria-labelledby="f-rag-t f-rag-d">
+    <title id="f-rag-t">How RAG works</title>
+    <desc id="f-rag-d">Ahead of time: documents are split into chunks, each chunk is embedded, and the embeddings go into a vector index. When you ask: the question is embedded, the index returns the nearest chunks, the prompt combines question and chunks, and the model writes the answer.</desc>
+    <defs><Arrow id="f-rag-a" /><Arrow id="f-rag-aa" accent /></defs>
+    <text x="0" y="14" class="t-small t-muted">Ahead of time</text>
+    <text x="222" y="14" class="t-small t-muted">When you ask</text>
+    {
+      left.map((t, i) => (
+        <g>
+          <rect x="0" y={Y(i)} width="196" height="44" rx="6" class="box" />
+          <text x="98" y={Y(i) + 27} text-anchor="middle">{t}</text>
+          {i < left.length - 1 && <path d={`M98 ${Y(i) + 46} V${Y(i + 1) - 2}`} class="wire" marker-end="url(#f-rag-a)" />}
+        </g>
+      ))
+    }
+    {
+      right.map((t, i) => (
+        <g>
+          <rect x="222" y={Y(i)} width="198" height="44" rx="6" class={i === right.length - 1 ? 'box-accent' : 'box'} />
+          <text x="321" y={Y(i) + 27} text-anchor="middle" class={i === right.length - 1 ? 't-on-accent t-strong' : ''}>{t}</text>
+          {i < right.length - 1 && <path d={`M321 ${Y(i) + 46} V${Y(i + 1) - 2}`} class="wire" marker-end="url(#f-rag-a)" />}
+        </g>
+      ))
+    }
+    <path d={`M198 ${Y(3) + 22} H209 V${Y(2) + 22} H218`} class="wire-accent" marker-end="url(#f-rag-aa)" />
+    <text x="0" y="372" class="t-small t-muted">The arrow between lanes is a similarity search, not a keyword match.</text>
+  </svg>
+</Figure>

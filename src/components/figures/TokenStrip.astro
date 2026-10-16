@@ -1,0 +1,80 @@
+---
+// Token boundaries and IDs from a real tokenizer (OpenAI's o200k_base), computed at build time.
+import { decode, encode } from 'gpt-tokenizer/encoding/o200k_base'
+import Figure from './Figure.astro'
+
+const examples = [
+  { label: 'English', text: 'Unfortunately, the refrigerator stopped working yesterday.' },
+  {
+    label: 'Portuguese, same meaning',
+    text: 'Infelizmente, a geladeira parou de funcionar ontem.',
+  },
+  { label: 'One rare word', text: 'unconstitutionally' },
+  { label: '“strawberry” at the start of a text', text: 'strawberry' },
+  { label: 'The same word after a space', text: ' strawberry' },
+]
+const CH = 7.9 // monospace advance at 13px
+const PAD = 8
+const W = 420
+let y = 0
+const rows = examples.map((ex) => {
+  const ids = encode(ex.text)
+  const chips: { x: number; y: number; w: number; label: string; id: number }[] = []
+  if (ex.label) y += 18
+  const labelY = y
+  y += 8
+  let x = 0
+  for (const id of ids) {
+    const label = decode([id]).replaceAll(' ', '·')
+    const w = label.length * CH + PAD * 2
+    if (x + w > W) {
+      x = 0
+      y += 52
+    }
+    chips.push({ x, y, w, label, id })
+    x += w + 6
+  }
+  const row = { ...ex, ids, chips, labelY }
+  y += 52
+  return row
+})
+const height = y
+const describe = rows
+  .map(
+    (r) =>
+      `“${r.text.trim()}”${r.text.startsWith(' ') ? ' with a leading space' : ''}: ${r.ids.length} ${r.ids.length === 1 ? 'token' : 'tokens'} (${r.chips.map((c) => c.label).join(' | ')})`,
+  )
+  .join('. ')
+---
+
+<Figure caption="What the model receives: token pieces, each with an ID number. A dot marks a space. Real output of OpenAI’s current tokenizer; other models split text differently.">
+  <svg viewBox={`0 0 ${W} ${height}`} role="img" aria-labelledby="f-tok-t f-tok-d">
+    <title id="f-tok-t">Five pieces of text split into tokens</title>
+    <desc id="f-tok-d">{describe}.</desc>
+    {
+      rows.map((r) => (
+        <g>
+          {r.label && (
+            <text x="0" y={r.labelY} class="t-small t-muted">
+              {r.label}
+            </text>
+          )}
+          {r.chips.map((c, i) => (
+            <g>
+              <rect x={c.x} y={c.y} width={c.w} height="26" rx="4" class={i % 2 ? 'box' : 'box box-alt'} />
+              <text x={c.x + c.w / 2} y={c.y + 18} text-anchor="middle" class="t-mono">
+                {c.label}
+              </text>
+              <text x={c.x + c.w / 2} y={c.y + 40} text-anchor="middle" class="t-small t-muted">
+                {c.id}
+              </text>
+            </g>
+          ))}
+          <text x={W} y={r.labelY} text-anchor="end" class="t-small t-muted">
+            {r.ids.length} {r.ids.length === 1 ? 'token' : 'tokens'}
+          </text>
+        </g>
+      ))
+    }
+  </svg>
+</Figure>

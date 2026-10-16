@@ -1,0 +1,114 @@
+---
+import { render } from 'astro:content'
+import ArticleBody from '../components/ArticleBody.astro'
+import Base from '../layouts/Base.astro'
+import { dateFormat, readingMinutes, toc } from '../lib/article.ts'
+import { type Post, publishedPosts } from '../lib/posts.ts'
+import { SITE } from '../site.ts'
+
+export async function getStaticPaths() {
+  const posts = await publishedPosts() // newest first
+  return posts.map((post, i) => ({
+    params: { issue: post.path.slice(1, -1) },
+    props: { post, newer: posts[i - 1], older: posts[i + 1] },
+  }))
+}
+interface Props {
+  post: Post
+  newer?: Post
+  older?: Post
+}
+const { post, newer, older } = Astro.props
+const { headings } = await render(post)
+const sections = toc(headings)
+const minutes = readingMinutes(post.body ?? '')
+const updated = post.data.updated ?? post.published
+const ogImage = post.data.ogImage ?? `/og${post.path.slice(0, -1)}.png`
+const iso = (d: Date) => d.toISOString().slice(0, 10)
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: post.data.title,
+  description: post.data.summary,
+  image: new URL(ogImage, SITE.url).href,
+  datePublished: post.published.toISOString(),
+  dateModified: updated.toISOString(),
+  inLanguage: 'en',
+  keywords: post.data.tags.join(', '),
+  wordCount: Math.round(minutes * 230),
+  url: new URL(post.path, SITE.url).href,
+  mainEntityOfPage: new URL(post.path, SITE.url).href,
+  author: {
+    '@type': 'Person',
+    name: SITE.author.name,
+    url: SITE.author.url,
+    jobTitle: SITE.author.jobTitle,
+  },
+  publisher: { '@type': 'Person', name: SITE.author.name, url: SITE.author.url },
+}
+---
+
+<Base title={post.data.title} description={post.data.summary} type="article" ogImage={ogImage} jsonLd={jsonLd} islands kind="article" published={post.published} modified={updated}>
+  <article class="column">
+    <header class="opener">
+      <h1>{post.data.title}</h1>
+      <p class="issue-line">
+        Issue {post.issue} · <time datetime={iso(post.published)}>{dateFormat.format(post.published)}</time> · {minutes} min read
+        {updated > post.published && <> · Updated <time datetime={iso(updated)}>{dateFormat.format(updated)}</time></>}
+      </p>
+      <p class="dek">{post.data.summary}</p>
+      <p class="byline">By <a href={SITE.author.url}>{SITE.author.name}</a></p>
+    </header>
+    {
+      sections.length > 2 && (
+        <nav class="toc" aria-labelledby="toc-label">
+          <p class="toc-label" id="toc-label">In this issue</p>
+          <ol>
+            {sections.map((h) => (
+              <li>
+                <a href={`#${h.slug}`}>{h.text}</a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )
+    }
+    <div class="prose"><ArticleBody post={post} /></div>
+    <footer class="article-end">
+      {
+        post.data.tags.length > 0 && (
+          <ul class="tags" aria-label="Tags">
+            {post.data.tags.map((t) => (
+              <li>
+                <a href={`/tags/${t}/`}>{t}</a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+      {
+        (newer || older) && (
+          <ul class="pager" aria-label="More issues">
+            {older && (
+              <li>
+                <a href={older.path} rel="prev">
+                  <span class="dir">Previous issue</span>
+                  {older.data.title}
+                </a>
+              </li>
+            )}
+            {newer && (
+              <li class="next">
+                <a href={newer.path} rel="next">
+                  <span class="dir">Next issue</span>
+                  {newer.data.title}
+                </a>
+              </li>
+            )}
+          </ul>
+        )
+      }
+      <p><a href="/#issues">All issues</a></p>
+    </footer>
+  </article>
+</Base>

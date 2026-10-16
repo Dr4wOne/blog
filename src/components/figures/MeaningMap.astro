@@ -1,0 +1,35 @@
+---
+import Figure from './Figure.astro'
+
+const points = [
+  { x: 64, y: 62, label: 'dog' },
+  { x: 92, y: 86, label: 'puppy' },
+  { x: 54, y: 112, label: 'cat' },
+  { x: 86, y: 132, label: 'kitten' },
+  { x: 290, y: 56, label: 'car' },
+  { x: 318, y: 84, label: 'automobile' },
+  { x: 282, y: 110, label: 'truck' },
+  { x: 258, y: 226, label: 'refrigerator' },
+  { x: 40, y: 220, label: 'How do I reset my password?', accent: true },
+  { x: 64, y: 248, label: 'Steps to recover your login', accent: true },
+]
+---
+
+<Figure caption="A sketch of meaning as position. Real embeddings have hundreds or thousands of dimensions; this flattens them to two. Positions are illustrative.">
+  <svg viewBox="0 0 420 290" role="img" aria-labelledby="f-map-t f-map-d">
+    <title id="f-map-t">Words and sentences placed by meaning</title>
+    <desc id="f-map-d">Dog, puppy, cat and kitten sit close together. Car, automobile and truck form another group. Refrigerator sits far from both. The questions “How do I reset my password?” and “Steps to recover your login” sit next to each other although they share no words.</desc>
+    <rect x="0.75" y="0.75" width="418.5" height="288.5" rx="6" class="box-ground" />
+    <ellipse cx="74" cy="98" rx="62" ry="58" class="wire dash" />
+    <ellipse cx="306" cy="84" rx="70" ry="48" class="wire dash" />
+    <ellipse cx="128" cy="236" rx="118" ry="34" class="wire-accent dash" />
+    {
+      points.map((p) => (
+        <g>
+          <circle cx={p.x} cy={p.y} r="4.5" class={p.accent ? 'dot-accent' : 'dot'} />
+          <text x={p.x + 9} y={p.y + 5} class={p.accent ? 't-accent t-strong' : ''}>{p.label}</text>
+        </g>
+      ))
+    }
+  </svg>
+</Figure>

@@ -1,0 +1,39 @@
+---
+import Figure from './Figure.astro'
+
+// Illustrative attention scores for one head while processing "it" (they sum to 100).
+const words = [
+  ['I', 3],
+  ['took', 2],
+  ['the', 2],
+  ['dog', 52],
+  ['to', 1],
+  ['the', 3],
+  ['vet', 18],
+  ['because', 7],
+  ['it', 12],
+] as const
+const TX = 300
+const TY = 152
+---
+
+<Figure caption="Attention while the model processes “it”. Each line’s thickness is how much the model draws on that word (in one “attention head”, explained below). The scores are illustrative; a real model runs many heads in every layer, and each token can only look at tokens before it.">
+  <svg viewBox="0 0 420 304" role="img" aria-labelledby="f-att-t f-att-d">
+    <title id="f-att-t">One attention head resolving “it”</title>
+    <desc id="f-att-d">{`For the sentence “I took the dog to the vet because it”, the word “it” draws most on “dog” (${words[3][1]} percent), then “vet” (${words[6][1]} percent), and little on the other words.`}</desc>
+    {
+      words.map(([w, pct], i) => {
+        const y = 22 + i * 32
+        return (
+          <g>
+            <text x="112" y={y + 5} text-anchor="end" class={pct > 40 ? 't-strong' : ''}>{w}</text>
+            <text x="150" y={y + 5} text-anchor="end" class="t-small t-muted">{pct}%</text>
+            <path d={`M160 ${y} C230 ${y} 230 ${TY} ${TX - 4} ${TY}`} class={pct > 40 ? 'wire-accent' : 'wire'} style={`stroke-width:${1 + pct / 6};opacity:${0.35 + pct / 80}`} />
+          </g>
+        )
+      })
+    }
+    <rect x={TX} y={TY - 20} width="70" height="40" rx="6" class="box-accent" />
+    <text x={TX + 35} y={TY + 6} text-anchor="middle" class="t-on-accent t-strong t-large">it</text>
+  </svg>
+</Figure>

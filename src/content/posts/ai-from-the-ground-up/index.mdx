@@ -1,0 +1,533 @@
+---
+issue: 1
+slug: ai-from-the-ground-up
+title: AI From the Ground Up
+summary: "A guided tour, with no math, from what an LLM is to the agents, harnesses and tooling people use to get real work done."
+published: 2026-10-15
+updated: 2026-10-15
+tags: [ai, llms, agents, tooling]
+draft: false
+---
+
+import Aside from '../../../components/Aside.astro'
+import AgentConfig from '../../../components/figures/AgentConfig.astro'
+import AgentLoop from '../../../components/figures/AgentLoop.astro'
+import Attention from '../../../components/figures/Attention.astro'
+import AutocompleteLoop from '../../../components/figures/AutocompleteLoop.astro'
+import ContextWindow from '../../../components/figures/ContextWindow.astro'
+import ForwardPass from '../../../components/figures/ForwardPass.astro'
+import HarnessAnatomy from '../../../components/figures/HarnessAnatomy.astro'
+import MeaningMap from '../../../components/figures/MeaningMap.astro'
+import RagPipeline from '../../../components/figures/RagPipeline.astro'
+import TokenStrip from '../../../components/figures/TokenStrip.astro'
+import TrainingPhases from '../../../components/figures/TrainingPhases.astro'
+import AgentStepper from '../../../components/widgets/AgentStepper.astro'
+import Temperature from '../../../components/widgets/Temperature.astro'
+import Tokenizer from '../../../components/widgets/Tokenizer.astro'
+
+Most explanations of AI either stay at the "it's magic" level or jump straight into linear algebra. This one sits in between: a guided tour, with no math, from *what an LLM actually is* to *the agents and tooling people use to get real work done with it*.
+
+Here is the whole argument in one line, so you know where we are going: **a model completes text; put it in a loop with tools and you get an agent; wrap that in a harness and you get something you can work with; configure the harness and it works the way your team works.** The eight sections below take that sentence apart, one piece at a time. A few words appear before their own section, so here they are in short:
+
+- **Token:** a small piece of text, the unit the model reads and writes.
+- **Context:** everything the model sees on one call (its *context window*).
+- **Agent:** a model running in a loop where it can ask for actions, see the results and continue.
+- **Harness:** the program that runs that loop and carries out the actions. Claude Code, Codex and Cursor are harnesses; one of them running a model is what people call a **coding agent**.
+- **Provider:** the company that hosts a model and sells access to it through an API.
+- **MCP:** a standard way to plug tools into a harness.
+- **Embedding:** a list of numbers that stands for the meaning of a text. **RAG** (retrieval-augmented generation) uses embeddings to put the right documents in front of the model.
+
+## What is an LLM?
+
+### The core idea
+
+An **LLM** (large language model) is, at its core, a **text-completion machine**. You give it a beginning, and it predicts the next small piece of text. Then it looks at everything again, including what it just wrote, and predicts the next piece. And again, until the answer is complete.
+
+> **Analogy:** it's your phone keyboard's **autocomplete**, turbocharged. The keyboard suggests the next word; an LLM suggests the next word so well that it can write an entire email, a piece of code, or a coherent summary.
+
+<AutocompleteLoop />
+
+What's impressive isn't the idea. It's the **scale**. The model read an enormous amount of text and got so good at predicting that, to get the next word right, it effectively learned grammar, facts, style, and even patterns of reasoning.
+
+### How it learned all that, very roughly
+
+- The model was shown **a huge amount of text** (books, websites, code) and asked, trillions of times: "given this text, what comes next?"
+- Every time it got it wrong, its **internal numbers**, the *weights*, were nudged a tiny bit so it would miss less next time. That's **training**.
+- At the end, the weights are frozen into one giant file. **That file is the model.** It doesn't learn anything on its own after that.
+
+> Weights are just **numbers**: billions of them. There's no table of facts inside that the model looks things up in. The knowledge is spread across those numbers, the same way your ability to ride a bike isn't written down anywhere.
+
+The result of this first stage is a **base model**: fluent and knowledgeable, but it simply continues text. Ask it a question and it may answer with three more questions, because that's how the text it read often went on. Two more training stages turn it into an assistant. In **instruction tuning**, it learns from many examples of a request followed by a good answer. Then it gets **rewarded**: its answers are scored, by people or by a separate judging model, or by checking them (does the code pass its tests?), and the weights are nudged toward answers that score well. That kind of training by reward is called **reinforcement learning**.
+
+<TrainingPhases />
+
+<Aside title="Deep dive: the stages after pre-training">
+
+The first assistants were shaped with **reinforcement learning from human feedback (RLHF)**: people compared pairs of answers, and the model was tuned toward the ones they preferred.[^instructgpt] Today the same idea comes in several forms: another model scoring answers against a written list of principles,[^cai] and, for "reasoning" models, reinforcement learning on tasks with checkable answers, such as math problems and code that must pass tests.[^r1] That last step produced **reasoning models**: LLMs trained to write out intermediate steps before the final answer. The "thinking" is ordinary generated text, often hidden from you, and it's why recent models are much better at multi-step problems. Those thinking tokens are billed and take up room in the context like any others.
+
+</Aside>
+
+### What an LLM is not
+
+- **Not a database.** It doesn't look up the answer; it **generates** it, word by word. Often that matches the right fact, but nothing guarantees it. That's why it sometimes makes things up (more on *hallucination* under [inference and context](#inference-context-and-prompting)).
+- **Not deterministic by default.** The same question can produce different answers, because the model gives every possible next word a probability and then draws one, like a weighted die (more under [inference and context](#inference-context-and-prompting)).
+- **Not a mind.** It models **patterns of language** extremely well. That's useful and powerful, but on its own it has no goals, no experiences and no way to check its words against the world; it produces what is likely to come next.
+- **Not up to date.** If its training data ends in March, it knows nothing about April, unless you **put that information in the prompt** or give it a search tool.
+- **Not learning from you.** The weights don't change while you chat. It only "remembers" what's in the current conversation. Products with a memory feature store notes and paste the relevant ones back in (often found with embeddings, below); the model itself still starts from zero.
+- **Not always better when bigger.** A smaller model can be faster, cheaper, and good enough for the task.
+
+**In one line:** an LLM is a frozen file of numbers that predicts the next piece of text, very well.
+
+## Tokens: what the model sees
+
+### The core idea
+
+The model doesn't read letters or words the way we do. Before anything else, text is chopped into **tokens**: small pieces that can be a whole word, part of a word, a space, or a punctuation mark.
+
+> **Analogy:** imagine building sentences from **LEGO bricks**. You don't have a brick for every English word; you have a fixed set of bricks, some big ("house"), some small ("un", "tion"), and you build words by snapping them together. The model works with these text bricks.
+
+Each token becomes a **number** (an ID), and the model only ever handles those numbers. The ID is only a lookup key; it says nothing about meaning (that comes later, with embeddings). The output goes the other way: numbers, then tokens, then text.
+
+<TokenStrip />
+
+### A token is not a word
+
+A rule of thumb for English is **1 token ≈ 4 characters ≈ ¾ of a word**,[^tokens] but it varies a lot:
+
+- Common words are usually **one token** ("the", " cat").
+- Rare or long words are split into **several tokens**: "unconstitutionally" becomes "un", "constitution", "ally".
+- Spaces usually ride along with the next word. In a sentence, " strawberry" with its leading space is a **single token**, while "strawberry" at the very start of a text is three.
+- **Other languages usually take more tokens** for the same meaning, because most training text is English. In the figure, the Portuguese sentence needs 12 tokens where the English one needs 8. Newer tokenizers have narrowed this gap, but it hasn't closed.
+
+### Why AI used to fail "how many r's in strawberry?"
+
+Because it **doesn't see letters**. In a normal sentence "strawberry" reaches the model as one token, a single number, so the letters inside it are simply not in front of it. The model has to *know* the spelling from training instead of reading it, so it guessed, and often guessed wrong. Newer reasoning models usually get it right by writing the word out letter by letter first. Recalling a spelling is easier than counting inside a token, and once each letter is its own token on the board, the model can see and count them.
+
+> Counting letters is a **character** task, and the model thinks in **tokens**. It's like asking someone to count the bricks in a wall from a photo of the finished house.
+
+### Why this matters day to day
+
+- **Cost.** Providers charge **per token**, with separate prices for input and output (output usually costs more, partly because it is generated one token at a time while input is read in parallel). A giant prompt costs more. So does a long answer.
+- **Context limit.** The model's working memory is measured in **tokens**, not pages (see [inference and context](#inference-context-and-prompting)).
+- **Speed.** The model generates **one token at a time**. More tokens in the answer means a longer wait.
+
+<Aside title="Deep dive: how the bricks are made (BPE)">
+
+The vocabulary is built before training by an algorithm such as **byte-pair encoding**.[^bpe] Start with single characters (or bytes) as bricks. Find the pair that appears together most often in a large sample of text and merge it into a new brick. Repeat until the vocabulary has the size you want: modern models use vocabularies of roughly 100,000 to 200,000 tokens. Frequent words end up as one brick; rare words stay in pieces. The widget below runs exactly this algorithm, at a much smaller scale.
+
+There are also **special tokens** you never type, which mark the start and end of a message and who is speaking (system, user, assistant). The program you're chatting through (the harness, explained later) inserts them for you.
+
+</Aside>
+
+<Tokenizer />
+
+<Aside title="Deep dive: a quick cost estimate">
+
+Paste a file of about 8,000 words and you've sent roughly **10,000 to 11,000 tokens** of input. The model has no session: every call is self-contained, so chat tools send the whole conversation again with every message. If that file stays in the conversation, you pay for it on every turn. Many providers keep the model's intermediate work (the per-token vectors described under [transformers](#transformers-and-attention)) on the start of a recent prompt for a few minutes and charge less to reuse it (*prompt caching*), but "just send everything, always" still adds up.
+
+</Aside>
+
+**In one line:** the model reads and writes tokens, not letters, and you pay for every one of them.
+
+## Embeddings: meaning as numbers
+
+### The core idea
+
+An **embedding** turns a piece of text (a word, a sentence, a paragraph) into a **list of numbers**, called a **vector**, that represents its **meaning**. Texts with similar meanings get similar vectors. Embeddings are usually made by a separate, smaller **embedding model** that you call like any other API; LLMs build similar vectors internally as their first step (see the section on [transformers](#transformers-and-attention), below), but they're separate tools for different jobs: an embedding model is built to give one vector per text for search, while an LLM's internal vectors serve its own next-token prediction.
+
+> **Analogy:** think of a **map**. Every city has coordinates, and nearby cities have nearby coordinates. An embedding gives each text a coordinate of meaning. "Dog" and "puppy" land almost on the same spot; "dog" and "refrigerator" land far apart.
+
+The difference is that this map doesn't have two dimensions. It has **hundreds or thousands**. We can't picture that, but the idea of "near" and "far" works the same way.
+
+<MeaningMap />
+
+### What it's for
+
+Once meaning becomes a position, a computer can do things exact-word search can't:
+
+- **Search by meaning.** You search "how do I reset my password" and find a page titled "Steps to recover your login", with no words in common.
+- **Group similar texts,** such as support tickets about the same problem.
+- **Give agents a memory:** store notes, then fetch the relevant ones by closeness.
+- **Retrieval-augmented generation (RAG),** below.
+
+"Close" usually means the two vectors point in nearly the same direction, a measure called *cosine similarity*. Direction matters more than distance because a longer text tends to produce a longer vector without changing what it's about; the 2-D map simply shows "about the same topic" as "near". The individual numbers aren't human-readable topics; only how close two vectors are matters.
+
+### How RAG uses embeddings
+
+The model doesn't know **your** documents. RAG works around that:[^rag]
+
+<RagPipeline />
+
+1. Your documents are split into chunks (typically a few paragraphs; you choose the size), and each chunk gets an embedding.
+2. The embeddings go into a **vector index** (often called a vector database).
+3. When you ask something, your **question** gets an embedding too, and the closest chunks are retrieved.
+4. Those chunks are **pasted into the prompt**, and the model answers from them.
+
+The model "knows" things it never saw in training, because you handed it the right passages at the right moment.
+
+### Common misconceptions
+
+- **"An embedding is a token."** No. A token is a piece of text; an embedding is a list of numbers that stands for the meaning of some text.
+- **"Vector search always finds the right thing."** If the right chunk was never indexed, or the text was split badly, it returns something irrelevant, and the model answers confidently about it.
+- **"I can swap the embedding model any time."** A new model draws a **new map**, so every document has to be embedded again.
+
+<Aside title="Deep dive: why hybrid search often wins">
+
+Meaning-based search is great for synonyms and paraphrases, but sometimes you need the **exact string**: an error code, an invoice number. Classic keyword ranking (**BM25**) is good at exactly that,[^bm25] and combining the two usually beats either alone.
+
+</Aside>
+
+**In one line:** an embedding is a coordinate of meaning, and "close" means "about the same thing".
+
+## Transformers and attention
+
+### The core idea
+
+The **transformer** is the **architecture**, the kind of machinery, behind nearly every LLM you've heard of. It was introduced in 2017 in a paper with a title that became an in-joke: *"Attention Is All You Need."*[^transformer]
+
+Inside the model, each token is represented by a vector, a list of numbers like the embeddings above. Its key idea is **attention**: while processing each word (really each token; words are easier to read), the model looks at all the words before it and decides **how much each one matters** right now. Those *attention scores* (not to be confused with the model's trained weights) are then used as a recipe: the word's vector is updated with a blend of the earlier words' vectors, mixed in those proportions.
+
+> **Analogy:** read *"I took the dog to the vet because it was sick."* To know what "it" is, you look back at "dog" and mostly ignore "vet". Attention does the same thing: with the scores in the figure, the new vector for "it" is about half "dog", a fifth "vet" and a little of everything else. That's how "it" comes to carry the meaning "the dog".
+
+<Attention />
+
+### Why it was a breakthrough
+
+Earlier language models read text **one word at a time, in order**, carrying a running summary along. That had two problems: training was **slow**, because each step had to wait for the previous one, and the summary **forgot the beginning** of long texts.
+
+A transformer reads all the tokens of a text **in parallel**: every token is processed at the same time, each one allowed to look back at any earlier token directly, however far away. That made it practical to train **much bigger** models on **much more** text, which is why LLMs leapt forward. Writing is different: the answer still comes out **one token at a time**, because each new token depends on the ones before it. Reading is parallel; writing is sequential. All tokens are computed at the same time, but each one only uses the tokens before it. That's because the model is trained to predict the next token: if it could peek ahead, the answer would already be in front of it.
+
+### How one token gets made
+
+<ForwardPass />
+
+1. Your text is split into **tokens** (see [tokenization](#tokens-what-the-model-sees)), and each becomes a list of numbers carrying its meaning and its position (the same idea as [embeddings](#embeddings-meaning-as-numbers), but learned inside the model, with the position mixed in).
+2. Those numbers pass through **dozens of stacked layers**. A **layer** is one round of "every token looks at the earlier tokens, then updates its own vector". Each layer has several **attention heads**, each free to look for a different kind of relationship (what "it" refers to, which verb goes with which noun), followed by a step that processes each token's vector on its own (called *feed-forward*; the name isn't important), combining what the heads found. Layer by layer, each token's vector picks up context: after a few layers, the vector for "it" carries something like "the dog".
+3. At the top, the model produces a **probability for every token in its vocabulary**.
+4. One token is chosen (see [inference and context](#inference-context-and-prompting)), **appended**, and the whole pass runs again for the next one.
+
+> The model writes **one token at a time**. It doesn't draft the whole sentence first and then type it out.
+
+### Common misconceptions
+
+- **"Transformer is the name of a model."** It's the architecture. GPT, Claude and Gemini are all transformers, the way a Beetle and a Civic are both cars.
+- **"Attention means it understands."** Attention is a calculation that weighs relevance between tokens, not awareness.
+- **"It reads one word at a time, like we do."** It processes all the tokens it has at once; order enters as information about position, not as a cursor moving along.
+
+
+
+**In one line:** a transformer weighs every earlier token to predict the next one, and does it in parallel.
+
+## Inference, context and prompting
+
+### The core idea
+
+**Inference** means **using** a trained model to produce an answer, as opposed to training it. Every message you send runs an inference: the model takes everything in its **context window** and generates the reply one token at a time (see [transformers](#transformers-and-attention)) until it emits a token that means "done". Each inference stands alone: the model keeps nothing between calls. (Providers may cache work to save time and money, but that never changes what the model knows.)
+
+### The context window is a whiteboard
+
+> **Analogy:** the context window is a **whiteboard** of fixed size. Your instructions, your question, the conversation so far and any document you pasted all have to fit on it. The model only knows what is written **on that board right now**.
+
+<ContextWindow />
+
+Three consequences:
+
+- **It's finite.** When it fills up, something has to go: older messages are dropped or summarised, or a document doesn't fit.
+- **It doesn't persist.** Close the conversation and the board is wiped. Any memory across conversations is a tool that saves notes elsewhere and pastes the relevant ones onto the board next time.
+- **Junk makes things worse.** Irrelevant material doesn't just cost more. Models use information in the middle of a long context less reliably than at the start or the end (*lost in the middle*),[^lost] and accuracy tends to drop as the context grows, even on simple tasks.[^rot]
+
+In a coding tool, your message, the open files, the conversation history and the project's rules together form the context for each inference. When an agent "forgets" something from the start of a long session, the usual reason is that the context filled up and older material was dropped or summarised. Choosing what goes on the board, and where, is called **context engineering**.
+
+<Aside title="Deep dive: why context windows have a limit">
+
+In a standard transformer, every token is compared with every earlier token, so doubling the text roughly **quadruples** the attention work, and memory grows with it. That's a big part of why each model has a maximum number of tokens it can handle at once: the context window. Engineering has pushed that limit a long way, for example by keeping the intermediate vectors already computed for earlier tokens instead of recomputing them for every new token (the *cache*; prompt caching is a provider keeping this cache between your calls) and by computing attention in smarter ways,[^flash][^vllm] so many current models accept hundreds of thousands of tokens, some a million or more.
+
+</Aside>
+
+### Why the same question gives different answers
+
+When the model has its list of likely next tokens (see [transformers](#transformers-and-attention)), it doesn't simply take the top one every time. It makes a **weighted draw**, and a setting called **temperature** controls how bold that draw is:
+
+- **Low temperature:** the favourite almost always wins; at zero, it always does, in principle. Answers are **consistent and predictable**, good for facts and code.
+- **High temperature:** less likely tokens get a real chance. (Most APIs accept values from 0 to 1 or 0 to 2; above 1, the odds are flattened beyond the model's own.) Answers are **more varied**, good for brainstorming, and more likely to go off the rails.
+
+<Temperature />
+
+> That's why AI isn't a calculator: by default, a die is rolled at every token. Even at temperature zero, answers can occasionally differ between runs: shared servers process many requests together, which changes the order the numbers are added in, and adding in a different order can round differently in the last decimal places, and that can flip a close call between two tokens.[^nondet]
+
+### Prompting: how to ask well
+
+A **prompt** is the text you send. A few basics solve most problems:
+
+- **Give context and a goal.** "You're reviewing this code for security bugs. List each bug with the line number" beats "look at this".
+- **Say what format you want.** "Three bullets." "Only the JSON."
+- **Show an example** of the output you want (*few-shot* prompting: a few examples, or "shots").
+- **Ask for reasoning on hard problems.** Asking the model to think step by step used to help a lot;[^cot] "reasoning" models now do this on their own before answering.
+- **Separate instructions from data.** Make it obvious which part is your request and which part is material to work on. That's also a **security** measure (below).
+
+Many products have two levels of prompt: the **system prompt**, the product's own standing instructions ("you are a support assistant; never reveal customer data"), and the **user prompt**, what you type. The system prompt frames the whole conversation. In coding tools, **rules files** are added after the product's own system prompt and act as a project-level one (see [tooling](#the-tooling-around-the-harness)).
+
+### Hallucination: why AI makes things up
+
+**Hallucination** is an answer that's **wrong but sounds right**. Remember the first section: the model generates the most plausible text; it doesn't consult a source of truth. When its training didn't make the right answer likely, it doesn't go quiet. It fills the gap with whatever **sounds** likely.
+
+You can reduce it, not eliminate it:
+
+- **Put the source in the prompt** (RAG, see [embeddings](#embeddings-meaning-as-numbers)) and ask for answers based only on it.
+- **Ask it to cite** where each claim came from, then check the citations: models can invent those too.
+- **Lower the temperature** for factual work. It makes answers consistent, not correct: if the model doesn't know, it will repeat the same wrong answer more reliably.
+- **Verify** anything that matters. In regulated or high-stakes work, this isn't optional.
+
+### Common misconceptions
+
+- **"It looked that up."** Only if a search tool is connected. Otherwise it generates from what it learned in training.
+- **"It sounded sure, so it's right."** Confidence in the wording is **not** evidence. Hallucinations sound confident too.
+- **"It failed once, so the model is bad."** Because of the randomness, try again or improve the prompt before you decide.
+- **"The more I paste, the better."** Usually the opposite: more cost and more distraction. Include **only what's needed**.
+
+<Aside title="Deep dive: prompt injection">
+
+The model can't reliably tell your instructions from the text it is working on: both are just tokens on the same board. So a document can contain "ignore your previous instructions and do X", and the model may obey. Separating instructions from data helps, but only reduces the risk. That's **prompt injection**. The **indirect** form, hidden in a web page, an email or a retrieved document, is the top risk on OWASP's list for LLM applications,[^owasp] and there is no complete fix yet.[^indirect] Treat anything an agent reads as untrusted input.
+
+</Aside>
+
+<Aside title="Deep dive: other sampling settings, and how to test">
+
+Besides temperature, **top-p** limits the draw to the most likely tokens that together reach a probability such as 90%,[^topp] and **max tokens** caps the length of the answer. Because output is probabilistic, "run it once and see if it passed" isn't a test. Teams keep **evaluation sets** of inputs with known good answers, run them often, and sometimes use one model to grade another (*LLM-as-a-judge*), which works best when the grading criteria are explicit.[^judge]
+
+</Aside>
+
+**In one line:** the model only knows what's on the board for this one call, and it rolls a die at every token.
+
+## What is an agent?
+
+### The core idea
+
+So far, the AI only **answers**. An **agent** puts the model in a **loop** where it can **act** and **see the result** before deciding what to do next:
+
+1. **Goal.** It receives an objective: "fix the failing login test".
+2. **Reason.** It decides the next step. This "reasoning" is ordinary generated text.
+3. **Act.** It asks for a **tool** to be used: read a file, run a test, search the web.
+4. **Observe.** It reads the tool's result and goes back to step 2.
+
+An agent isn't a separate program: it's what you get when a harness runs a model in this loop. The model decides; the harness acts. That split is the subject of the next section.
+
+> **Analogy:** the difference between **asking for a recipe**, where you get text, and **having a cook in your kitchen**, who opens the fridge, tastes, adjusts the salt and serves. The cook doesn't get it right the first time either: they act, taste and correct.
+
+<AgentLoop />
+
+### What tools are
+
+On its own, the model only produces text. A **tool** is a function someone has made available to it: "read file", "run command", "look up the customer's balance". The model doesn't run the tool. The program around it (the *harness*, next section) lists the available tools in the context, the model answers with a structured **request** instead of prose, and the harness runs the tool and appends the result. Under the hood the model writes the request in a special format that the provider's API recognises and returns as a separate structured field, so the harness never has to guess:
+
+```text
+In the context:  tool run_command(command: string) — runs a shell command
+Model output:    {"tool": "run_command", "input": {"command": "npm test -- login"}}
+Harness:         sees a tool call, asks you first if its permission settings say so, runs it,
+                 appends the output, and calls the model again
+```
+
+> Every tool is a **door to the real world**. That's where the agent's power comes from, and why it needs care: a tool that deletes files is useful and dangerous at the same time.
+
+<AgentStepper />
+
+### When the agent stops
+
+An agent without brakes can go in circles and **burn time and money**: every turn of the loop is another inference, with the whole context sent again. So every serious agent has stopping rules:
+
+- **The goal is met** (the test passes).
+- **A step limit** is reached.
+- **A budget** of tokens, money or time runs out.
+- **It needs a human:** it's stuck, or the next action is risky enough to need approval.
+
+### Common misconceptions
+
+- **"An agent is a smarter model."** It's the **same kind of model** in a loop with tools. The ability to act comes from the structure around it.
+- **"The model runs the commands."** It **asks**; the harness runs them. That separation is what lets the system ask for your approval first.
+- **"More agents are better."** Several agents can work in parallel or specialise, but they cost more and need coordinating. Start with **one**.
+- **"With tools, it can't hallucinate."** It can still **pick the wrong tool** or misread a result. Tools reduce errors; they don't remove them.
+
+<Aside title="Deep dive: ReAct, and one agent or many">
+
+The reason-act-observe loop has a name: **ReAct**.[^react] Writing down a thought before each action, then reading the result, is what lets an agent correct itself midway.
+
+**Many agents** (a researcher, a coder, a reviewer, or ten copies working in parallel, each its own harness session with its own context window) buy speed and separation of roles, and pay for it in tokens and coordination. Practical guides recommend starting with the simplest setup that works and adding agents only for a concrete reason.[^effective]
+
+</Aside>
+
+<Aside title="Deep dive: least privilege for agents">
+
+Because every tool is a door, give each agent **only the tools it needs**. A reviewing agent doesn't need write access; a coding agent doesn't need production data. If something goes wrong, the damage stays small.
+
+</Aside>
+
+**In one line:** an agent is a model in a loop that asks for tools, sees results, and stops on purpose.
+
+## What is a harness?
+
+### The core idea
+
+The model completes text. It does **not** open files, run commands, remember your project, or run the agent loop. All of that is done by the **harness**: the program that **wraps** the model and turns it into a working tool.
+
+> **Analogy:** the model is the **engine**; the harness is the **rest of the car**: steering wheel, pedals, dashboard, brakes. A brilliant engine on the garage floor takes you nowhere. The name comes from horse tack: the gear that hitches a horse to a cart, with the reins in your hands.
+
+<HarnessAnatomy />
+
+A coding harness, such as Claude Code, OpenAI's Codex or Cursor:
+
+- **Reads your project:** files, structure, what's open in the editor.
+- **Builds the context:** gathers your message, relevant files and rules, and sends them to the model.
+- **Runs the agent loop** from the agent section.
+- **Executes the tools:** edits files, runs commands, calls MCP servers.
+- **Applies your configuration:** rules, skills and commands (see [tooling](#the-tooling-around-the-harness)).
+- **Asks for approval** before risky actions, and keeps a log.
+
+### Model, harness and provider
+
+Three things that often get mixed up:
+
+| Piece | What it is | Examples |
+| --- | --- | --- |
+| **Model** | the "brain" that generates text | GPT, Claude, Gemini |
+| **Harness** | the program around the model; for coding tools, it also runs the agent loop | Claude Code, Codex, Cursor, Devin |
+| **Provider** | who hosts the model and serves it through an API | OpenAI, Anthropic, Google; or a cloud such as AWS, which serves Claude through its own API |
+
+They're **independent pieces that snap together**: many harnesses let you pick the model underneath, and the same model is used by many harnesses. Chat apps such as ChatGPT or the Claude app are harnesses too, each built around its maker's models.
+
+### Which harness am I in?
+
+This matters more than it sounds, because **each harness reads its configuration from its own places**, and products rename and replace their harnesses.
+
+In my own setup, Cascade (the harness built into the Windsurf editor) and the Devin CLI read their rules from different folders, so a rule written for one silently did nothing in the other.[^devin]
+
+The lesson outlasts the product names. When a rule or a command "doesn't work", first check **which harness** is running and **which files** it reads. The practical habit: keep your rules in **one canonical place** that every harness you use reads, which today usually means an `AGENTS.md` file (see [tooling](#the-tooling-around-the-harness)).
+
+### Common misconceptions
+
+- **"Claude Code (or Cursor, or Devin) is the AI model."** They're **harnesses**; with a model running inside, they make a coding agent. The model can often be swapped.
+- **"The harness thinks."** It doesn't generate text. It organises the work and calls the model. A harness is smart plumbing.
+- **"It doesn't matter where I put my rules."** It matters a lot: each harness reads specific files and folders.
+
+<Aside title="Deep dive: why a harness, rather than the model directly">
+
+Putting project access, tool execution, context building, approvals and logging **in one program** is what makes it possible to control and audit what agents do without relying on everyone's discipline.
+
+</Aside>
+
+**In one line:** the harness is everything around the model that turns text into action, and you should know which one you're in.
+
+## The tooling around the harness
+
+### The core idea
+
+A harness becomes far more useful when you **configure** it with your team's knowledge and procedures. Instead of re-explaining everything in every conversation, you write those things down **in standard places**, and the harness loads them.
+
+> **Analogy:** an **excellent new hire with no memory from one day to the next**. To make them productive, you leave things in writing: the **house rules**, a few **how-to manuals**, **checklists** for common procedures, and a **keyring** for the systems they need. The tooling is exactly that kit.
+
+<AgentConfig />
+
+### Rules: standing instructions
+
+Instructions that apply to **every conversation**: "never push to main", "use pnpm", the architecture you follow.
+
+- They live in files like **`AGENTS.md`** at the project root, an open format that most coding agents now read,[^agentsmd] or in harness-specific files and folders such as `CLAUDE.md` or `.windsurf/rules/`.
+- They're the coding-tool version of the **system prompt** described under [inference and context](#inference-context-and-prompting).
+
+### Skills: know-how on demand
+
+A **skill** is a folder with a `SKILL.md` file: instructions, and sometimes scripts, for one specific job, such as "release a new version" or "write a migration". Unlike rules, a skill is loaded **only when the task calls for it**: only each skill's name and one-line description sit in the context, and when the model decides it needs one, it asks for the full file with a tool call. That keeps the context small. The format started at Anthropic and is now an open standard read by many harnesses.[^skills]
+
+### Commands: procedures you trigger
+
+Step-by-step procedures that you start with a **slash command**, so they run the same way every time: `/review` to review a change, `/deploy` to check a deployment. Some harnesses call these *workflows*. In newer harnesses commands and skills share one file format; what differs is who starts them: you start a command, the model picks a skill. Either way, they're **versioned with your code**, so the procedure improves in one place.
+
+### MCP: a standard plug for tools and data
+
+The **Model Context Protocol** is an open standard for plugging tools and data into an agent.[^mcp] Instead of every integration being a one-off, an **MCP server** (a small program the harness starts on your machine, or a service it reaches over the network) offers **tools** (actions the model can request) and **resources** (data that you or the harness can pull into the context, such as a file or a database schema), and any harness that speaks MCP can use them.
+
+> Every MCP server is also a **way in**. The specification itself says tools amount to arbitrary code execution, because a server is a program running with your permissions, and need the user's consent. Install servers the way you'd install a dependency with access to your machine.
+
+### Spec-driven development and orchestrators
+
+**Spec-driven development** means agreeing on a written specification before an agent writes any code. **Spec Kit**, from GitHub, is one toolkit for it: you write the specification and the plan before any code, then let agents break it into tasks and carry them out, step by step, through its own commands.[^speckit] It keeps you from charging into code without agreeing on what to build.
+
+When a task is too big for one agent, an **orchestrator**, a program on top of the harness, starts several agent sessions in parallel and tracks them. Think of many cooks in a well-run kitchen. Most day-to-day work still needs only one.
+
+### Where a beginner should start
+
+1. **Read the project's rules** (`AGENTS.md` and any rules folder). It's the house manual.
+2. **Try one command** on something small, such as `/review` on a short change.
+3. **Ask for small, checkable tasks**, and check the result (models hallucinate).
+4. **Never approve a command you don't understand.** Approval is your rein (see [harnesses](#what-is-a-harness)).
+
+### Common misconceptions
+
+- **"Rules, skills and commands are the same thing."** Rules apply **always**; skills load **when the model decides it needs them**; commands run **when you start them**.
+- **"I created the command, so everyone has it."** Only harnesses that read that folder will see it.
+- **"MCP is a product."** It's a **protocol**; servers are the concrete pieces.
+
+<Aside title="Deep dive: rules as governance">
+
+In regulated or high-stakes environments, many rules aren't style preferences. They're **controls**: don't send personal data to external services, require human approval for irreversible actions, keep an audit trail. Configuration files are part of your security and compliance story, and deserve the same review as code.
+
+</Aside>
+
+**In one line:** rules, skills, commands and MCP are how a team writes its way of working down, once, for every agent.
+
+## The full picture
+
+From the token to the transformer, from inference to the agent, and from the harness to its configuration, the whole stack fits in the sentence we started with:
+
+**A model completes text. Put it in a loop with tools and you get an agent. Wrap that in a harness and you get something you can work with. Configure the harness with rules, skills, commands and MCP, and it works the way your team works.**
+
+The next issues go deeper: how to design and run all of this with cost, governance and quality under control.
+
+[^instructgpt]: Ouyang et al., "Training language models to follow instructions with human feedback", 2022. https://arxiv.org/abs/2203.02155
+
+[^cai]: Bai et al., "Constitutional AI: Harmlessness from AI Feedback", 2022. https://arxiv.org/abs/2212.08073
+
+[^r1]: DeepSeek-AI, "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning", 2025. https://arxiv.org/abs/2501.12948
+
+[^tokens]: OpenAI, "What are tokens and how to count them". https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them
+
+[^bpe]: Sennrich, Haddow and Birch, "Neural Machine Translation of Rare Words with Subword Units", 2016. https://arxiv.org/abs/1508.07909
+
+[^rag]: Lewis et al., "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks", 2020. https://arxiv.org/abs/2005.11401
+
+[^bm25]: Robertson and Zaragoza, "The Probabilistic Relevance Framework: BM25 and Beyond", 2009. https://doi.org/10.1561/1500000019
+
+[^transformer]: Vaswani et al., "Attention Is All You Need", 2017. https://arxiv.org/abs/1706.03762
+
+[^flash]: Dao et al., "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness", 2022. https://arxiv.org/abs/2205.14135
+
+[^vllm]: Kwon et al., "Efficient Memory Management for Large Language Model Serving with PagedAttention", 2023. https://arxiv.org/abs/2309.06180
+
+[^lost]: Liu et al., "Lost in the Middle: How Language Models Use Long Contexts", 2023. https://arxiv.org/abs/2307.03172
+
+[^rot]: Hong, Troynikov and Huber, "Context Rot: How Increasing Input Tokens Impacts LLM Performance", Chroma, 2025. https://research.trychroma.com/context-rot
+
+[^nondet]: He and Thinking Machines Lab, "Defeating Nondeterminism in LLM Inference", 2025. https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/
+
+[^cot]: Wei et al., "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models", 2022. https://arxiv.org/abs/2201.11903
+
+[^owasp]: OWASP, "LLM01:2025 Prompt Injection". https://genai.owasp.org/llmrisk/llm01-prompt-injection/
+
+[^indirect]: Greshake et al., "Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection", 2023. https://arxiv.org/abs/2302.12173
+
+[^topp]: Holtzman et al., "The Curious Case of Neural Text Degeneration", 2019. https://arxiv.org/abs/1904.09751
+
+[^judge]: Zheng et al., "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena", 2023. https://arxiv.org/abs/2306.05685
+
+[^react]: Yao et al., "ReAct: Synergizing Reasoning and Acting in Language Models", 2022. https://arxiv.org/abs/2210.03629
+
+[^effective]: Anthropic, "Building effective agents", 2024. https://www.anthropic.com/engineering/building-effective-agents
+
+[^devin]: Both are from Cognition, which has since moved Windsurf onto the Devin CLI's harness. Devin Desktop documentation, checked 2026-10-15. https://docs.devin.ai/desktop/devin-local
+
+[^agentsmd]: AGENTS.md, stewarded by the Agentic AI Foundation (Linux Foundation). https://agents.md
+
+[^skills]: Agent Skills specification. https://agentskills.io
+
+[^mcp]: Model Context Protocol specification, version 2026-07-28. https://modelcontextprotocol.io/specification/latest
+
+[^speckit]: GitHub, Spec Kit. https://github.com/github/spec-kit

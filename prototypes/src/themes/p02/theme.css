@@ -1,0 +1,324 @@
+/* Swiss grid: one grotesk, a strict 12-column grid, hierarchy by scale and position. */
+:root {
+  --bg: #ffffff;
+  --surface: #f0f0ee;
+  --surface-2: #e2e2df;
+  --ink: #0d0d0d;
+  --muted: #4d4d4d;
+  --accent: #c8201a;
+  --accent-ink: #ffffff;
+  --link: #0d0d0d;
+  --line: #d4d4d0;
+  --line-strong: #555555;
+  --font-text: var(--font-schibsted);
+  --font-display: var(--font-text);
+  --font-code: var(--font-jetbrains);
+  --step-small: 0.875rem;
+  --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --step-head: clamp(1.9rem, 1.2rem + 2.4vw, 3.1rem);
+  --step-display: clamp(3rem, 0.8rem + 8.6vw, 9.5rem);
+  --leading: 1.55;
+  --gutter: clamp(1rem, 2.5vw, 2rem);
+  --radius: 0;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0a0f;
+    --surface: #17171c;
+    --surface-2: #24242a;
+    --ink: #f2f2f0;
+    --muted: #b4b4b0;
+    --accent: #ff5a4f;
+    --accent-ink: #0a0a0f;
+    --link: #f2f2f0;
+    --line: #2e2e35;
+    --line-strong: #9a9a9a;
+  }
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  padding-inline: var(--gutter);
+  max-width: 100rem;
+  margin-inline: auto;
+}
+.grid > * {
+  grid-column: 1 / -1;
+}
+a {
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+}
+.site-header {
+  align-items: baseline;
+  padding-block: 1.25rem;
+  font-size: var(--step-small);
+}
+.wordmark {
+  grid-column: 1 / 4;
+  font-weight: 800;
+  font-size: 1.375rem;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  text-decoration: none;
+}
+.site-desc {
+  display: none;
+  margin: 0;
+}
+.site-header nav {
+  grid-column: 4 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.5rem;
+}
+.site-header nav a {
+  text-decoration: none;
+  font-weight: 600;
+}
+.site-header nav a:hover {
+  text-decoration: underline;
+}
+@media (min-width: 64rem) {
+  .site-desc {
+    display: block;
+    grid-column: 4 / 9;
+  }
+  .site-header nav {
+    grid-column: 9 / -1;
+  }
+}
+.opener {
+  padding-block: clamp(3rem, 10vw, 9rem) clamp(2rem, 5vw, 4rem);
+  row-gap: 1.5rem;
+}
+.opener h1 {
+  margin: 0;
+  font-size: var(--step-display);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  margin-left: -0.04em;
+}
+.meta {
+  margin: 0;
+  font-size: var(--step-small);
+  font-weight: 600;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+.dek {
+  margin: 0;
+  font-size: var(--step-lead);
+  line-height: 1.35;
+  max-width: 34ch;
+}
+@media (min-width: 64rem) {
+  .opener h1 {
+    grid-column: 1 / 11;
+    grid-row: 1;
+  }
+  .meta {
+    grid-column: 1 / 4;
+    grid-row: 2;
+  }
+  .dek {
+    grid-column: 4 / 11;
+    grid-row: 2;
+  }
+}
+.body {
+  padding-bottom: 4rem;
+  row-gap: 2rem;
+}
+.toc {
+  font-size: var(--step-small);
+}
+.toc-label {
+  margin: 0 0 0.75rem;
+  font-weight: 800;
+}
+.toc ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.toc li {
+  padding: 0.35rem 0;
+}
+.toc a {
+  text-decoration: none;
+}
+.toc a:hover {
+  text-decoration: underline;
+}
+@media (min-width: 64rem) {
+  .rail {
+    grid-column: 1 / 4;
+  }
+  .rail .toc {
+    position: sticky;
+    top: 1.5rem;
+  }
+  .prose {
+    grid-column: 4 / 11;
+  }
+}
+.prose {
+  max-width: 36rem;
+}
+.prose > :where(p, ul, ol, blockquote, table) {
+  margin: 0 0 1.1em;
+}
+.prose h2 {
+  margin: 4.5rem 0 1.5rem;
+  padding-top: 1rem;
+  font-size: var(--step-head);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  box-shadow: inset 0 6px 0 var(--ink);
+}
+.prose h3 {
+  margin: 2.25rem 0 0.6rem;
+  font-size: var(--step-lead);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.prose blockquote {
+  margin: 1.75rem 0;
+  padding: 0;
+  font-size: var(--step-lead);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+.prose .fig,
+.prose .widget {
+  margin: 2.5rem 0;
+}
+.prose .fig {
+  padding: clamp(1rem, 3vw, 2rem);
+  background: var(--surface);
+}
+.aside {
+  margin: 2rem 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  box-shadow: inset 0 4px 0 var(--accent);
+  padding-top: 0.9rem;
+}
+@media (min-width: 64rem) {
+  .aside {
+    margin-left: 4rem;
+  }
+}
+.footnotes {
+  clear: both;
+  margin-top: 4rem;
+  padding-top: 1rem;
+  box-shadow: inset 0 6px 0 var(--ink);
+}
+.footnotes::before {
+  content: "References";
+  display: block;
+  font-weight: 800;
+  font-size: var(--step-lead);
+  margin-bottom: 1rem;
+}
+.home-hero {
+  padding-block: clamp(3rem, 10vw, 9rem);
+}
+.home-hero h1 {
+  margin: 0;
+  font-size: var(--step-display);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+@media (min-width: 64rem) {
+  .home-hero h1 {
+    grid-column: 1 / 12;
+  }
+}
+.issues h2 {
+  margin: 0 0 1rem;
+  padding-top: 1rem;
+  font-size: var(--step-lead);
+  font-weight: 800;
+  box-shadow: inset 0 6px 0 var(--ink);
+}
+.issue-rows {
+  margin: 0 0 5rem;
+  padding: 0;
+  list-style: none;
+}
+.issue-rows a {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: 0.5rem;
+  padding: 1.5rem 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+.issue-rows a > * {
+  grid-column: 1 / -1;
+}
+.issue-rows .num {
+  font-weight: 700;
+}
+.issue-rows .t {
+  font-size: var(--step-head);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+.issue-rows a:hover .t {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+}
+.issue-rows .s {
+  font-size: var(--step-body);
+  max-width: 40ch;
+}
+.issue-rows .d {
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+@media (min-width: 64rem) {
+  .issue-rows .num,
+  .issue-rows .d {
+    grid-column: 1 / 4;
+  }
+  .issue-rows .t,
+  .issue-rows .s {
+    grid-column: 4 / 12;
+  }
+  .issue-rows .num {
+    grid-row: 1;
+  }
+  .issue-rows .d {
+    grid-row: 2;
+  }
+}
+.site-footer {
+  margin-top: 10rem;
+  padding-block: 3rem 2rem;
+  background: var(--ink);
+  color: var(--bg);
+  max-width: none;
+}
+.site-footer a {
+  color: var(--bg);
+}
+.site-footer .big {
+  margin: 0;
+  font-size: clamp(5rem, 24vw, 22rem);
+  font-weight: 800;
+  line-height: 0.8;
+  letter-spacing: -0.06em;
+  margin-left: -0.05em;
+}

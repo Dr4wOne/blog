@@ -1,0 +1,33 @@
+---
+import { SITE } from '../../components/data.ts'
+import Page from '../../components/Page.astro'
+import type { HomeProps } from '../../components/types.ts'
+import { fonts } from './fonts.ts'
+import './theme.css'
+
+const { issues, base } = Astro.props as HomeProps
+const [latest] = issues
+---
+
+<Page title={`${SITE.name}: writing by ${SITE.author}`} description={SITE.tagline} fonts={fonts} theme="warm">
+  <header class="site-header"><a class="wordmark" href={`${base}/`}>dr4w</a><nav aria-label="Site"><a href="#issues">Issues</a><a href={SITE.home}>About Daniel</a></nav></header>
+  <main id="main" class="col">
+    <h1 class="home-h1">Slow explanations of fast technology.</h1>
+    <p class="welcome">Written by {SITE.author}, for engineers who want the whole picture.</p>
+    {
+      latest && (
+        <a class="lead-card" href={`${base}${latest.post.path}`}>
+          <span class="lc-meta">Issue {latest.post.issue} · {latest.date}</span>
+          <span class="lc-title">{latest.post.data.title}</span>
+          <span class="lc-sum">{latest.post.data.summary}</span>
+          <span class="lc-cta">Begin reading · {latest.minutes} minutes</span>
+        </a>
+      )
+    }
+    <section id="issues" aria-labelledby="issues-h" class="list">
+      <h2 id="issues-h">Every issue</h2>
+      <ol reversed>{issues.map((i) => <li><a href={`${base}${i.post.path}`}>{i.post.data.title}</a><span>{i.date}</span></li>)}</ol>
+    </section>
+  </main>
+  <footer class="site-footer col"><p>{SITE.author} · <a href={SITE.home}>dr4w.io</a></p></footer>
+</Page>

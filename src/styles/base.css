@@ -1,0 +1,457 @@
+/* Shared foundation. Themes set the tokens and the layout; nothing here picks a look. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  color-scheme: light dark;
+  hanging-punctuation: first;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: var(--step-body);
+  line-height: var(--leading, 1.6);
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --fig-ink: var(--ink);
+  --fig-muted: var(--muted);
+  --fig-accent: var(--accent);
+  --fig-on-accent: var(--accent-ink);
+  --fig-surface: var(--surface);
+  --fig-surface-2: var(--surface-2, var(--surface));
+  --fig-line: var(--line-strong, var(--muted));
+}
+img,
+svg,
+video {
+  max-width: 100%;
+}
+p,
+li {
+  text-wrap: pretty;
+}
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+  hyphens: none;
+}
+a {
+  color: var(--link, var(--ink));
+  text-decoration-thickness: 0.07em;
+  text-underline-offset: 0.18em;
+}
+a:hover {
+  text-decoration-thickness: 0.14em;
+}
+:focus-visible {
+  outline: 3px solid var(--focus, var(--accent));
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.visually-hidden,
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 10;
+  padding: 0.6rem 1rem;
+  background: var(--ink);
+  color: var(--bg);
+}
+.skip-link:focus {
+  top: 1rem;
+}
+[hidden] {
+  display: none !important;
+}
+
+/* Headings and their self-links */
+.heading {
+  position: relative;
+  scroll-margin-top: 2rem;
+}
+.anchor {
+  margin-left: 0.35em;
+  font-weight: 400;
+  color: var(--muted);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+}
+.heading:hover .anchor,
+.anchor:focus-visible {
+  opacity: 1;
+}
+
+/* Code */
+code {
+  font-family: var(--font-code);
+  font-size: 0.88em;
+  font-variant-ligatures: none;
+}
+:not(pre) > code {
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  background: var(--surface);
+}
+pre {
+  overflow-x: auto;
+  padding: 1rem 1.25rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  background: var(--surface) !important;
+}
+.astro-code span {
+  color: var(--shiki-light);
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92em;
+  font-variant-numeric: tabular-nums;
+}
+th,
+td {
+  padding: 0.55em 0.75em 0.55em 0;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line, var(--surface-2));
+}
+thead th {
+  border-bottom-width: 2px;
+  border-bottom-color: var(--ink);
+}
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* Footnotes (GFM) */
+.footnotes {
+  font-size: var(--step-small);
+  color: var(--ink);
+}
+.footnotes ol {
+  padding-left: 1.4em;
+}
+.footnotes li {
+  margin-bottom: 0.5em;
+  overflow-wrap: anywhere;
+}
+[data-footnote-ref] {
+  text-decoration: none;
+  padding: 0 0.1em;
+}
+[data-footnote-ref]::before {
+  content: "[";
+}
+[data-footnote-ref]::after {
+  content: "]";
+}
+sup {
+  line-height: 0;
+}
+
+/* Figures */
+.fig figcaption {
+  margin-top: 0.75rem;
+  font-size: var(--step-small);
+  line-height: 1.5;
+  color: var(--ink);
+}
+.fig-n {
+  font-weight: 650;
+}
+
+/* Widgets: structure only; colour comes from tokens */
+.widget {
+  padding: clamp(1rem, 3vw, 1.75rem);
+  background: var(--surface);
+  border-radius: var(--radius, 4px);
+}
+.widget > * + * {
+  margin-top: 0.85rem;
+}
+.widget-title {
+  margin: 0;
+  font-family: var(--font-display, var(--font-text));
+  font-weight: 650;
+  font-size: var(--step-lead);
+  line-height: 1.25;
+}
+.widget-lede,
+.widget-note,
+.widget-stats {
+  margin: 0;
+}
+.widget-note {
+  color: var(--muted);
+  font-size: var(--step-small);
+}
+.widget-label {
+  display: block;
+  font-weight: 600;
+  font-size: var(--step-small);
+}
+.widget-input {
+  display: block;
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--ink);
+  background: var(--bg);
+  border: 2px solid var(--line-strong, var(--muted));
+  border-radius: var(--radius, 4px);
+  resize: vertical;
+}
+.widget-button {
+  min-height: 44px;
+  padding: 0.55rem 1.1rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-button, var(--radius, 4px));
+  cursor: pointer;
+  transition:
+    transform 0.12s ease-out,
+    background-color 0.15s ease-out;
+}
+.widget-button:active {
+  transform: translateY(1px);
+}
+.widget-button-quiet {
+  color: var(--ink);
+  background: transparent;
+  border-color: var(--line-strong, var(--muted));
+}
+.token-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-code);
+  font-size: 0.9rem;
+}
+.token-list li {
+  padding: 0.2rem 0.45rem;
+  white-space: pre;
+  background: var(--bg);
+  border-radius: 3px;
+}
+.token-list li:nth-child(even) {
+  background: var(--surface-2, var(--bg));
+}
+.temp-control {
+  display: grid;
+  grid-template-columns: auto 1fr 3ch;
+  align-items: center;
+  gap: 0.75rem;
+}
+.temp-control .widget-label {
+  margin: 0;
+}
+.temp-control input {
+  width: 100%;
+  min-height: 44px;
+  accent-color: var(--accent);
+}
+.temp-control output {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+.temp-table th[scope="row"] {
+  width: 7rem;
+  font-weight: 500;
+}
+.temp-table td {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.temp-bar {
+  display: block;
+  width: calc(var(--p) * 0.85);
+  min-width: 2px;
+  height: 0.8rem;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.2s ease-out;
+}
+.temp-pct {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--step-small);
+}
+.agent-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+}
+.agent-steps li {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 0.25rem 0.75rem;
+  padding: 0.65rem 0.8rem;
+  background: var(--bg);
+  border-radius: 3px;
+}
+.agent-steps li[data-kind="approve"],
+.agent-steps li[data-kind="denied"] {
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+.agent-label {
+  font-weight: 650;
+  font-size: var(--step-small);
+}
+.agent-code {
+  grid-column: 2;
+  white-space: pre-wrap;
+}
+.agent-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+@media (max-width: 30rem) {
+  .agent-steps li {
+    grid-template-columns: 1fr;
+  }
+  .agent-code {
+    grid-column: 1;
+  }
+}
+
+/* Asides (deep dives): inline by default; themes may move them to a margin */
+.aside {
+  font-size: var(--aside-size, 0.94em);
+}
+.aside-title {
+  margin: 0 0 0.4em;
+  font-weight: 650;
+}
+.aside > p:not(.aside-title) {
+  margin: 0.5em 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 11pt;
+  }
+  .site-header nav,
+  .toc,
+  .anchor,
+  .widget [data-js],
+  .site-footer nav,
+  .skip-link {
+    display: none !important;
+  }
+  .widget {
+    background: none;
+    padding: 0;
+    break-inside: avoid;
+  }
+  .fig,
+  .aside {
+    break-inside: avoid;
+  }
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    overflow-wrap: anywhere;
+  }
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .astro-code span {
+    color: var(--shiki-dark);
+  }
+}
+
+/* Motion: a small reveal as figures, widgets, notes and section headings scroll in. Pure CSS
+   (scroll-driven animations), no JavaScript; elements already on screen at load are unaffected,
+   and reduced-motion users get no movement. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .prose :is(.fig, .widget, .aside, blockquote, h2) {
+      animation: reveal linear both;
+    }
+    /* Separate rule: a minifier must not fold the timeline into the shorthand (Chrome rejects that). */
+    .prose :is(.fig, .widget, .aside, blockquote, h2):not(#_) {
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+@keyframes reveal {
+  from {
+    transform: translateY(1.5rem);
+  }
+}
+
+/* Entrance on home pages: transform only, so nothing is hidden and LCP is unaffected. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="home"]
+    :is(header, main, footer)
+    :is(h1, h2, h3, p, li, nav a, main a, main a > span) {
+    animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  [data-page="home"] main :is(p, li) {
+    animation-delay: 0.08s;
+  }
+  [data-page="home"] main li:nth-child(n + 2) {
+    animation-delay: 0.14s;
+  }
+}
+@keyframes rise {
+  from {
+    transform: translateY(0.9rem);
+  }
+}

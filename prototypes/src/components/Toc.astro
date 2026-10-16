@@ -1,0 +1,14 @@
+---
+import type { MarkdownHeading } from 'astro'
+
+interface Props {
+  headings: MarkdownHeading[]
+  label?: string
+}
+const { headings, label = 'In this issue' } = Astro.props
+---
+
+<nav class="toc" aria-labelledby="toc-label">
+  <p class="toc-label" id="toc-label">{label}</p>
+  <ol>{headings.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
+</nav>

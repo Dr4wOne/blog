@@ -1,0 +1,30 @@
+---
+import { DENIED, STEPS } from '../../lib/agent-steps.ts'
+---
+
+<section class="widget" data-widget="agent" aria-labelledby="w-agent-title">
+  <p class="widget-title" id="w-agent-title">Try it: an agent at work</p>
+  <p class="widget-lede">One real-looking task, one step at a time. The model only decides; the harness does.</p>
+  <ol class="agent-steps">
+    {
+      STEPS.map((s) => (
+        <li data-kind={s.kind}>
+          <span class="agent-label">{s.label}</span>
+          <span class="agent-text">{s.text}</span>
+          {s.code && <code class="agent-code">{s.code}</code>}
+        </li>
+      ))
+    }
+    <li data-kind="denied" hidden>
+      <span class="agent-label">{DENIED.label}</span>
+      <span class="agent-text">{DENIED.text}</span>
+    </li>
+  </ol>
+  <div class="agent-controls" data-js hidden>
+    <button type="button" class="widget-button" data-next>Next step</button>
+    <button type="button" class="widget-button" data-approve hidden>Allow the command</button>
+    <button type="button" class="widget-button widget-button-quiet" data-deny hidden>Don’t allow</button>
+    <button type="button" class="widget-button widget-button-quiet" data-reset>Start over</button>
+  </div>
+  <p class="visually-hidden" aria-live="polite" data-live></p>
+</section>
