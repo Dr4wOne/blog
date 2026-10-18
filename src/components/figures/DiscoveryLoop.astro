@@ -1,0 +1,34 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+const steps = [
+  { title: 'Look', note: 'read-only: what does it answer to?' },
+  { title: 'Write it down', note: 'every claim with its evidence' },
+  { title: 'Prove it', note: 'one safe command, read the state back' },
+  { title: 'Build', note: 'a block-list before anything risky' },
+  { title: 'Judge', note: 'numbers, tests, and the owner on the sofa' },
+]
+---
+
+<Figure caption="The loop every device went through. The agent does most of the looking and writing; a person approves each gate before anything changes in the house.">
+  <svg viewBox="0 0 420 352" role="img" aria-labelledby="f-loop-t f-loop-d">
+    <title id="f-loop-t">Look, write down, prove, build, judge</title>
+    <desc id="f-loop-d">Five steps in a loop. Look at the device read-only. Write down each claim with its evidence. Prove it with one safe command and read the state back. Build, with a block-list of commands never to send. Judge with numbers, tests and the owner. Then back to looking for the next device or the next question.</desc>
+    <defs><Arrow id="f-loop-a" /><Arrow id="f-loop-aa" accent /></defs>
+    {
+      steps.map((s, i) => {
+        const y = i * 70
+        return (
+          <g>
+            <rect x="0" y={y} width="360" height="52" rx="6" class={i === 2 ? 'box-accent' : 'box'} />
+            <text x="16" y={y + 22} class={i === 2 ? 't-strong t-on-accent' : 't-strong'}>{s.title}</text>
+            <text x="16" y={y + 41} class={i === 2 ? 't-small t-on-accent' : 't-small t-muted'}>{s.note}</text>
+            {i < steps.length - 1 && <path d={`M180 ${y + 53} V${y + 68}`} class="wire" marker-end="url(#f-loop-a)" />}
+          </g>
+        )
+      })
+    }
+    <path d="M362 306 C410 300 410 32 364 26" class="wire-accent dash" marker-end="url(#f-loop-aa)" />
+  </svg>
+</Figure>

@@ -1,0 +1,38 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+const hops = [
+  { title: 'Phone', lines: ['Sends what is pressed every 40 ms,', 'even when nothing changed.'] },
+  { title: 'Hub', lines: ['Nothing heard for 100 ms?', 'Release every button.'], accent: true },
+  {
+    title: 'Controller service',
+    lines: ['Hub to Bluetooth write:', 'p95 0.13 ms over 1,000 frames.'],
+  },
+  { title: 'Switch 2', lines: ['Sees a Pro Controller.', 'After each sleep, pair again.'] },
+]
+---
+
+<Figure caption="One button press, from the phone to the console. The steady 40 ms heartbeat is what lets the hub notice a dropped phone within a tenth of a second and let go of every button.">
+  <svg viewBox="0 0 420 392" role="img" aria-labelledby="f-press-t f-press-d">
+    <title id="f-press-t">The path of a button press</title>
+    <desc id="f-press-d">The phone sends the full controller state every 40 milliseconds. The hub releases every button if it hears nothing for 100 milliseconds. The controller service writes to Bluetooth, measured at 0.13 milliseconds at the 95th percentile over 1,000 frames. The Switch 2 sees a Pro Controller and must be paired again after it sleeps.</desc>
+    <defs><Arrow id="f-press-a" /></defs>
+    {
+      hops.map((h, i) => {
+        const y = i * 100
+        return (
+          <g>
+            <rect x="0" y={y} width="420" height="72" rx="6" class={h.accent ? 'box-accent' : 'box'} />
+            <text x="18" y={y + 26} class={h.accent ? 't-strong t-on-accent' : 't-strong'}>{h.title}</text>
+            <text x="18" y={y + 46} class={h.accent ? 't-small t-on-accent' : 't-small t-muted'}>{h.lines[0]}</text>
+            <text x="18" y={y + 62} class={h.accent ? 't-small t-on-accent' : 't-small t-muted'}>{h.lines[1]}</text>
+            {i < hops.length - 1 && <path d={`M210 ${y + 74} V${y + 96}`} class="wire" marker-end="url(#f-press-a)" />}
+            {i === 0 && <text x="222" y={y + 90} class="t-small t-muted">Wi-Fi</text>}
+            {i === 2 && <text x="222" y={y + 90} class="t-small t-muted">Bluetooth</text>}
+          </g>
+        )
+      })
+    }
+  </svg>
+</Figure>
