@@ -1,0 +1,31 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+---
+
+<Figure caption="The shape of dr4w home. The phone only talks to the hub; the hub talks to each device in that device's own language. No cloud service sits in between; away from home, the phone reaches the hub through your own VPN.">
+  <svg viewBox="0 0 420 336" role="img" aria-labelledby="f-hub-t f-hub-d">
+    <title id="f-hub-t">Phone, hub, devices</title>
+    <desc id="f-hub-d">The phone's web app connects over HTTPS, at home or through a private VPN, to the hub, a computer at home. The hub loads one adapter per device type. The TV adapter speaks Android TV Remote v2 over Wi-Fi with TLS. The Switch 2 adapter makes the hub act as a Pro Controller over Bluetooth.</desc>
+    <defs><Arrow id="f-hub-a" /><Arrow id="f-hub-aa" accent /></defs>
+    <rect x="130" y="0" width="160" height="56" rx="6" class="box" />
+    <text x="210" y="24" text-anchor="middle" class="t-strong">Your phone</text>
+    <text x="210" y="43" text-anchor="middle" class="t-small t-muted">the web app</text>
+    <path d="M210 58 V112" class="wire" marker-end="url(#f-hub-a)" />
+    <text x="222" y="90" class="t-small t-muted">HTTPS, home or VPN</text>
+    <rect x="70" y="116" width="280" height="72" rx="6" class="box-accent" />
+    <text x="210" y="142" text-anchor="middle" class="t-on-accent t-strong">The hub</text>
+    <text x="210" y="162" text-anchor="middle" class="t-on-accent t-small">a computer at home, one adapter</text>
+    <text x="210" y="178" text-anchor="middle" class="t-on-accent t-small">per device type</text>
+    <path d="M150 190 C140 214 100 222 96 244" class="wire-accent" marker-end="url(#f-hub-aa)" />
+    <path d="M270 190 C280 214 320 222 324 244" class="wire-accent" marker-end="url(#f-hub-aa)" />
+    <rect x="0" y="248" width="196" height="76" rx="6" class="box" />
+    <text x="98" y="272" text-anchor="middle" class="t-strong">TV</text>
+    <text x="98" y="292" text-anchor="middle" class="t-small t-muted">Android TV Remote v2</text>
+    <text x="98" y="310" text-anchor="middle" class="t-small t-muted">Wi-Fi, TLS, paired once</text>
+    <rect x="224" y="248" width="196" height="76" rx="6" class="box" />
+    <text x="322" y="272" text-anchor="middle" class="t-strong">Switch 2</text>
+    <text x="322" y="292" text-anchor="middle" class="t-small t-muted">Bluetooth: the hub acts</text>
+    <text x="322" y="310" text-anchor="middle" class="t-small t-muted">as a Pro Controller</text>
+  </svg>
+</Figure>

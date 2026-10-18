@@ -1,0 +1,246 @@
+---
+updated: 2026-10-18
+published: 2026-10-18
+issue: 2
+slug: from-chatgpt-to-my-living-room
+title: ChatGPT to my sofa
+summary: "Four years of working with AI, from pasting Java into a chat window to a home hub that drives my TV and turns my phone into a Switch 2 controller."
+tags: [ai, agents, home-automation, reverse-engineering]
+draft: false
+---
+
+import Aside from '../../../components/Aside.astro'
+import AiTimeline from '../../../components/figures/AiTimeline.astro'
+import DiscoveryLoop from '../../../components/figures/DiscoveryLoop.astro'
+import HubShape from '../../../components/figures/HubShape.astro'
+import PressPath from '../../../components/figures/PressPath.astro'
+import Screens from '../../../components/figures/Screens.astro'
+import WhereGainsGo from '../../../components/figures/WhereGainsGo.astro'
+import home from '../../../assets/home/home.webp'
+import remote from '../../../assets/home/remote.webp'
+import commandBar from '../../../assets/home/command-bar.webp'
+import controller from '../../../assets/home/controller.webp'
+
+<Aside title="In short">
+
+How a software engineer went from asking ChatGPT about Java to building with agents, what I think that productivity should mean for prices, and a home hub built that way: it drives my TV and turns my phone into a Switch 2 controller. Ends with how to try it.
+
+</Aside>
+
+On a Saturday night in October I sat on the sofa, opened **Change Grip/Order** on my Nintendo Switch 2, and pressed A on my phone. On the console, a Pro Controller that does not exist appeared. My laptop was pretending to be one, and my phone was telling it what to press.
+
+No step of that is magic. But every step of it was built by AI agents, from a description I wrote; the controller part took a couple of days. Four years ago I could not have imagined that. This issue is the story of how I got there: the tools, what changed in the way I work, what I think it means, and how you can try the same thing at home.
+
+## The first conversation
+
+My first real experience with AI was ChatGPT, the week it launched on 30 November 2022. It was a research preview built on a model from OpenAI's **GPT-3.5** series.[^chatgpt]
+
+I am a software engineer, working mostly in Java, so I did what every engineer did that week: I pasted code into it. I asked it to review a class, to suggest an optimization, to write a unit test, to remind me of a syntax I always forget. That was it. Small things.
+
+And I was mesmerized. It was something I had always dreamed about: a machine you talk to in plain language, and it answers about *your* problem. Not a search result, not a forum thread from 2011. An answer. Often wrong in small ways, but an answer.
+
+> It was the first time a computer felt less like a tool and more like a colleague who never got tired of my questions.
+
+## From suggestions to agents
+
+Then things kept moving. At the company where I work, we got a **GitHub Copilot** subscription. Copilot had been generally available to individual developers since June 2022 and came to companies as Copilot for Business in February 2023.[^copilot-ga][^copilot-business]
+
+Copilot changed *where* the AI lived. It was no longer in a browser tab I copied code into; it was in the editor, suggesting the next lines as I typed, pointing at a suspicious line, filling in the boring parts of a test. The conversation became a whisper over my shoulder.
+
+The next step for me was **Cursor**. In late 2024 Cursor added an early agent to its Composer that could pick its own context and run commands in the terminal, and by February 2025 *Agent* was the default mode.[^cursor-043][^cursor-046]
+
+That was my first real taste of what an **agent** is: a model running in a loop, where it reads files, runs a command, looks at the result and decides the next step ([issue 1](/01-ai-from-the-ground-up/) explains the loop from the ground up). You stop asking "what is wrong with this line?" and start saying "make this test pass".
+
+It also forced me to learn two new skills:
+
+- **Getting back to context, fast.** An agent forgets everything between sessions. So the project itself has to be the memory: a short guide for agents at the root, a status file that says where we stopped, decision records that say why. Every session of mine now starts by reading those and ends by updating them.
+- **Prompting with specs.** The more precise the *what* and the *why*, the better the *how*. GitHub later gave this a name and a toolkit, **spec-driven development**: write the specification first, plan from it, break it into tasks, and only then implement.[^speckit]
+
+## Years without typing code
+
+Here is the confession: for the last two to three years, I have not written code the old way, the caveman way, one keystroke at a time. Everything I build goes through agents and models. I describe, I review, I test, I decide. I still read every diff that matters. But my hands are on the specification, not on the semicolons.
+
+<AiTimeline />
+
+And the tools changed under my feet the whole time. GPT-3, in 2020, had 175 billion parameters;[^gpt3] today's frontier labs no longer publish their sizes, but the jumps in what the models can do are obvious every few months. Agents moved from the editor into the terminal: Anthropic shipped **Claude Code** as a research preview in February 2025 and made it generally available in May.[^claude-code][^claude-4] GitHub turned Copilot into an agent that takes an issue and opens a pull request.[^copilot-agent]
+
+What I find most beautiful is *where* the improvements came from: **from the people who use the tools.** The assistants we know were shaped by people comparing answers and marking the better ones.[^instructgpt] The thumbs up and down under each answer feed the next model.[^openai-data] And the ways of working (a guide file for agents, reusable skills, specs before code) came from practitioners sharing what worked for them.[^agentsmd] We are not only users. We are, in a quiet way, co-authors.
+
+## Productivity and prices
+
+Here is my humble opinion.
+
+Technology should bring productivity. More productivity means each thing costs less effort to make. Things that cost less to make *should* cost less to buy. That idea is famous in the Bitcoin community: Jeff Booth's *The Price of Tomorrow* argues that technology is deflationary by nature, and that a healthy economy should let prices fall as we get better at making things.[^booth] Saifedean Ammous's *The Bitcoin Standard* makes a related case for sound money.[^ammous]
+
+<WhereGainsGo />
+
+In practice that is often not what happens. In my opinion that is down to poor governance and to the greed of a few people who turn gains into monopolies instead of lower prices. A third outcome is also possible: when something gets cheaper, we often use more of it, the **Jevons paradox**.[^jevons] But that is a topic for another issue.
+
+The evidence on AI productivity itself is mixed, and that is healthy. In a controlled task, developers with Copilot finished 55.8% faster.[^peng] In a call centre, an AI assistant raised the number of issues resolved per hour by 14% on average, and by 34% for newer workers.[^brynjolfsson] And one careful study in early 2025 found experienced open-source developers were 19% *slower* with AI on their own projects.[^metr] Productivity is not automatic. You have to learn to work this way.
+
+My hope is simple. AI is now used by ordinary and creative people, not only by large companies. If the gains reach them, and through them reach everyone else, this could be one of the good turns of technology.
+
+## REA, and a question about my TV
+
+In October 2026 I installed **REA**, an open-source tool whose pitch is "reverse engineer anything with agents".[^rea] It plugs into a coding agent through MCP (the Model Context Protocol, a standard way to give an agent tools) and gives it the instruments a reverse engineer uses: decompilers for native binaries and Android apps, readers for packet captures, firmware unpackers, a browser to observe websites. Every conclusion comes back with the evidence behind it and its limits.
+
+I set it up the way I set up everything now: I asked the agent to do it, and to show me the plan first. Then we built a small REA workspace around it: rules for evidence and scope, a workflow for an investigation, a template for each new case, and a memory. Two rules shaped everything that came after:
+
+- **Only analyse what you own or are allowed to inspect.**
+- **Separate what you observed from what you think it means.**
+
+People use REA to understand how a feature works in an app they admire, to read what an Android app sends, to unpack a router's firmware, or to study a saved network capture. I set it up with my own game in mind too, a Mega Man-style platformer, to study how open-source engines of that genre are put together.
+
+And then a question came up on the sofa: *could an agent learn to talk to my TV?*
+
+<DiscoveryLoop />
+
+The honest answer surprised me. For the TV, REA's heavy instruments were not needed. The TV announces itself on the network, and its protocol (**Android TV Remote v2**) is already documented by an open-source library, the same one Home Assistant uses.[^atvr2][^ha-atv] What *was* needed was REA's discipline: look first, read-only; write down every claim with its evidence; never send a command based on a guess. That loop became the recipe for every device after.
+
+## The phone becomes a remote
+
+The agent started by only listening. It browsed the network's announcements, read the TV's public descriptors and shook hands with its encrypted ports without sending a single command. From that it worked out what the TV is (a Philips set running Android TV 11), which doors it has open, and which of them control it.
+
+Then came the first real test, as the spec described it: *pair once, send volume up, read the volume back from the TV's own report, a hundred times, and time each one.* The TV showed a six-character code, I typed it, and a TypeScript client on my laptop became a remote. With the TV on its home screen, 95% of volume changes were confirmed within 70 ms.
+
+## From one remote to a hub
+
+One remote is a toy. I wanted a **hub**: one page on my phone for everything in the living room, with scenes like "movie night", running on a computer at home, with no cloud service in between.
+
+<HubShape />
+
+So the TV client became one *adapter* among many, and I wrote a longer brief: an adapter contract, a hub server, a phone-first web app, a public demo with simulated devices, and very strict privacy rules (no address, serial or name from my home may ever enter the repository). Before building, the agent had to answer four questions in writing:
+
+1. What would a top professional do that the brief does not ask for?
+2. What is the most direct evidence to start from (the device's own traffic, not someone's summary of it)?
+3. Which methods and tools?
+4. What independent evidence will show it works (the device's read-back, tests, measurements)?
+
+The answers added things I would not have asked for, such as marking every value as *confirmed* by the device or only *assumed*.
+
+The result is **dr4w home**, open source.[^repo] You can try it in your browser with simulated devices at home.dr4w.io.[^showcase] A fresh agent, given only the docs, added a new simulated device end to end in under four minutes.[^status]
+
+<Screens
+  shots={[
+    { src: home, alt: 'Home screen with scenes and four devices, each with its live state' },
+    { src: commandBar, alt: 'The command bar suggesting the Movie night scene after typing a few letters' },
+    { src: remote, alt: 'The TV remote in the app: a round directional pad with OK, volume buttons and app shortcuts' },
+  ]}
+  caption="The hub on a phone: the living room at a glance, a command bar that understands “movie night”, and the TV remote, whose volume number is the TV's own report."
+/>
+
+## A laptop as a controller
+
+Then the Switch 2.[^switch2] Consoles do not expose a friendly local API. But there is a well-known trick: a Linux computer can *pretend to be a Pro Controller* over Bluetooth. The open-source project **nxbt** does exactly that.[^nxbt] So the hub got a small controller service around nxbt, and the phone got a full controller screen.
+
+<Screens
+  layout="wide"
+  shots={[{ src: controller, alt: 'The phone controller in landscape: two sticks, a directional pad, A B X Y, shoulder buttons, and a status line saying Connected' }]}
+  caption="The phone as a controller (from the public demo). The status line shows the connection and the round trip in milliseconds."
+/>
+
+It did not work the first time, and the failures were the best part of the journey:
+
+- **The console never saw the controller.** The service lacked the Linux capability `CAP_NET_BIND_SERVICE`, which it needs to open the two Bluetooth L2CAP channels a controller uses. Without it, nxbt retried in a silent loop. One line in a service file fixed it.
+- **The laptop's Bluetooth chip froze.** Restarting the Bluetooth stack twice within seconds hung the chip until we reloaded its driver. The service now waits between restarts and checks the adapter answers.
+- **The agent turned off my headphones.** To check a status, it connected to the controller service's socket. With systemd socket activation, connecting *starts* the service, and the service takes over Bluetooth. It wrote itself a memory never to do that again, and it has not.
+- **The console refuses to reconnect after it sleeps.** This one we could not fix from the laptop; the Switch 2 rejects the emulated controller's reconnection. So it is documented plainly: after the console sleeps, open Change Grip/Order for a few seconds.
+
+<PressPath />
+
+Safety came before fun. A stuck button is a real bug: imagine a car in Mario Kart that never stops accelerating. So the phone sends its full state every 40 ms, and if the hub hears nothing for 100 ms, it releases every button. I tested it the crude way: hold a button, turn off the phone's Wi-Fi. The button let go.
+
+Then I pressed A on the phone, and the A on the screen lit up. Every button and both sticks worked.
+
+## Try it yourself
+
+**In one minute,** with nothing installed: open home.dr4w.io on your phone and play with the simulated living room, the TV remote and the Switch 2 controller.
+
+**In five minutes,** on your computer (Node.js 24 and pnpm):
+
+```bash
+git clone https://github.com/Dr4wOne/dr4w-home
+cd dr4w-home
+pnpm install
+pnpm dev:demo
+```
+
+**In about thirty minutes,** with your own Android TV or Google TV: run the hub on a computer that stays on at home, then `pnpm hub pair <tv-address>` and type the code the TV shows. The quickstart walks through it, including the phone and remote access.[^quickstart]
+
+**With a Switch 2:** the guide says plainly what works and what does not, how to install the controller service, and how to pause it.[^switch2-guide]
+
+**To add your own device,** with an agent or by hand: `pnpm device:new <name>` scaffolds the adapter and copies the recipe's checklist into it.[^add-device]
+
+<Aside title="Deep dive: the shape of my prompts">
+
+Every device started from a brief with the same parts: the goal in one line; the deliverables; **gates** where the agent stops and waits for me (discovery report, local demo, release); what it must *always ask* before doing (buying hardware, registering accounts, anything public); targets with numbers; and the checks that decide "done" (the device's read-back, tests, a fresh agent following the docs, and me). The agent answers the four questions before building.
+
+</Aside>
+
+## What comes next
+
+The air conditioner is next, and it already taught me something: it has no Wi-Fi, only an infrared remote. So the first gate was not code but a shopping list for my approval. After that, a tiny wired bridge for the Switch 2, so the console reconnects by itself and my laptop keeps its Bluetooth. Then the original Switch.
+
+Four years ago I pasted a Java class into a chat window and was amazed by the answer. Today I describe a device, approve a few gates, and press A on my phone. The path between those two moments is not a story about machines replacing me. It is a story about moving up: from typing, to describing, to deciding.
+
+**In one line:** the code is written by agents now; the curiosity, the questions and the judgement are still mine.
+
+[^chatgpt]: OpenAI, "Introducing ChatGPT", 2022. https://openai.com/index/chatgpt/
+
+[^copilot-ga]: Thomas Dohmke, "GitHub Copilot is generally available to all developers", 2022. https://github.blog/news-insights/product-news/github-copilot-is-generally-available-to-all-developers/
+
+[^copilot-business]: Thomas Dohmke, "GitHub Copilot for Business is now available", 2023. https://github.blog/news-insights/product-news/github-copilot-for-business-is-now-available/
+
+[^cursor-043]: Cursor, "New Composer UI, Agent, Commit Messages" (0.43), 2024. https://cursor.com/changelog/0-43-x
+
+[^cursor-046]: Cursor, "Agent is ready and UI refresh" (0.46), 2025. https://cursor.com/changelog/0-46-x
+
+[^speckit]: Den Delimarsky, "Spec-driven development with AI: Get started with a new open source toolkit", GitHub, 2025. https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/
+
+[^gpt3]: Brown et al., "Language Models are Few-Shot Learners", 2020. https://arxiv.org/abs/2005.14165
+
+[^claude-code]: Anthropic, "Claude 3.7 Sonnet and Claude Code", 2025. https://www.anthropic.com/news/claude-3-7-sonnet
+
+[^claude-4]: Anthropic, "Introducing Claude 4", 2025. https://www.anthropic.com/news/claude-4
+
+[^copilot-agent]: Thomas Dohmke, "GitHub Copilot: Meet the new coding agent", 2025. https://github.blog/news-insights/product-news/github-copilot-meet-the-new-coding-agent/
+
+[^instructgpt]: Ouyang et al., "Training language models to follow instructions with human feedback", 2022. https://arxiv.org/abs/2203.02155
+
+[^openai-data]: OpenAI, "How your data is used to improve model performance", OpenAI Help Center. https://help.openai.com/en/articles/5722486-how-your-data-is-used-to-improve-model-performance
+
+[^agentsmd]: AGENTS.md, stewarded by the Agentic AI Foundation (Linux Foundation). https://agents.md
+
+[^booth]: Jeff Booth, "The Price of Tomorrow: Why Deflation is the Key to an Abundant Future", 2020. https://books.apple.com/book/id1492775334
+
+[^ammous]: Saifedean Ammous, "The Bitcoin Standard: The Decentralized Alternative to Central Banking", Wiley, 2018. https://www.wiley.com/en-us/The+Bitcoin+Standard%3A+The+Decentralized+Alternative+to+Central+Banking-p-9781119473862
+
+[^jevons]: Blake Alcott, "Jevons' paradox", Ecological Economics 54(1), 2005. https://doi.org/10.1016/j.ecolecon.2005.03.020
+
+[^peng]: Peng, Kalliamvakou, Cihon and Demirer, "The Impact of AI on Developer Productivity: Evidence from GitHub Copilot", 2023. https://arxiv.org/abs/2302.06590
+
+[^brynjolfsson]: Brynjolfsson, Li and Raymond, "Generative AI at Work", NBER Working Paper 31161, 2023. https://www.nber.org/papers/w31161
+
+[^metr]: Becker, Rush, Barnes and Rein, "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity", METR, 2025. METR notes these early-2025 results are now dated. https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/
+
+[^rea]: morluto, "REA: reverse engineering for your coding agent", GitHub. https://github.com/morluto/rea
+
+[^atvr2]: tronikos, "androidtvremote2: a Python library implementing the Android TV Remote protocol v2", GitHub. https://github.com/tronikos/androidtvremote2
+
+[^ha-atv]: Home Assistant, "Android TV Remote" integration. https://www.home-assistant.io/integrations/androidtv_remote/
+
+[^repo]: Dr4w, "dr4w home: an open-source home hub you run yourself", GitHub. https://github.com/Dr4wOne/dr4w-home
+
+[^showcase]: dr4w home, the live demo with simulated devices. https://home.dr4w.io
+
+[^switch2]: Nintendo, "Nintendo Switch 2 to be released on June 5, 2025", 2025. https://www.nintendo.co.jp/corporate/release/en/2025/250402.html
+
+[^status]: dr4w home, "Status": docs judges, a fresh agent adding a demo fan (6.6 minutes, then 3.6 after the doc fixes). https://github.com/Dr4wOne/dr4w-home/blob/main/docs/STATUS.md
+
+[^nxbt]: Brikwerk, "nxbt: control your Nintendo Switch through a website, terminal, or macro", GitHub. https://github.com/Brikwerk/nxbt
+
+[^quickstart]: dr4w home, "Quickstart". https://github.com/Dr4wOne/dr4w-home/blob/main/docs/quickstart.md
+
+[^switch2-guide]: dr4w home, "Nintendo Switch 2: what works, what does not". https://github.com/Dr4wOne/dr4w-home/blob/main/docs/switch-2.md
+
+[^add-device]: dr4w home, "Add a device". https://github.com/Dr4wOne/dr4w-home/blob/main/docs/add-a-device.md

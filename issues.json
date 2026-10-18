@@ -1,4 +1,15 @@
 {
   "$comment": "Issue registry. Append-only: once an issue is here, its number and slug never change. Written by /publish-post; checked by the build and by CI.",
-  "issues": [{ "issue": 1, "slug": "ai-from-the-ground-up", "published": "2026-10-15" }]
+  "issues": [
+    {
+      "issue": 1,
+      "slug": "ai-from-the-ground-up",
+      "published": "2026-10-15"
+    },
+    {
+      "issue": 2,
+      "slug": "from-chatgpt-to-my-living-room",
+      "published": "2026-10-18"
+    }
+  ]
 }

@@ -1,0 +1,47 @@
+---
+import Figure from './Figure.astro'
+
+const steps = [
+  { when: 'Nov 2022', what: 'ChatGPT', note: 'I paste Java and ask for reviews, tests, syntax.' },
+  { when: '2023', what: 'Copilot at work', note: 'The editor suggests the next lines as I type.' },
+  {
+    when: '2024',
+    what: 'Cursor and agents',
+    note: 'The editor runs tasks. I stop typing code by hand.',
+  },
+  { when: '2025', what: 'Specs first', note: 'I write what and why; the agent works out how.' },
+  {
+    when: '2025–26',
+    what: 'Agents in the terminal',
+    note: 'Agents run whole tasks: I plan, review, test, decide.',
+  },
+  {
+    when: 'Oct 2026',
+    what: 'A hub at home',
+    note: 'My TV, then a Switch 2, controlled from my phone.',
+  },
+]
+---
+
+<Figure caption="My path with AI tools. Each step moved me one level up: from asking about code, to accepting suggestions, to describing work an agent carries out.">
+  <svg viewBox="0 0 420 404" role="img" aria-labelledby="f-ai-t f-ai-d">
+    <title id="f-ai-t">From a chat window to a home hub</title>
+    <desc id="f-ai-d">A vertical timeline. November 2022: ChatGPT, used to review Java and write tests. 2023: Copilot at work, suggesting lines. 2024: Cursor and agents that run tasks; no more typing code by hand. 2025: writing specs first. 2025 to 2026: agents in the terminal run whole tasks while I plan, review, test and decide. October 2026: a home hub that controls a TV and a Switch 2 from a phone.</desc>
+    <path d="M10 10 V370" class="wire" />
+    {
+      steps.map((s, i) => {
+        const y = i * 68 + 10
+        const last = i === steps.length - 1
+        return (
+          <g>
+            <circle cx="10" cy={y} r={last ? 8 : 6} class={last ? 'dot-accent' : 'dot'} />
+            <text x="32" y={y + 5} class="t-strong">
+              <tspan class={last ? 't-accent' : ''}>{s.when}</tspan> · {s.what}
+            </text>
+            <text x="32" y={y + 26} class="t-small t-muted">{s.note}</text>
+          </g>
+        )
+      })
+    }
+  </svg>
+</Figure>

@@ -1,0 +1,37 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+const ends = [
+  { title: 'Lower prices', lines: ['Everyone gains:', 'things cost less.'], accent: true },
+  { title: 'Higher margins', lines: ['The seller keeps it,', 'often a monopoly.'] },
+  { title: 'More of it', lines: ['Cheaper use invites', 'more use (Jevons).'] },
+]
+---
+
+<Figure caption="Where a productivity gain can go. Technology makes the left branch possible; whether we get it depends on competition and on the rules around the market.">
+  <svg viewBox="0 0 420 252" role="img" aria-labelledby="f-gain-t f-gain-d">
+    <title id="f-gain-t">Three destinations for a productivity gain</title>
+    <desc id="f-gain-d">At the top: the same work now takes less effort. It can become lower prices, where everyone gains; higher margins, kept by the seller, often behind a monopoly; or more consumption, because cheaper use invites more use, the Jevons paradox.</desc>
+    <defs><Arrow id="f-gain-a" /><Arrow id="f-gain-aa" accent /></defs>
+    <rect x="100" y="0" width="220" height="48" rx="6" class="box" />
+    <text x="210" y="21" text-anchor="middle" class="t-strong">Same work, less effort</text>
+    <text x="210" y="39" text-anchor="middle" class="t-small t-muted">tools, machines, AI</text>
+    <path d="M170 50 C120 70 70 80 66 120" class="wire-accent" marker-end="url(#f-gain-aa)" />
+    <path d="M210 50 V120" class="wire" marker-end="url(#f-gain-a)" />
+    <path d="M250 50 C300 70 350 80 354 120" class="wire" marker-end="url(#f-gain-a)" />
+    {
+      ends.map((e, i) => {
+        const x = i * 142
+        return (
+          <g>
+            <rect x={x} y="124" width="136" height="92" rx="6" class={e.accent ? 'box-accent' : 'box'} />
+            <text x={x + 68} y="150" text-anchor="middle" class={e.accent ? 't-strong t-on-accent' : 't-strong'}>{e.title}</text>
+            <text x={x + 68} y="176" text-anchor="middle" class={e.accent ? 't-small t-on-accent' : 't-small t-muted'}>{e.lines[0]}</text>
+            <text x={x + 68} y="194" text-anchor="middle" class={e.accent ? 't-small t-on-accent' : 't-small t-muted'}>{e.lines[1]}</text>
+          </g>
+        )
+      })
+    }
+  </svg>
+</Figure>
