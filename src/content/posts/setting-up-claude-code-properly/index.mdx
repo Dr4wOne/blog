@@ -1,9 +1,12 @@
 ---
+updated: 2026-10-19
+published: 2026-10-19
+issue: 3
 slug: setting-up-claude-code-properly
-title: Setting up Claude Code properly
+title: Set up Claude Code properly
 summary: "A Claude Code session is a model, a small program around it and a limited window of text. Here is what loads when you type claude, where skills and hooks live, and how I set up my eight-week study project."
 tags: [claude-code, ai, developer-tools, java, learning]
-draft: true
+draft: false
 ---
 
 import Aside from '../../../components/Aside.astro'
@@ -21,7 +24,7 @@ A Monday night. An empty folder. A cursor blinking.
 
 I am going back on track with my studies: Java concurrency, distributed systems, interview preparation, all from Brisbane, with about two hours a day. The plan is eight small projects in eight weeks, each one built, broken and fixed on purpose. I wanted to start it the proper way, with the right tools and skills in place from the first command.
 
-Here is the confession. I already had a few skills installed, and every time I started something new I would ask Claude to write me a giant prompt that name-dropped RTK, Caveman and a handful of other tools. I could not have told you which ones were actually loaded, where they lived, or whether a brand new project would even get them.
+Here is the confession. I already had a few skills installed, and every time I started something new I would ask Claude to write me a giant prompt that name-dropped RTK, Caveman (two token-saving tools, more on them below) and a handful of other tools. I could not have told you which ones were actually loaded, where they lived, or whether a brand new project would even get them.
 
 So this issue is what I worked out, using the study project as the example. It is written for someone who has used Claude Code a bit but never opened the hood.
 
@@ -37,7 +40,7 @@ Each turn is a small loop. You type something, the model answers or asks for a t
 
 Think of it like inventory slots in a game. Anything you add to a session competes for those slots, and it lands in one of three buckets:
 
-1. **Always on.** Costs slots every single turn. Your CLAUDE.md files, the start of auto memory, skill names and descriptions, MCP tool names.
+1. **Always on.** Costs slots every single turn. Your CLAUDE.md files, the start of auto memory (notes Claude saves for itself), skill names and descriptions, and the names of MCP tools (extra tools from servers you connect).
 2. **On demand.** Stays in the stash until needed. The full text of a skill, a CLAUDE.md in a sub-folder, memory topic files, the full schemas of MCP tools.
 3. **Outside the model.** Hooks, settings and permissions. They are plain code the harness runs, so they cost no slots unless a hook deliberately injects text.
 
@@ -49,14 +52,14 @@ When you launch Claude in a folder, it reads from three places. I think of them 
 
 - **Built in.** Ships with Claude Code, nothing to install: the system prompt and tools, slash commands such as `/context`, and helper agents like Explore and Plan.
 - **My notebook, `~/.claude/`.** (Notebook, as in laptop. Yes, I say notebook.) Follows me into every project: a personal `CLAUDE.md`, personal skills, `settings.json`, and the notes Claude writes for itself, which are stored here but kept per project.
-- **The project folder.** Only exists when I launch inside it: `CLAUDE.md`, `AGENTS.md`, `.claude/rules/`, `.claude/skills/`, `.claude/settings.json`, and two private files, `CLAUDE.local.md` and `.claude/settings.local.json`.[^settings]
+- **The project folder.** Only exists when I launch inside it: `CLAUDE.md`, `AGENTS.md`, `.claude/rules/`, `.claude/skills/`, `.claude/settings.json`, and two private files, `CLAUDE.local.md` and `.claude/settings.local.json`.[^settings] A file in `.claude/rules/` can start with a `paths` filter, such as `**/*.java`, and then it loads only when Claude touches matching files.
 
 Some details that surprised me:
 
 - Instruction files do not override each other. They are all stitched together, from the filesystem root down to the folder you launched in, and the file closest to you is read last.[^memory]
 - `CLAUDE.md` files in sub-folders are not loaded at launch. They load the first time Claude reads or edits a file in that folder.
-- Auto memory loads only the first 200 lines or 25KB of its index file.
-- The docs do not publish one strict order for everything that reaches the model, so treat any ordered list, including mine, as approximate.
+- Auto memory loads only the first 200 lines or 25KB of its index file, `MEMORY.md`.
+- The docs do not publish one strict order for everything that reaches the model, so treat any ordered list of it as approximate.
 
 The practical lesson is the dull one. **Launch in the project folder, not in `~`.** If you start Claude in your home folder and ask it to create the project, that session never read the project's files, because they did not exist yet. Make the folder first, then start Claude inside it.
 
@@ -90,7 +93,7 @@ I turned that into a skill called `ambition`. It drops speed, keeps the three le
 
 A hook is a small command the harness runs when something happens: before a tool call, after one, when a session starts, when Claude stops. Because the harness runs it, not the model, it is deterministic. It happens every time, whether Claude remembers or not.[^hooks]
 
-That is exactly what RTK uses. RTK compresses shell output before the model reads it, and it gets there with a `PreToolUse` hook that rewrites Bash commands, so `git status` quietly becomes `rtk git status`.[^rtk] I never ask for it. It just happens.
+That is exactly what RTK uses. RTK compresses shell output before the model reads it, and it gets there with a `PreToolUse` hook (it runs before each tool call) that rewrites Bash commands, so `git status` quietly becomes `rtk git status`.[^rtk] I never ask for it. It just happens.
 
 So is that hook global or per project? It has the scope of the file that holds it:
 
@@ -141,9 +144,9 @@ The generated README is not a formality. It has four headings I have to fill in 
 ### Try it yourself
 
 1. Make the folder first, then launch Claude inside it.
-2. Type `/context` and write down the baseline.
+2. Type `/context` and write down the total tokens used. That is your baseline.
 3. Type `/skills` and check your skill is listed.
-4. Ask for a prompt, not a result: `/ambition write the prompt for the week 2 pinning-lab, do not execute it`.
+4. Ask for a prompt, not a result. With my skill that is `/ambition write the prompt for the week 2 pinning-lab, do not execute it`; with yours, any `/skill-name` and a task.
 5. Commit the scaffold, so the rules and pinned skill travel with the repo.
 
 ## The tool tour, with honest caveats
@@ -186,14 +189,14 @@ I also built a small widget, just below, where you type in your `/context` numbe
 
 If you skipped to the bottom, this is the whole issue:
 
-- [ ] Create the project folder first, then launch `claude` inside it.
-- [ ] Put shared rules in `AGENTS.md` and import it with `@AGENTS.md` as the first line of `CLAUDE.md`.
-- [ ] Keep `CLAUDE.md` under about 200 lines. Move file-specific advice into `.claude/rules/` with a `paths` filter.
-- [ ] Leave personal skills in `~/.claude/skills/`. Copy one into the project only when the repo should carry it.
-- [ ] Use a hook for anything that must happen every time. CLAUDE.md is advice.
-- [ ] Know where each hook lives: `~/.claude/settings.json` for all projects, `.claude/settings.json` for one.
-- [ ] Run `/context` before and after every addition.
-- [ ] Put a hard number and an outside judge in the README before writing code.
+- Create the project folder first, then launch `claude` inside it.
+- Put shared rules in `AGENTS.md` and import it with `@AGENTS.md` as the first line of `CLAUDE.md`.
+- Keep `CLAUDE.md` under about 200 lines. Move file-specific advice into `.claude/rules/` with a `paths` filter.
+- Leave personal skills in `~/.claude/skills/`. Copy one into the project only when the repo should carry it.
+- Use a hook for anything that must happen every time. CLAUDE.md is advice.
+- Know where each hook lives: `~/.claude/settings.json` for all projects, `.claude/settings.json` for one.
+- Run `/context` before and after every addition.
+- Put a hard number and an outside judge in the README before writing code.
 
 What is next for me is the first lab. Week 1 is a concurrency project with a clear goal: write a memory-model test that catches a broken publication, then fix it and watch it pass. Week 2 is the one I am most curious about, virtual threads and the pinning problem on Java 21 versus 25, measured instead of argued about.
 
