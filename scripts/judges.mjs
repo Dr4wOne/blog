@@ -209,6 +209,7 @@ if (want('inp')) {
     '[data-widget=tokenizer]',
     '[data-widget=temperature]',
     '[data-widget=agent]',
+    '[data-widget=context]',
   ]) {
     if (!(await page.$(sel))) continue
     await page.locator(sel).scrollIntoViewIfNeeded()
@@ -218,6 +219,8 @@ if (want('inp')) {
     await page.locator('#w-tok-in').pressSequentially(' interaction test', { delay: 30 })
   if (await page.$('#w-temp-in')) await page.locator('#w-temp-in').fill('1.6')
   if (await page.$('[data-sample]')) await page.locator('[data-sample]').click()
+  if (await page.$('#w-ctx-0')) await page.locator('#w-ctx-0').fill('4500')
+  if (await page.$('#w-ctx-caveman')) await page.locator('#w-ctx-caveman').check()
   for (let i = 0; i < 4; i++)
     if (await page.locator('[data-next]').isVisible()) await page.locator('[data-next]').click()
   await page.waitForTimeout(500)

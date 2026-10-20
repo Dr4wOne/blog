@@ -4,6 +4,7 @@ const loaders: Record<string, () => Promise<{ default: (el: HTMLElement) => unkn
   tokenizer: () => import('../components/widgets/tokenizer.client.ts'),
   temperature: () => import('../components/widgets/temperature.client.ts'),
   agent: () => import('../components/widgets/agent.client.ts'),
+  context: () => import('../components/widgets/context.client.ts'),
 }
 
 const start = async (el: HTMLElement) => {
