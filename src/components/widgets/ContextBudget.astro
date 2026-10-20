@@ -1,0 +1,55 @@
+---
+import { budget, CATEGORIES, CAVEMAN_TOKENS, fmt, pct, WINDOW } from '../../lib/context-budget.ts'
+
+const b = budget(
+  CATEGORIES.map(([, t]) => t),
+  WINDOW,
+  false,
+)
+---
+
+<section class="widget" data-widget="context" aria-labelledby="w-ctx-title">
+  <p class="widget-title" id="w-ctx-title">Try it: your context budget</p>
+  <p class="widget-lede">
+    Run <code>/context</code> in a fresh session and type its numbers in. Each bar is that category's share of the
+    window. The values it starts with are placeholders, not measurements.
+  </p>
+  <div>
+    <div class="ctx-track" aria-hidden="true"><span class="ctx-bar ctx-bar-total" style={`--p:${b.usedShare * 100}%`}></span></div>
+    <p class="widget-stats" aria-live="polite" data-total>
+      Used {fmt(b.used)} of {fmt(WINDOW)} tokens ({pct(b.usedShare)}). Free: {fmt(b.free)}.
+    </p>
+  </div>
+  <table class="ctx-table">
+    <caption class="visually-hidden">Tokens per /context category and share of the window</caption>
+    <thead><tr><th scope="col">Category</th><th scope="col">Tokens</th><th scope="col">Share</th></tr></thead>
+    <tbody>
+      {
+        CATEGORIES.map(([name, t], i) => (
+          <tr>
+            <th scope="row"><label for={`w-ctx-${i}`}>{name}</label></th>
+            <td>
+              <input class="widget-input ctx-in" id={`w-ctx-${i}`} type="number" inputmode="numeric" min="0" step="100" value={t} data-js hidden />
+              <span data-nojs>{fmt(t)}</span>
+            </td>
+            <td>
+              <span class="ctx-bar" style={`--p:${(b.shares[i] as number) * 100}%`} />
+              <span class="ctx-pct">{pct(b.shares[i] as number)}</span>
+            </td>
+          </tr>
+        ))
+      }
+      <tr data-caveman hidden>
+        <th scope="row">Caveman rules</th>
+        <td>{fmt(CAVEMAN_TOKENS)}</td>
+        <td><span class="ctx-bar" style="--p:0%"></span><span class="ctx-pct"></span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="ctx-controls" data-js hidden>
+    <label class="widget-label" for="w-ctx-window">Window size</label>
+    <input class="widget-input ctx-in" id="w-ctx-window" type="number" inputmode="numeric" min="1000" step="1000" value={WINDOW} />
+    <label class="ctx-check"><input type="checkbox" id="w-ctx-caveman" /><span>Add Caveman's rules (about {fmt(CAVEMAN_TOKENS)} tokens, its README's own figure)</span></label>
+  </div>
+  <p class="widget-note" data-nojs>Placeholder values for a {fmt(WINDOW)}-token window. Turn on JavaScript to type in your own.</p>
+</section>

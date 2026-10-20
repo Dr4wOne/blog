@@ -7,6 +7,7 @@ draft: true
 ---
 
 import Aside from '../../../components/Aside.astro'
+import ContextBudget from '../../../components/widgets/ContextBudget.astro'
 
 <Aside title="In short">
 
@@ -99,7 +100,7 @@ So is that hook global or per project? It has the scope of the file that holds i
 | `.claude/settings.json` | One project | Yes, commit it |
 | `.claude/settings.local.json` | One project | No, private to me |
 
-RTK installs with `rtk init -g`, where the `g` means global, so I expect its hook to live in the first row and run everywhere. I say expect because I would rather confirm than assume: `/hooks` lists every active hook, and the setup audit script I wrote prints them too.
+RTK installs with `rtk init -g`, where the `g` means global, and on my laptop that is exactly where it landed: `~/.claude/settings.json` has a `PreToolUse` hook on Bash that runs `rtk hook claude`. I checked rather than assumed: `/hooks` lists every active hook, and the setup audit script I wrote prints them too.
 
 One limit worth knowing. RTK's hook only rewrites Bash tool calls. Claude's built-in Read, Grep and Glob tools are not touched, so RTK shrinks what shell commands print and nothing else.
 
@@ -115,7 +116,7 @@ The first script is read-only. It audits what every project on my laptop already
 cd ~/study-lab && claude
 ```
 
-That produces this:
+The kit produces this:
 
 ```
 study-lab/
@@ -149,10 +150,10 @@ The generated README is not a formality. It has four headings I have to fill in 
 
 Now the fun part. Here is what each of my five extras does, where it plugs in, and what the authors admit about it. Every number below is the project's own claim. I have not measured any of them yet, and neither should you take my word for them.
 
-- **RTK** is a Rust command line tool that compresses shell output (git, test runners, linters, Docker, Kubernetes) before the model reads it. The README says up to 90% less Bash output, and also says plainly that this is not a 90% cut to your bill, because Bash output is only one slice of what the model reads. If a command fails, the full output is kept so you can recall it. It plugs in as a hook. Telemetry is opt-in.[^rtk]
-- **Caveman** makes the agent write tersely and shrinks logs and JSON before reading them. Its README claims about 65% fewer output tokens on its own benchmarks. It also admits that its rules add about 1,160 input tokens, that a plain instruction to be concise captures much of the gain, and that telemetry is on by default. Its optional Auto routing sends your prompts to a cloud service, so read before you switch that on.[^caveman]
+- **RTK** is a Rust command line tool that compresses shell output (git, test runners, linters, Docker, Kubernetes) before the model reads it. The README says up to 90% less Bash output, and also says plainly that this is not a 90% cut to your bill, because Bash output is only one slice of what the model reads. It plugs in as a hook. Telemetry is opt-in.[^rtk]
+- **Caveman** makes the agent write tersely and shrinks logs and JSON before reading them. Its README claims about 65% fewer output tokens, though its own benchmark table shows about 41% with `/caveman` and 61% with `/ultracave`. It also admits that its rules add about 1,160 input tokens, that a plain instruction to be concise captures much of the gain, and that telemetry is on by default. Its optional Auto routing sends your prompts to a cloud service, so read before you switch that on.[^caveman]
 - **karpathy-skills** is a single `CLAUDE.md` of four habits taken from Andrej Karpathy's observations about how LLMs write code: think before coding, keep it simple, make surgical changes, and work towards checks you can verify. It is cheap and always on. The README warns it favours caution over speed. One thing I caught: the repo I was given has install commands that point at a different repository, so check the source before you install.[^karpathy]
-- **taste-skill** is a set of frontend design skills with three dials for layout variance, motion and density. It loads for UI work only. The default version is labelled experimental and the page offers no benchmarks. My study labs are backend, so it stays out of them.[^taste]
+- **taste-skill** is a set of frontend design skills: art direction drawn from a curated set of real sites, plus a look-and-fix loop checked in a real browser. It loads for UI work only, and the page offers no benchmarks. My study labs are backend, so it stays out of them.[^taste]
 - **archify** turns an idea or a repository into an interactive diagram: architecture, workflow, sequence, data flow or lifecycle. The output is one HTML file you can open anywhere. It needs Node for validation and the layout is the agent's judgement, not an algorithm.[^archify]
 
 So what goes where?
@@ -177,7 +178,9 @@ Two more commands earn their place. `/skill-doctor` shows what each skill costs 
 
 There is also a lesson about memory that is worth tattooing somewhere. When a long session fills up, Claude compacts it, first clearing old tool output and then summarising. The root `CLAUDE.md`, unscoped rules and auto memory get re-read from disk afterwards. Anything you only said in chat is gone. If a rule has to survive, it belongs in a file.[^window]
 
-I also built a small page with a chart where you type in your `/context` numbers and see the bar fill up, including a toggle for what Caveman's 1,160 tokens would do to it. The values it ships with are placeholders, so run your own. A tool that tells you how much room is left is worth more than a tool that promises to make more.
+I also built a small widget, just below, where you type in your `/context` numbers and see the bar fill up, including a toggle for what Caveman's 1,160 tokens would do to it. The values it ships with are placeholders, so run your own. A tool that tells you how much room is left is worth more than a tool that promises to make more.
+
+<ContextBudget />
 
 ## The checklist, and what is next
 
@@ -200,7 +203,7 @@ The Monday night version of me had an empty folder and a vague feeling that some
 
 <Aside title="Not confirmed in the docs">
 
-The exact order in which the system prompt, tool definitions and CLAUDE.md reach the model, and where RTK's installer writes its hook. I expect `~/.claude/settings.json` because of the `-g` flag, but `/hooks` is the way to check. All pages were opened on 19 October 2026; tool figures are the authors' own claims.
+The exact order in which the system prompt, tool definitions and CLAUDE.md reach the model; the docs only say the system prompt comes first. Where RTK's installer writes its hook is not in its README either, so I checked my own machine with `/hooks`. All pages were opened on 19 October 2026; tool figures are the authors' own claims.
 
 </Aside>
 
