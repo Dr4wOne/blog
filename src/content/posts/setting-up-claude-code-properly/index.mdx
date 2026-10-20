@@ -1,0 +1,229 @@
+---
+slug: setting-up-claude-code-properly
+title: Setting up Claude Code properly
+summary: "A Claude Code session is a model, a small program around it and a limited window of text. Here is what loads when you type claude, where skills and hooks live, and how I set up my eight-week study project."
+tags: [claude-code, ai, developer-tools, java, learning]
+draft: true
+---
+
+import Aside from '../../../components/Aside.astro'
+
+<Aside title="In short">
+
+A Claude Code session is three things stacked together: a model, a small program wrapped around it, and a limited window of text. Everything you add to a setup (rules, skills, hooks, tools) either sits in that window all the time, loads only when needed, or runs outside it entirely. Once that clicked, setting up my study project took one evening instead of a pile of guesses.
+
+</Aside>
+
+## I did not know what my own setup was doing
+
+A Monday night. An empty folder. A cursor blinking.
+
+I am going back on track with my studies: Java concurrency, distributed systems, interview preparation, all from Brisbane, with about two hours a day. The plan is eight small projects in eight weeks, each one built, broken and fixed on purpose. I wanted to start it the proper way, with the right tools and skills in place from the first command.
+
+Here is the confession. I already had a few skills installed, and every time I started something new I would ask Claude to write me a giant prompt that name-dropped RTK, Caveman and a handful of other tools. I could not have told you which ones were actually loaded, where they lived, or whether a brand new project would even get them.
+
+So this issue is what I worked out, using the study project as the example. It is written for someone who has used Claude Code a bit but never opened the hood.
+
+## Model, harness, context: three things stacked
+
+Start with the picture in your head, because everything else hangs off it.
+
+- **The model** is Claude. It only ever sees text. It never touches your files.
+- **The harness** is Claude Code, the program on your laptop. It builds the text the model sees, runs the tools the model asks for (read a file, edit, run a shell command), and asks you for permission along the way.[^how]
+- **The context window** is the notepad the model reads from on every turn. It has a fixed number of pages.[^window]
+
+Each turn is a small loop. You type something, the model answers or asks for a tool, the harness runs it and pastes the result back onto the notepad, and round we go.
+
+Think of it like inventory slots in a game. Anything you add to a session competes for those slots, and it lands in one of three buckets:
+
+1. **Always on.** Costs slots every single turn. Your CLAUDE.md files, the start of auto memory, skill names and descriptions, MCP tool names.
+2. **On demand.** Stays in the stash until needed. The full text of a skill, a CLAUDE.md in a sub-folder, memory topic files, the full schemas of MCP tools.
+3. **Outside the model.** Hooks, settings and permissions. They are plain code the harness runs, so they cost no slots unless a hook deliberately injects text.
+
+The bucket matters more than it sounds. The docs are clear that CLAUDE.md is treated as context, not as enforced configuration.[^memory] It is advice. If something must never be forgotten, you do not write it in CLAUDE.md, you make it a hook.
+
+## What actually happens when you type `claude`
+
+When you launch Claude in a folder, it reads from three places. I think of them as three homes.
+
+- **Built in.** Ships with Claude Code, nothing to install: the system prompt and tools, slash commands such as `/context`, and helper agents like Explore and Plan.
+- **My notebook, `~/.claude/`.** (Notebook, as in laptop. Yes, I say notebook.) Follows me into every project: a personal `CLAUDE.md`, personal skills, `settings.json`, and the notes Claude writes for itself, which are stored here but kept per project.
+- **The project folder.** Only exists when I launch inside it: `CLAUDE.md`, `AGENTS.md`, `.claude/rules/`, `.claude/skills/`, `.claude/settings.json`, and two private files, `CLAUDE.local.md` and `.claude/settings.local.json`.[^settings]
+
+Some details that surprised me:
+
+- Instruction files do not override each other. They are all stitched together, from the filesystem root down to the folder you launched in, and the file closest to you is read last.[^memory]
+- `CLAUDE.md` files in sub-folders are not loaded at launch. They load the first time Claude reads or edits a file in that folder.
+- Auto memory loads only the first 200 lines or 25KB of its index file.
+- The docs do not publish one strict order for everything that reaches the model, so treat any ordered list, including mine, as approximate.
+
+The practical lesson is the dull one. **Launch in the project folder, not in `~`.** If you start Claude in your home folder and ask it to create the project, that session never read the project's files, because they did not exist yet. Make the folder first, then start Claude inside it.
+
+Once it is running, you do not have to guess what loaded. Type `/context`, `/memory`, `/skills` or `/hooks` and it will tell you.
+
+## Skills: the part I kept getting wrong
+
+A skill is a folder with a `SKILL.md` inside. It holds instructions for one kind of job, plus optional scripts. That is all it is.[^skills]
+
+Three facts cleared up most of my confusion:
+
+- **Personal skills are global.** Anything in `~/.claude/skills/` is available in every project on my machine, automatically. There is nothing to add to a project. Skills in a project's `.claude/skills/` exist only in that project, and travel with the repo if I commit them.
+- **Only the label is loaded up front.** Claude sees each skill's name and description. The full body loads when a request matches the description, or when I type `/skill-name`. The description is capped at 1,536 characters in that listing, so the useful part goes first.
+- **Declaring skills in CLAUDE.md is not a thing.** A skill exists because its folder exists. CLAUDE.md can say when to prefer one, nothing more. To switch one off for a single project, you set it to off in `.claude/settings.local.json` with `skillOverrides`, or deny it with a `Skill(name)` permission rule.
+
+When the same skill name exists in both places, the personal copy wins over the project copy. So pinning a copy into a repo only makes sense when the repo should carry it, for another machine, a teammate or CI. And a pinned copy is a snapshot. It does not follow my later edits.
+
+### The skill I wrote from an article
+
+Felix Rieseberg, who works on Claude, wrote a piece on how to be more ambitious with models.[^felix] His idea is that ambition comes in four kinds: speed, altitude, depth and range. Speed is the boring one, the same work in less time. The other three change what the work is:
+
+- **Altitude:** go up a level. Ask what you want to happen next, the goal beyond the goal.
+- **Depth:** work like the best practitioner in the field, with their raw material and their tools.
+- **Range:** borrow methods from other fields.
+
+He also insists on two things I stole shamelessly: specific hard goals, and an outside judge. Do not let the model grade its own homework.
+
+I turned that into a skill called `ambition`. It drops speed, keeps the three lenses, and forces every plan or prompt to end with a numeric goal, a judge and a stop condition. It has a prompt mode, which is what I use when I say generate the prompt, do not execute it. It also has a deliberate trap: a trivial request, like fixing one flaky test, should get almost no ambition, because inflating small tasks is just scope creep with better branding.
+
+## Hooks, and why RTK follows me everywhere
+
+A hook is a small command the harness runs when something happens: before a tool call, after one, when a session starts, when Claude stops. Because the harness runs it, not the model, it is deterministic. It happens every time, whether Claude remembers or not.[^hooks]
+
+That is exactly what RTK uses. RTK compresses shell output before the model reads it, and it gets there with a `PreToolUse` hook that rewrites Bash commands, so `git status` quietly becomes `rtk git status`.[^rtk] I never ask for it. It just happens.
+
+So is that hook global or per project? It has the scope of the file that holds it:
+
+| File | Runs in | Shared through git |
+| --- | --- | --- |
+| `~/.claude/settings.json` | All my projects | No |
+| `.claude/settings.json` | One project | Yes, commit it |
+| `.claude/settings.local.json` | One project | No, private to me |
+
+RTK installs with `rtk init -g`, where the `g` means global, so I expect its hook to live in the first row and run everywhere. I say expect because I would rather confirm than assume: `/hooks` lists every active hook, and the setup audit script I wrote prints them too.
+
+One limit worth knowing. RTK's hook only rewrites Bash tool calls. Claude's built-in Read, Grep and Glob tools are not touched, so RTK shrinks what shell commands print and nothing else.
+
+## Starting the study project properly
+
+Once the three homes made sense, I stopped doing this by hand and wrote a small starter kit. It is two shell scripts and a few templates, and it has its own tests, because a setup script nobody tested is just a hopeful comment.
+
+The first script is read-only. It audits what every project on my laptop already gets: personal skills, global hooks, my personal `CLAUDE.md`. The second one creates the project:
+
+```bash
+./audit-claude-setup.sh
+./new-project.sh ~/study-lab --java --with-skill ambition
+cd ~/study-lab && claude
+```
+
+That produces this:
+
+```
+study-lab/
+├── AGENTS.md                 shared rules for any AI tool
+├── CLAUDE.md                 first line is @AGENTS.md, then Claude-only notes
+├── README.md                 outcome, hard goal, outside judge, budget, stop condition
+├── .claude/
+│   ├── settings.json         safe permissions (git and mvn allowed, .env reads denied)
+│   ├── rules/java.md         loads only when .java files are touched
+│   └── skills/ambition/      pinned copy of my skill
+└── .gitignore                CLAUDE.local.md, settings.local.json, .env
+```
+
+### The AGENTS.md trap
+
+This one is very easy to miss. I use more than one AI tool, so I keep the shared rules in `AGENTS.md`. But Claude Code reads `AGENTS.md` only when there is no `CLAUDE.md` in the folder or above it. The moment you add a `CLAUDE.md`, the `AGENTS.md` is ignored. The fix is a one-line import, `@AGENTS.md`, as the first line of `CLAUDE.md`. Imports expand at launch, so one file feeds both tools.[^memory] The audit script now warns when it spots the mistake.
+
+### The README is part of the setup
+
+The generated README is not a formality. It has four headings I have to fill in before any code: the outcome, a hard numeric goal, the outside judge and the stop condition. That is the ambition skill showing up in the project itself. For my first lab, the concurrency one, the hard goal is a jcstress test that exposes a broken publication, then a fix that passes. The judge is a tool that is not me and not the model.
+
+### Try it yourself
+
+1. Make the folder first, then launch Claude inside it.
+2. Type `/context` and write down the baseline.
+3. Type `/skills` and check your skill is listed.
+4. Ask for a prompt, not a result: `/ambition write the prompt for the week 2 pinning-lab, do not execute it`.
+5. Commit the scaffold, so the rules and pinned skill travel with the repo.
+
+## The tool tour, with honest caveats
+
+Now the fun part. Here is what each of my five extras does, where it plugs in, and what the authors admit about it. Every number below is the project's own claim. I have not measured any of them yet, and neither should you take my word for them.
+
+- **RTK** is a Rust command line tool that compresses shell output (git, test runners, linters, Docker, Kubernetes) before the model reads it. The README says up to 90% less Bash output, and also says plainly that this is not a 90% cut to your bill, because Bash output is only one slice of what the model reads. If a command fails, the full output is kept so you can recall it. It plugs in as a hook. Telemetry is opt-in.[^rtk]
+- **Caveman** makes the agent write tersely and shrinks logs and JSON before reading them. Its README claims about 65% fewer output tokens on its own benchmarks. It also admits that its rules add about 1,160 input tokens, that a plain instruction to be concise captures much of the gain, and that telemetry is on by default. Its optional Auto routing sends your prompts to a cloud service, so read before you switch that on.[^caveman]
+- **karpathy-skills** is a single `CLAUDE.md` of four habits taken from Andrej Karpathy's observations about how LLMs write code: think before coding, keep it simple, make surgical changes, and work towards checks you can verify. It is cheap and always on. The README warns it favours caution over speed. One thing I caught: the repo I was given has install commands that point at a different repository, so check the source before you install.[^karpathy]
+- **taste-skill** is a set of frontend design skills with three dials for layout variance, motion and density. It loads for UI work only. The default version is labelled experimental and the page offers no benchmarks. My study labs are backend, so it stays out of them.[^taste]
+- **archify** turns an idea or a repository into an interactive diagram: architecture, workflow, sequence, data flow or lifecycle. The output is one HTML file you can open anywhere. It needs Node for validation and the layout is the agent's judgement, not an algorithm.[^archify]
+
+So what goes where?
+
+1. The karpathy rules go in the project `CLAUDE.md`, kept short.
+2. RTK goes in as a hook, because it costs almost no context.
+3. `ambition` and `archify` are skills. They cost a description until I use them, and archify will draw the architecture for each lab's README.
+4. Caveman goes in last, and only if I decide I want it. It overlaps with RTK on shrinking tool output, and while I am studying I would rather have Claude explain things in full sentences.
+5. taste-skill waits for a repo with a user interface, like my site.
+
+## Measure it, do not guess it
+
+There is a funny thing about token-saving tools. They are supposed to reduce waste, and then people pile five of them on without checking whether the pile itself is the new waste.
+
+So I made a rule for myself: **every addition gets a before and an after.**
+
+- Run `/context` in a fresh session and write the numbers down. That is the baseline.
+- Add one thing, restart, run `/context` again.
+- Keep it only if I can say what it bought me.
+
+Two more commands earn their place. `/skill-doctor` shows what each skill costs in context and how often it is used. `/doctor prompt-audit` reads your instruction files and flags contradictions, which matters because when two instructions disagree Claude may pick one more or less at random.
+
+There is also a lesson about memory that is worth tattooing somewhere. When a long session fills up, Claude compacts it, first clearing old tool output and then summarising. The root `CLAUDE.md`, unscoped rules and auto memory get re-read from disk afterwards. Anything you only said in chat is gone. If a rule has to survive, it belongs in a file.[^window]
+
+I also built a small page with a chart where you type in your `/context` numbers and see the bar fill up, including a toggle for what Caveman's 1,160 tokens would do to it. The values it ships with are placeholders, so run your own. A tool that tells you how much room is left is worth more than a tool that promises to make more.
+
+## The checklist, and what is next
+
+If you skipped to the bottom, this is the whole issue:
+
+- [ ] Create the project folder first, then launch `claude` inside it.
+- [ ] Put shared rules in `AGENTS.md` and import it with `@AGENTS.md` as the first line of `CLAUDE.md`.
+- [ ] Keep `CLAUDE.md` under about 200 lines. Move file-specific advice into `.claude/rules/` with a `paths` filter.
+- [ ] Leave personal skills in `~/.claude/skills/`. Copy one into the project only when the repo should carry it.
+- [ ] Use a hook for anything that must happen every time. CLAUDE.md is advice.
+- [ ] Know where each hook lives: `~/.claude/settings.json` for all projects, `.claude/settings.json` for one.
+- [ ] Run `/context` before and after every addition.
+- [ ] Put a hard number and an outside judge in the README before writing code.
+
+What is next for me is the first lab. Week 1 is a concurrency project with a clear goal: write a memory-model test that catches a broken publication, then fix it and watch it pass. Week 2 is the one I am most curious about, virtual threads and the pinning problem on Java 21 versus 25, measured instead of argued about.
+
+The Monday night version of me had an empty folder and a vague feeling that something should be installed. The version writing this has the same empty folder, plus a map of what every file in it will do, and a way to check.
+
+**Setup is not about installing more. It is about knowing what is loaded, why, and what it costs.**
+
+<Aside title="Not confirmed in the docs">
+
+The exact order in which the system prompt, tool definitions and CLAUDE.md reach the model, and where RTK's installer writes its hook. I expect `~/.claude/settings.json` because of the `-g` flag, but `/hooks` is the way to check. All pages were opened on 19 October 2026; tool figures are the authors' own claims.
+
+</Aside>
+
+[^how]: Anthropic, "How Claude Code works", Claude Code docs. https://code.claude.com/docs/en/how-claude-code-works
+
+[^window]: Anthropic, "Context window", Claude Code docs. https://code.claude.com/docs/en/context-window
+
+[^memory]: Anthropic, "Manage Claude's memory", Claude Code docs. https://code.claude.com/docs/en/memory
+
+[^settings]: Anthropic, "Settings", Claude Code docs. https://code.claude.com/docs/en/settings
+
+[^skills]: Anthropic, "Skills", Claude Code docs. https://code.claude.com/docs/en/skills
+
+[^hooks]: Anthropic, "Hooks guide", Claude Code docs. https://code.claude.com/docs/en/hooks-guide
+
+[^felix]: Felix Rieseberg, "How to be more ambitious: a tutorial for humans with models". https://felixrieseberg.com/how-to-be-more-ambitious-a-tutorial-for-humans-with-models/
+
+[^rtk]: RTK, README (the author's own figures). https://github.com/rtk-ai/rtk
+
+[^caveman]: Caveman, README (the author's own figures). https://github.com/juliusbrussee/caveman
+
+[^karpathy]: andrej-karpathy-skills, README. https://github.com/multica-ai/andrej-karpathy-skills
+
+[^taste]: taste-skill, README. https://github.com/Leonxlnx/taste-skill
+
+[^archify]: archify, README. https://github.com/tt-a1i/archify
