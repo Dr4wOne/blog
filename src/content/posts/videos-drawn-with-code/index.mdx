@@ -1,0 +1,213 @@
+---
+slug: videos-drawn-with-code
+title: My videos are drawn with code
+summary: "My last YouTube videos were drawn by a program, not filmed or generated. How it works, what video 03 really cost, how it compares with video models, and how to try it."
+tags: [ai, video, javascript, claude-code, youtube]
+draft: true
+---
+
+import Aside from '../../../components/Aside.astro'
+
+<Aside title="In short">
+
+My last two YouTube videos were drawn by a program, not filmed and not generated. Claude wrote the code, a browser drew every frame, and a clone of my voice read the script. Video 03 cost me 28 cents of voice and about fifteen dollars of agent work. The same five and a half minutes from a video model would have started at seventeen dollars a take, and none of the takes could spell. I have also published the whole thing as a free skill (a folder of instructions and code that Claude Code can follow), so you can make your own.
+
+</Aside>
+
+## It started with a video in Portuguese
+
+I found it on a Sunday: a Brazilian channel, Maestros da IA, showing Claude making a video with JavaScript.[^maestros] No video model. Just a program that draws a picture for any moment you ask for, and a tool that glues the pictures together. The title promised videos "for free".
+
+I had wanted a YouTube channel for years. What stopped me was never ideas. It was the editing. Hours in a timeline for three minutes of footage, and every typo means doing it again.
+
+Some quick vocabulary before I go on. Claude Code is Claude running in my terminal, where it can read files and run commands. An agent is one of those sessions with a job, and helper agents are extra sessions it starts for side tasks. And every post on this blog is an "issue": video 03 is made from issue 3.
+
+So I tried it. A few days later I had two videos, an intro I picked from five candidates, and a pipeline that turns any of my blog posts into a narrated, captioned video with a vertical Short on the side. It is not free, and I will show you exactly what it costs. But at 28 cents of voice per video, it is closer than I expected.
+
+## Paint the scene, or write the instructions
+
+There are two ways to get a video out of AI.
+
+The first is the one everybody pictures. You type "a spaceship flies past Saturn" and a model paints the moving picture. That is a video model, like Google's Veo or Runway's Gen-4.
+
+The second is quieter. You ask a language model to **write the instructions** for the scene: put this title here, slide this box in at second two, draw an arrow when I say "hook". A browser follows the instructions and draws the frames. It does not guess: it draws the same plan the same way every time.
+
+I think of it as the difference between hiring a painter for every frame and hiring an architect once. The architect is expensive for an afternoon. After that, the builders work for almost nothing, and they build exactly what is on the plan, every time.
+
+**In one line:** pay for intelligence to design the animation, and use ordinary computing to draw the frames.
+
+## How a frame is born
+
+A video is a stack of still pictures. At 30 frames per second, my five and a half minute video is 9,924 of them.
+
+Every scene in my pipeline is one function: give it a time, and it draws the picture for that moment.
+
+```js
+function render(t) {
+  const x = 100 + 600 * ease(Math.min(1, t / 2))
+  drawCircle(x, 200)
+}
+```
+
+`ease` is a small curve that makes the motion start and stop softly, and `drawCircle` does what it says. At second 0 the circle is on the left. At second 2 it has slid to the right. Ask for second 1.5 a thousand times and you get the same picture a thousand times. That property has a name, **deterministic**, and the whole pipeline leans on it. So a frame never looks at the clock, never uses real randomness and never fetches anything from the internet.
+
+Headless Chrome, which is the Chrome browser running without a window, runs the function for every frame. A library called Playwright drives it from a script. FFmpeg, the tool almost every video app uses under the hood, turns the pictures and the audio into an MP4.[^ffmpeg] Because a scene only changes when its code or text changes, the pipeline keeps a cache: fix one scene and only that scene is drawn again.
+
+## My pipeline, from article to upload
+
+Here is what happens when I say "make the video for issue 3".
+
+1. **Read the article.** An agent pulls out every claim with its exact quote and the section it came from.
+2. **Plan before writing.** A roadmap of three to seven topics, each with a one-line promise and a one-line recap. My videos follow the same shape every time, so viewers always know where they are.
+3. **Write the script.** One sentence per line, each one tied to a section of the article. Nothing the article does not say.
+4. **Check the facts.** A *different* agent compares the script with the article. The writer never grades its own homework.
+5. **Storyboard.** Scenes, templates and timings, plus a contact sheet: one small picture per scene, so problems show up before anything is rendered properly.
+6. **Visual review.** Another agent looks at the pictures only, no code, and lists what is cramped, empty or confusing.
+7. **My approval.** A 15 second demo and an animatic, a rough low-resolution version of the whole video. I say "approve", or I don't.
+8. **Voice.** A cost estimate first, then a ten second preview, then my approval again, then the full narration. The voice is mine: I recorded samples, and ElevenLabs built a voice model that reads my scripts.
+9. **Render and check.** The picture is rendered once before the voice and again after it, then thirteen automatic checks run: text that overflows or overlaps, contrast, blank frames, flashes, caption speed, loudness, sync, and more.
+
+Those approvals, steps 7 and 8, are the part I would keep even if everything else changed. (There are two more: the spec of a new kind of video, and the channel's intro and outro, which I picked once.) The full narration is never paid for before I have seen the storyboard and heard a short preview, which itself costs a few cents.
+
+## What video 03 actually cost
+
+I did not want to guess, so I counted. Tokens are the chunks of text a model reads and writes, and you pay per token. Claude Code keeps a log of every message with the tokens it used, and I added them up for each video.[^tokens]
+
+| Video 03, 5 minutes 31 seconds | Cost |
+| --- | --- |
+| Claude, priced at API rates | about US$15 |
+| My cloned voice (ElevenLabs) | US$0.28 |
+| Rendering, on my laptop | 108 seconds, no bill |
+
+Two honest notes. I pay a monthly Claude subscription, not per token, so the fifteen dollars is what the same work would cost on the API, the pay-as-you-go way of using Claude from code.[^claude] And video 01 cost about seventy, because I built the pipeline while making it, then made the video a second time. That is a one-off, not a per-video price.
+
+Now the same five and a half minutes from a video model, using published prices on 20 October 2026:
+
+| Model | Price per second | 5:31 of video, one take |
+| --- | --- | --- |
+| Google Veo 3.1 Lite, 720p | US$0.05 | about US$17 |
+| Google Veo 3.1 Fast, 1080p | US$0.12 | about US$40 |
+| Google Veo 3.1, 1080p | US$0.40 | about US$132 |
+| Runway Gen-4 Turbo | US$0.05 | about US$17 |
+| Luma Ray 3.2, 1080p | US$0.24 | about US$79 |
+
+Sources for every row are in the footnotes.[^veo][^runway][^luma] On paper the cheapest tiers look close to my fifteen dollars. In practice they are not.
+
+Veo makes clips of 4, 6 or 8 seconds,[^veodocs] so five and a half minutes is about 42 separate clips, each one a new roll of the dice. You pay for every clip that comes out, whether or not it is the shot you wanted, and every retry is the full price again. And they struggle with words: in a human evaluation of ten video models, most could not produce legible, consistent text.[^text] My explainers are mostly text and diagrams.
+
+What convinced me was smaller than any of that. When a caption in video 03 ran too fast to read, the fix was one line of text and a re-render. It cost nothing but a minute of laptop time. With a video model, a fix is a new generation.
+
+<Aside title="Deep dive: why the agent work costs what it costs">
+
+About 96% of the tokens in video 03 were cache reads. A cache read is the model re-reading text it has already seen, like the project's instructions, which Anthropic charges at a small fraction of the normal price. (It has nothing to do with the scene cache I mentioned earlier.) Most of the fifteen dollars went to the helper agents, not the main conversation, because each one reads the project from scratch. The words the model actually wrote were a tiny share.
+
+</Aside>
+
+## Where video models win
+
+I do not think one replaces the other. Video models are the right tool for real people, real places, weather, water, cinematic shots, anything with a camera feel. My pipeline cannot invent a forest. It can only draw what I can describe in shapes and text.
+
+The best answer is often both. Generate or license one or two short clips for atmosphere, then let code draw the titles, diagrams, captions and transitions on top. You pay a video model for the few seconds that need it, not for every second of the finished video.
+
+## Seven ways I keep the tokens down
+
+These are the habits that keep a video at about fifteen dollars of agent work. Most of them are not clever. They are just about not asking the model to do the same thing twice.
+
+1. **Templates, not new code.** After the first video, most scenes are existing templates fed with new text and data. The model fills in a plan; it does not rewrite the renderer.
+2. **Plan once, check cheaply.** The roadmap and script are approved before any storyboard work, so rejected ideas cost a paragraph, not a scene.
+3. **Pictures before frames.** A contact sheet catches cramped and empty scenes for the cost of one image, before the full render.
+4. **Short reports.** Every helper agent returns 25 lines or fewer and file paths, never full logs or images. Long reports get re-read on every later step.
+5. **Re-render only what changed.** The scene cache means a fix touches one scene, not the whole video.
+6. **Squeeze tool output.** RTK, which I wrote about in [issue 3](/03-setting-up-claude-code-properly/), shrinks what shell commands print before the model reads it.
+7. **Fewer fix rounds.** Most of video 03's agent cost was the helper agents, and the busiest one went through several fix-and-check rounds. Clear rules in the templates beat fixing the same kind of problem in every video.
+
+The next one I want to try is running the helper agents on a smaller model. If you have a trick of your own, tell me: leave a comment on the video, or reply to me on [X](https://x.com/dr4wone) or [LinkedIn](https://br.linkedin.com/in/danielsbaumann). I will try the good ones and report back in a later issue.
+
+## Try it in five minutes
+
+You need Node.js and FFmpeg. Put the files below in one empty folder, run the commands, then open `out.mp4`: a circle slides across the screen under a fading title.
+
+`scene.html`, a page that can draw itself at any time `t`:
+
+```html
+<!doctype html>
+<body style="margin:0;background:#101827">
+  <h1 id="title" style="position:absolute;top:60px;width:100%;color:#fff;text-align:center;font:bold 64px sans-serif">Hello, animation</h1>
+  <div id="dot" style="position:absolute;top:320px;width:120px;height:120px;border-radius:50%;background:#48d1b5"></div>
+  <script>
+    window.renderAt = (t) => {
+      const p = Math.min(1, t / 5), e = p * p * (3 - 2 * p)
+      document.querySelector('#dot').style.left = `${80 + 1000 * e}px`
+      document.querySelector('#title').style.opacity = Math.min(1, t / 1.2)
+    }
+  </script>
+</body>
+```
+
+`render.mjs`, which asks the page for 150 moments and saves each one:
+
+```js
+import { chromium } from 'playwright'
+import { mkdirSync } from 'node:fs'
+mkdirSync('frames', { recursive: true })
+const browser = await chromium.launch()
+const page = await browser.newPage({ viewport: { width: 1280, height: 720 } })
+await page.goto(new URL('scene.html', import.meta.url).href)
+for (let f = 0; f < 150; f++) {
+  await page.evaluate((t) => window.renderAt(t), f / 30)
+  await page.screenshot({ path: `frames/${String(f).padStart(4, '0')}.png` })
+}
+await browser.close()
+```
+
+And the glue:
+
+```bash
+npm install playwright && npx playwright install chromium
+node render.mjs
+ffmpeg -framerate 30 -i frames/%04d.png -c:v libx264 -pix_fmt yuv420p out.mp4
+```
+
+That is the whole idea in thirty lines.[^playwright] The page's `renderAt` is the same thing as `render` above. Everything in my real pipeline (scenes, captions, voice, checks) is that loop with more care around it.
+
+## The skill, free to use
+
+I packaged the pipeline as a free, open-source skill: [motion-skill](https://github.com/Dr4wOne/motion-skill). It has the renderer, the scene templates, the thirteen checks, the four approval gates, and a starter brand you can replace with your own. Narration is optional and off by default, so you can make silent or music-only videos without any paid account.
+
+It also works with Archify, an open-source tool that lays out architecture and workflow diagrams.[^archify] Archify decides where the boxes and arrows go; the skill draws them frame by frame in your video's style, with the arrows drawing themselves in as you talk.
+
+If you prefer React, Remotion is a mature framework built on the same idea, with its own licence terms for companies of four or more people.[^remotion]
+
+## What I would do differently
+
+- **I trusted an estimate.** I planned video 01 at 165 words a minute. My cloned voice reads at about 150, and the video came out fourteen seconds over its limit. Now I plan at 150.
+- **I forgot file names are long.** "AGENTS dot M D" takes over a second to say. One scene in video 03 ran three seconds over its maximum and had to be split.
+- **I almost misquoted my own bill.** My account shows 40,000 voice credits for six dollars; the public price page now says 30,000.[^elevenlabs] Always check the source, even when the source is you.
+
+If you liked this, the video version is on [the channel](https://www.youtube.com/@Dr4wTech). If it was useful, a like, a subscribe and a comment help a small channel reach more people, and the comments tell me what to make next.
+
+[^maestros]: Maestros da IA, "Claude Agora Cria Vídeos de Graça! (Graças ao JavaScript)", YouTube. https://www.youtube.com/watch?v=GmDFULXLUB4
+
+[^ffmpeg]: FFmpeg documentation. https://ffmpeg.org/documentation.html
+
+[^tokens]: Measured from my Claude Code session logs: one usage entry per message, main conversation plus helper agents, priced with Anthropic's published rates including cache reads and writes. Video 03: 37.7 million tokens, 96% cache reads, 4 helper agents. Anthropic, "Pricing", Claude docs, checked 2026-10-20. https://platform.claude.com/docs/en/about-claude/pricing
+
+[^claude]: Anthropic, "Pricing" (plans and API rates), checked 2026-10-20. https://claude.com/pricing
+
+[^veo]: Google, "Gemini Developer API pricing": Veo 3.1 Standard, Fast and Lite, per second of output with audio, checked 2026-10-20; you are charged only when a video is successfully generated. Google lists these preview models as deprecated, shutting down on 22 October 2026. https://ai.google.dev/gemini-api/docs/pricing
+
+[^runway]: Runway, "API Pricing & Costs": US$0.01 per credit, Gen-4 Turbo 5 credits per second, checked 2026-10-20. https://docs.dev.runwayml.com/guides/pricing/
+
+[^luma]: Luma, "Pricing": Ray 3.2, 1080p SDR, US$1.20 per 5 seconds, checked 2026-10-20; the page says rates may change before general availability. https://docs.agents.lumalabs.ai/guides/pricing/
+
+[^veodocs]: Google, "Generate videos with Veo 3.1 in Gemini API": durations of 4, 6 or 8 seconds. https://ai.google.dev/gemini-api/docs/veo
+
+[^text]: Guo et al., "T2VTextBench: A Human Evaluation Benchmark for Textual Control in Video Generation Models", 2025. https://arxiv.org/abs/2505.04946
+
+[^playwright]: Playwright, "Installation". https://playwright.dev/docs/intro
+
+[^archify]: tt-a1i, "Archify", GitHub (MIT licence). https://github.com/tt-a1i/archify
+
+[^remotion]: Remotion, "Licensing": free for individuals and companies of up to three people. https://www.remotion.pro/license
+
+[^elevenlabs]: ElevenLabs, "Pricing": Starter US$6 a month for 30,000 credits; one character is one credit on Multilingual v2, checked 2026-10-20. https://elevenlabs.io/pricing
