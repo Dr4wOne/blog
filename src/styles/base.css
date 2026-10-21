@@ -126,7 +126,7 @@ pre {
   background: var(--surface) !important;
 }
 .astro-code span {
-  color: var(--shiki-light);
+  color: inherit; /* monochrome code: theme colours failed contrast and the palette gate */
 }
 
 /* Tables */
@@ -471,7 +471,7 @@ sup {
 }
 @media (prefers-color-scheme: dark) {
   .astro-code span {
-    color: var(--shiki-dark);
+    color: inherit;
   }
 }
 
