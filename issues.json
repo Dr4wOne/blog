@@ -20,6 +20,11 @@
       "issue": 4,
       "slug": "videos-drawn-with-code",
       "published": "2026-10-20"
+    },
+    {
+      "issue": 5,
+      "slug": "php2shell-explained",
+      "published": "2026-10-24"
     }
   ]
 }

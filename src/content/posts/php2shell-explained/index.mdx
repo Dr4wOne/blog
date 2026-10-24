@@ -1,9 +1,12 @@
 ---
+updated: 2026-10-24
+published: 2026-10-24
+issue: 5
 slug: php2shell-explained
 title: PHP2Shell, explained
 summary: "Two flaws in the PHP engine let strangers run code on unpatched web servers. What PHP is, why the bugs happen, who is affected, and how to check and fix your site."
 tags: [security, php, web, wordpress]
-draft: true
+draft: false
 ---
 
 import Aside from '../../../components/Aside.astro'
@@ -396,12 +399,12 @@ This is the opposite of the safety ceiling described earlier, on purpose: turnin
 
 Attack attempts began on 17 October, so check from that date on.
 
-- [ ] PHP files created or changed recently that you did not change
-- [ ] Admin or user accounts you do not recognise in your CMS
-- [ ] Unknown scheduled jobs, unexpected processes or unusual CPU load
-- [ ] PHP worker processes starting shells or downloading tools[^cisa]
-- [ ] Strange outgoing connections or a sudden jump in outgoing email
-- [ ] Repeated PHP crashes, restarts or unusually large requests in the logs
+- PHP files created or changed recently that you did not change
+- Admin or user accounts you do not recognise in your CMS
+- Unknown scheduled jobs, unexpected processes or unusual CPU load
+- PHP worker processes starting shells or downloading tools[^cisa]
+- Strange outgoing connections or a sudden jump in outgoing email
+- Repeated PHP crashes, restarts or unusually large requests in the logs
 
 ```bash
 find /var/www -name "*.php" -newermt 2026-10-17 -ls   # PHP files changed since 17 October
