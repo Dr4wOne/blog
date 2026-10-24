@@ -1,0 +1,475 @@
+---
+slug: php2shell-explained
+title: PHP2Shell, explained
+summary: "Two flaws in the PHP engine let strangers run code on unpatched web servers. What PHP is, why the bugs happen, who is affected, and how to check and fix your site."
+tags: [security, php, web, wordpress]
+draft: true
+---
+
+import Aside from '../../../components/Aside.astro'
+import AttackReach from '../../../components/figures/AttackReach.astro'
+import FixPaths from '../../../components/figures/FixPaths.astro'
+import FlawOne from '../../../components/figures/FlawOne.astro'
+import FlawTwo from '../../../components/figures/FlawTwo.astro'
+import Php2ShellTimeline from '../../../components/figures/Php2ShellTimeline.astro'
+import PhpLanguageShare from '../../../components/figures/PhpLanguageShare.astro'
+import PhpRequestFlow from '../../../components/figures/PhpRequestFlow.astro'
+import PhpStack from '../../../components/figures/PhpStack.astro'
+import RceDecision from '../../../components/figures/RceDecision.astro'
+import RequestLife from '../../../components/figures/RequestLife.astro'
+
+<Aside title="In short">
+
+On 21 October 2026 PHP shipped emergency fixes for two critical flaws in its engine, nicknamed PHP2Shell. On an unpatched server, a stranger can run their own commands without logging in. Almost every PHP site is affected, attack attempts started four days before the fix, and public exploit code exists. The cure: update PHP to 8.5.12, 8.4.27, 8.3.36 or 8.2.35 (or your vendor's patched package), restart it, verify, and look for signs of a break-in. This guide starts from zero; skip to [How to check if you are affected](#how-to-check-if-you-are-affected) if you only need the steps.
+
+</Aside>
+
+## What is PHP?
+
+PHP is a programming language that runs on a web server and builds each web page just before it is sent to your browser.
+
+Think of a restaurant. The browser is the customer, the web server is the waiter, PHP is the chef who cooks each meal on demand, and the database is the pantry. The customer never enters the kitchen and only receives the finished plate.
+
+<PhpRequestFlow />
+
+### The smallest PHP program
+
+```php
+<?php
+$name = "Maria";
+echo "<h1>Hello, " . $name . "!</h1>";
+```
+
+The server runs this code and sends the browser only the result: `<h1>Hello, Maria!</h1>`. The visitor never sees the PHP code itself.
+
+### Why that matters for security
+
+Because PHP runs on the server, whoever controls what PHP does controls a piece of the server. That single idea explains every vulnerability in this guide.
+
+## Why PHP matters
+
+PHP runs roughly 7 in 10 websites whose server-side language can be detected, mostly because WordPress is built on it.[^w3lang]
+
+<PhpLanguageShare />
+
+### WordPress: the biggest reason
+
+WordPress, the most popular website builder in the world, is written in PHP. So are its themes and plugins. The same survey puts WordPress at about four in ten of all websites,[^w3wp] and every one of those sites runs the PHP engine on its server.
+
+### The stack: why a flaw in PHP is a big deal
+
+A flaw in the engine sits under every app built on top of it, so careful site code cannot block it.
+
+<PhpStack />
+
+### What PHP is mostly used for
+
+| Use | Typical PHP software | What is at stake |
+| --- | --- | --- |
+| Blogs, news and company sites | WordPress, Drupal, Joomla | Content, admin accounts, visitors |
+| Online shops | WooCommerce, Magento | Customer data, orders |
+| Forums and communities | phpBB | Member accounts and messages |
+| Custom web apps and APIs | Laravel, Symfony | Business data, keys, integrations |
+| Portals and internal tools | Custom PHP | Staff, student or client records |
+
+## Life of a request: where memory comes in
+
+Every web request gets its own temporary workspace in memory, and PHP must tidy it up before the same PHP process (a "worker") takes the next request.
+
+<RequestLife />
+
+### Four ideas to remember
+
+1. **Request memory** is the workspace PHP builds for one visitor's request and throws away at the end.
+2. **The memory limit** is a ceiling set by the server owner. A script that asks for more is stopped.
+3. **Workers are reused.** The same PHP process serves many visitors in a row, so anything left behind by one request can still be there for the next.
+4. **Cleanup trusts the workspace.** The cleanup step assumes everything it is about to free was fully set up and is still valid.
+
+### What the emergency stop looks like in code
+
+```php
+<?php
+// php.ini says: memory_limit = 128M
+$big = str_repeat("x", 500 * 1024 * 1024); // asks for 500 MB
+// PHP aborts this request: "Allowed memory size exhausted"
+```
+
+This stop is normal and safe in a healthy PHP. For the curious: PHP implements it by jumping straight out of whatever it was doing, without finishing the current task. The danger starts when that jump lands at a bad moment, which is the topic of the next sections.
+
+## What happened
+
+On 21 October 2026, the PHP project released emergency updates for two critical flaws in the PHP engine itself, nicknamed PHP2Shell, after details leaked two days before the planned disclosure.[^certeu]
+
+<Php2ShellTimeline />
+
+Wiz Research found the first flaw on 19 August, with help from AI models and its own tools, and reported it to the PHP security team on 24 August.[^wiz] A researcher at Calif found the flaws independently, also with an AI model.[^wiki] A fix was being prepared in private when Amazon's threat intelligence saw a first exploitation attempt on 17 October.[^wiki] On 20 October the details leaked on social media and PHP announced an early release, ahead of the planned date of 22 October.[^watchtowr] On 23 October PHP disclosed a third remote code execution flaw that only affects unusual setups; it gets no emergency release.[^certeu]
+
+### The three CVE numbers
+
+A CVE number is simply a public ID tag for a known vulnerability, so everyone talks about the same bug. Severity is scored from 0 to 10.
+
+| CVE | Plain-English name | Severity | Status |
+| --- | --- | --- | --- |
+| CVE-2026-109618 | Memory corruption after an out-of-memory stop | 9.2 critical | Fixed 21 Oct |
+| CVE-2026-109619 | Stale data left over from an earlier request | 9.2 critical | Fixed 21 Oct |
+| CVE-2026-115560 | A third remote code execution issue, only in unusual setups | Considered unlikely risk | No emergency release; details with the next regular release |
+
+The scores and the status of the third issue come from the PHP advisories as summarised by CERT-EU.[^certeu]
+
+### Who is affected?
+
+All PHP versions from 5.4 through 8.5.11 are affected.[^google] The official fixes exist for the four newest branches (a branch is a version line, such as 8.3): 8.5.12, 8.4.27, 8.3.36 and 8.2.35. The vulnerable setups include Apache with mod\_php (the highest risk, according to PHP), PHP-FPM, php-cgi, FrankenPHP and LiteSpeed (the different ways a web server can run PHP), so in practice almost any server running PHP for websites.[^cisa]
+
+### Is it being exploited?
+
+Attack attempts are confirmed, and public proof-of-concept code exists.[^certeu] Reports differ on how many attacks have actually succeeded. watchTowr's honeypots (decoy servers set up to attract attackers) have seen exploitation attempts since 21 October,[^watchtowr] while CISA had not observed successful exploitation when it published its alert.[^cisa] The safe assumption is that every unpatched server is a target.
+
+## Why it happens
+
+Both flaws are memory bugs: PHP's engine loses track of what is valid in memory, and an attacker can steer that mistake. PHP's engine is written in C, a language that gives programmers full control over memory and no safety net, so one wrong assumption in thousands of lines is enough. Both stem from the same underlying problem: PHP can leave its memory in a corrupted state when a request ends abnormally.[^bleeping]
+
+### Flaw 1: cleanup trusts a half-built workspace (CVE-2026-109618)
+
+<FlawOne />
+
+The idea in simplified pseudo-code (this is an illustration, not real PHP source):
+
+```c
+request.header = allocate();   // step A done
+request.table  = allocate();   // step B: memory runs out here, jump to emergency stop
+
+cleanup(request):
+    free(request.header);      // fine
+    free(request.table);       // table was never finished, but cleanup trusts it
+```
+
+### Flaw 2: a leftover pointer to freed memory (CVE-2026-109619)
+
+<FlawTwo />
+
+A pointer is a note that says where something is stored in memory. If a note survives after the thing it points to has been thrown away, the next request can follow it into memory that now holds something else. This bug type is called a use-after-free.
+
+```c
+// Request 1
+note = allocate("request 1 data");
+global_pointer = note;
+end_of_request: free(note);     // memory returned, but global_pointer still holds the old address
+
+// Request 2 (same worker)
+use(global_pointer);            // reads or writes memory that may belong to something else
+```
+
+### Why that leads to "run my code"
+
+When PHP is tricked into reading or writing the wrong piece of memory, an attacker who can shape what sits there may be able to change what PHP does next. That is how a memory mistake becomes remote code execution. Real exploits are far more intricate than these sketches, and this guide deliberately stops at the idea.
+
+## What is RCE, and how it usually happens
+
+Remote code execution (RCE) means a stranger on the internet makes your server run commands of their choosing, without ever logging in.
+
+<RceDecision />
+
+Most RCE in everyday PHP sites comes from the site's own code or plugins, where data from a visitor reaches something that executes. PHP2Shell is different: the flaw is inside the PHP engine, so even careful site code cannot prevent it. Knowing the classic cases still helps, because they are the ones you will meet most often.
+
+### The classic forms of RCE in PHP applications
+
+| Type | What goes wrong | Safe habit |
+| --- | --- | --- |
+| Command injection | Visitor text is pasted into a shell command | Avoid the shell, or validate and escape |
+| Code injection | Visitor text reaches `eval()` or similar | Never evaluate user text as code |
+| Unrestricted file upload | A `.php` file is uploaded into a public folder and then opened in the browser | Allow only safe types, rename, store outside the web folder |
+| File inclusion | `include` uses a path chosen by the visitor | Use an allowlist of pages |
+| Unsafe deserialization | `unserialize()` rebuilds objects from untrusted data | Use JSON for untrusted data |
+| Vulnerable plugin or theme | Third-party code has one of the problems above | Keep everything updated and remove what you do not use |
+| Engine or library bug | The runtime itself mishandles memory (PHP2Shell) | Update PHP as soon as a fix exists |
+
+### Example 1: command injection
+
+Unsafe: the visitor's text goes straight into a shell command.
+
+```php
+$host = $_GET['host'];
+echo shell_exec("ping -c 1 " . $host);
+// If the visitor adds extra shell commands after the host name, the server runs them too.
+```
+
+Safer: validate the input, then escape it before it reaches the shell.
+
+```php
+$host = $_GET['host'] ?? '';
+if (!filter_var($host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+    exit('Invalid host');
+}
+echo shell_exec("ping -c 1 " . escapeshellarg($host));
+```
+
+### Example 2: file upload
+
+Unsafe: the file keeps the visitor's chosen name and lands in a public folder, so a `.php` file can be opened in the browser and run.
+
+```php
+move_uploaded_file($_FILES['f']['tmp_name'], "public/uploads/" . $_FILES['f']['name']);
+```
+
+Safer: check the real file type, use a random name, and store it outside the public web folder.
+
+```php
+$allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
+$type = mime_content_type($_FILES['f']['tmp_name']);
+if (!isset($allowed[$type])) { exit('Not allowed'); }
+$name = bin2hex(random_bytes(16)) . '.' . $allowed[$type];
+move_uploaded_file($_FILES['f']['tmp_name'], "/var/app-uploads/" . $name);
+```
+
+### Example 3: file inclusion
+
+Unsafe: the visitor decides which file PHP loads.
+
+```php
+include $_GET['page'] . ".php";
+```
+
+Safer: only load pages from a fixed list.
+
+```php
+$pages = ['home', 'about', 'contact'];
+$page = in_array($_GET['page'] ?? '', $pages, true) ? $_GET['page'] : 'home';
+include __DIR__ . "/pages/$page.php";
+```
+
+The golden rule behind all three: treat everything that comes from a visitor as untrusted text, never as something to run.
+
+## Consequences
+
+A successful attack gives the attacker the same rights as the website itself, which is usually enough to steal data, take over the site and use the server for further attacks. Wiz showed exactly that: one unauthenticated request was enough to take over the latest WordPress, Drupal and Joomla containers in its tests.[^wiz]
+
+<AttackReach />
+
+The attacker is not automatically the all-powerful administrator of the machine. But the website's own files usually hold the database password and other secrets, and attackers commonly use that foothold to go further.
+
+### Who is hurt, and how
+
+| Who | Possible consequence |
+| --- | --- |
+| Site owner | Defaced or hijacked site, search-engine spam, downtime, cleanup costs |
+| Visitors and customers | Stolen personal data, malware served from a trusted site |
+| Hosting providers | Other customers' sites on the same server may be put at risk |
+| Businesses and schools | Data-protection duties, lost trust, and incident response work |
+| Everyone | Failed attacks can still crash PHP and take sites offline |
+
+### Why this one is urgent
+
+- It works without logging in, so any visitor can try it.
+- It lives in the PHP engine, so it affects almost every PHP site regardless of the code on top.
+- Public proof-of-concept code exists, which lowers the skill needed.
+- Attack attempts started before the fix was out, so attackers had a head start.
+
+## How to check if you are affected
+
+You are affected if the PHP version that serves your website is older than the fixed version of its branch, and the package was not patched by your vendor.
+
+### Step 1: find the PHP version your website really uses
+
+Command-line PHP and web PHP can be different installs, so check the one that serves the site.
+
+- **WordPress:** open the admin area, then Tools, Site Health, Info, Server. It lists the PHP version.
+- **Hosting control panel:** most panels show the PHP version per site.
+- **Your own server:** ask the web-facing PHP directly.
+
+```bash
+php -v                 # command-line PHP (may differ from the web one)
+php-fpm -v             # PHP-FPM (binary name can include the version, e.g. php-fpm8.3)
+apachectl -M | grep -i php   # is Apache loading PHP as a module?
+```
+
+### Step 2: compare with the fixed versions
+
+| PHP branch | First fixed version | What to do |
+| --- | --- | --- |
+| 8.5 | 8.5.12 | Be on 8.5.12 or newer |
+| 8.4 | 8.4.27 | Be on 8.4.27 or newer |
+| 8.3 | 8.3.36 | Be on 8.3.36 or newer |
+| 8.2 | 8.2.35 | Be on 8.2.35 or newer |
+| 8.1, 8.0 and 7.4 | No official release; only source-code patches you would build yourself | Upgrade to a supported branch, or use your OS vendor's patched package |
+| 7.3 and older (down to 5.4) | No fix | Upgrade to a supported branch |
+
+CISA advises taking PHP systems offline if you cannot patch them, or if they still run 8.1 or older.[^cisa] The versions and the backports are listed by CERT-EU and watchTowr.[^certeu][^watchtowr]
+
+### Step 3: beware of backported fixes
+
+Linux distributions often patch security bugs without changing the version number, so "8.2.30" on such a system may already be fixed. Ask your vendor, or check the package's changelog for the CVE numbers (the package name varies by system).[^bleeping]
+
+```bash
+# Red Hat family
+rpm -q php-cli --changelog | grep -E "CVE-2026-109618|CVE-2026-109619"
+
+# Debian and Ubuntu family
+zgrep -E "CVE-2026-109618|CVE-2026-109619" /usr/share/doc/php*-common/changelog.Debian.gz
+```
+
+If both CVE numbers show up in the changelog, the package contains the fix. If neither does, treat it as unpatched.
+
+### Step 4: containers and images
+
+If your site runs in Docker or another container, the container carries its own PHP. Updating the host does not update it.
+
+```bash
+docker run --rm your-image:tag php -v
+```
+
+Rebuild from a patched base image and redeploy.
+
+### Step 5: check the settings used by the temporary mitigations
+
+These settings do not replace the update, but they tell you whether a mitigation is currently on.
+
+```bash
+php -i | grep -E "memory_limit|session.upload_progress.enabled|post_max_size"
+```
+
+The command line may read a different config than your web server. Also look at your web PHP configuration, for example the PHP-FPM pool files, to be sure.
+
+### Quick check of your own site from outside
+
+Some servers announce their PHP version in a header. Only test sites you own or manage.
+
+```bash
+curl -sI https://example.com | grep -i "x-powered-by"
+```
+
+No header does not mean you are safe: many hosts hide it.
+
+## How to fix it
+
+The only complete fix is to update PHP; every other measure is a stopgap.[^certeu]
+
+<FixPaths />
+
+### Step 1: update PHP
+
+On shared or managed hosting, your provider does this or offers a newer PHP version in the control panel; check its status page or ask support. On your own server, install the fixed version or your vendor's patched package.
+
+```bash
+# Debian and Ubuntu family
+sudo apt update && sudo apt upgrade
+
+# Red Hat family
+sudo dnf upgrade 'php*'
+```
+
+If you use a third-party PHP repository, update from that repository instead, and check that it has the fix: CERT-EU warns that some popular third-party packages were not updated on release day.[^certeu] Fixed versions: 8.5.12, 8.4.27, 8.3.36 and 8.2.35.
+
+### Step 2: restart PHP
+
+A running PHP keeps the old code in memory until its workers restart.
+
+```bash
+sudo systemctl restart php8.3-fpm   # the service name depends on your version
+sudo systemctl restart apache2      # if Apache loads PHP as a module (httpd on Red Hat family)
+```
+
+### Step 3: verify
+
+Repeat the checks from the previous section: the version or the changelog must show the fix.
+
+### Step 4: temporary mitigations, only if you cannot patch today
+
+PHP's maintainers say there is no complete mitigation and that updating is the only safe choice. These settings only reduce exposure to the known attack paths: turning off upload-progress tracking closes the path used by flaw 2, a small `post_max_size` limits how much an attacker can send in one request, and on PHP 8.5 turning off fatal-error backtraces removes another way to trigger flaw 2. Restart every PHP worker after changing them.[^bleeping][^certeu]
+
+```ini
+; php.ini or a PHP-FPM pool file
+session.upload_progress.enabled = 0   ; also covers the third issue, CVE-2026-115560
+post_max_size = 8M                    ; use 32M if your site needs uploads
+
+; PHP 8.5 only
+fatal_error_backtraces = 0
+```
+
+```ini
+; PHP-FPM pool: switch off the memory limit and lock it so applications cannot change it
+php_admin_value[memory_limit] = -1
+```
+
+This is the opposite of the safety ceiling described earlier, on purpose: turning off the memory limit means PHP never takes the emergency-stop path from flaw 1. The price is that a runaway script can now eat all the memory, so also cap memory at the container or system level, in a way that stops only the affected worker, such as a container memory limit (CERT-EU advises against the per-process limits `RLIMIT_AS` and `RLIMIT_DATA`). Hiding errors with `display_errors` or `@` does not help.[^bleeping]
+
+### Step 5: look for signs of compromise
+
+Attack attempts began on 17 October, so check from that date on.
+
+- [ ] PHP files created or changed recently that you did not change
+- [ ] Admin or user accounts you do not recognise in your CMS
+- [ ] Unknown scheduled jobs, unexpected processes or unusual CPU load
+- [ ] PHP worker processes starting shells or downloading tools[^cisa]
+- [ ] Strange outgoing connections or a sudden jump in outgoing email
+- [ ] Repeated PHP crashes, restarts or unusually large requests in the logs
+
+```bash
+find /var/www -name "*.php" -newermt 2026-10-17 -ls   # PHP files changed since 17 October
+```
+
+If you find anything suspicious, take the site offline, restore from a clean backup, rotate every secret (database password, API keys, admin passwords, CMS security keys), then update and check again.
+
+### Step 6: make the next one less painful
+
+- Find every system running PHP, internet-facing ones first, including PHP bundled inside other software.[^ncsc]
+- Turn on automatic security updates where you can.
+- Subscribe to your PHP and OS vendors' security announcements.
+- Remove plugins, themes and sites you no longer use.
+- Keep tested, offline backups.
+- Run the site with the least privileges it needs.
+- Treat a web application firewall as an extra layer, never as the fix.
+
+## Key takeaways
+
+Two flaws in the PHP engine let strangers run code on unpatched servers, and the cure is to update PHP and restart it.
+
+- PHP builds web pages on the server, and about 7 in 10 sites with a known server language use it, mainly through WordPress.
+- Both flaws are memory mistakes: one trusts a half-built workspace after an out-of-memory stop, the other follows a note to memory that was already freed.
+- The result is remote code execution without logging in, with the website's own rights.
+- Attacks were seen four days before the fix, and public exploit code exists.
+- Fixed versions are 8.5.12, 8.4.27, 8.3.36 and 8.2.35. Older branches need an upgrade or a vendor-patched package.
+- Steps: update, restart, verify, look for signs of compromise, rotate secrets if anything looks wrong.
+
+## Glossary
+
+| Term | Plain meaning |
+| --- | --- |
+| PHP | The language that builds web pages on the server |
+| Server | The computer that stores a website and answers visitors |
+| Vulnerability | A bug that can be abused |
+| CVE | A public ID number for one known vulnerability |
+| CVSS | A 0 to 10 severity score; 9.2 is critical |
+| RCE (remote code execution) | A stranger makes your server run their commands |
+| Memory | The server's short-term workspace while it runs code |
+| Out of memory | A script asked for more workspace than allowed |
+| Pointer | A note saying where something is stored in memory |
+| Use-after-free | Following a pointer to memory that was already given back |
+| Worker | A PHP process that handles requests one after another |
+| Patch | An update that fixes a vulnerability |
+| Proof of concept | Example code that shows a flaw can be abused |
+| Mitigation | A stopgap that lowers risk without fixing the cause |
+
+Status as of 24 October 2026. Details may still change; corrections will be dated at the top.
+
+[^w3lang]: W3Techs, "Usage statistics of server-side programming languages for websites", 24 October 2026. Shares are of websites whose server-side language is known. https://w3techs.com/technologies/overview/programming_language
+
+[^w3wp]: W3Techs, "Usage statistics and market share of WordPress": 39.6% of all websites, 24 October 2026. https://w3techs.com/technologies/details/cm-wordpress
+
+[^certeu]: CERT-EU, "Security Advisory 2026-018: Critical vulnerabilities in PHP", updated 23 October 2026. https://cert.europa.eu/publications/security-advisories/2026-018
+
+[^wiz]: Wiz Research, "PHP2Shell: AI uncovers critical RCE vulnerabilities", 21 October 2026. https://www.wiz.io/blog/php2shell-php-rce
+
+[^wiki]: Wikipedia, "PHP2Shell", citing the AWS Security Blog (21 October 2026) for the 17 October attempt and the Wall Street Journal and Reuters for Calif's discovery. Checked 24 October 2026. https://en.wikipedia.org/wiki/PHP2Shell
+
+[^watchtowr]: watchTowr Labs, "PHP2Shell (CVE-2026-109618, CVE-2026-109619) FAQ". https://watchtowr.com/intelligence/php-cve-2026-109618-faq/
+
+[^google]: Google Cloud, "Responding to core PHP vulnerabilities". https://cloud.google.com/blog/products/identity-security/responding-to-core-php-vulnerabilities
+
+[^cisa]: CISA, "Critical vulnerabilities in PHP require immediate patching", 21 October 2026. https://www.cisa.gov/news-events/alerts/2026/10/21/critical-vulnerabilities-php-require-immediate-patching
+
+
+
+[^bleeping]: BleepingComputer, "PHP ships emergency patches for critical PHP2Shell flaws", October 2026. https://www.bleepingcomputer.com/news/security/php-ships-emergency-patches-for-critical-php2shell-flaws/
+
+
+[^ncsc]: UK NCSC, "Critical security issue affecting PHP", October 2026. https://www.ncsc.gov.uk/news/critical-security-issue-affecting-php

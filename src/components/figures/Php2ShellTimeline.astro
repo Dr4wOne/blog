@@ -1,0 +1,48 @@
+---
+import Figure from './Figure.astro'
+
+const steps = [
+  {
+    when: 'Aug 19',
+    what: 'Wiz finds the first flaw',
+    note: 'With AI models and its own tools; Calif finds it too.',
+  },
+  { when: 'Aug 24', what: 'Reported to PHP', note: 'A fix is prepared in private.' },
+  {
+    when: 'Oct 17',
+    what: 'First attack attempt',
+    note: 'Seen by Amazon threat intelligence.',
+    alarm: true,
+  },
+  { when: 'Oct 20', what: 'Details leak', note: 'PHP announces an early release.' },
+  { when: 'Oct 21', what: 'Fixes ship', note: '8.5.12, 8.4.27, 8.3.36, 8.2.35.', accent: true },
+  {
+    when: 'Oct 23',
+    what: 'A third flaw is disclosed',
+    note: 'Unusual setups only; no emergency release.',
+  },
+]
+---
+
+<Figure caption="From discovery to fix. The first attack attempt came four days before the fixed versions were out.">
+  <svg viewBox="0 0 420 404" role="img" aria-labelledby="f-tl-t f-tl-d">
+    <title id="f-tl-t">PHP2Shell timeline, 2026</title>
+    <desc id="f-tl-d">A vertical timeline. August 19: Wiz finds the first flaw with AI models and its own tools, and Calif finds it independently. August 24: reported to the PHP security team. October 17: the first exploitation attempt, seen by Amazon threat intelligence. October 20: details leak and PHP announces an early release. October 21: fixed versions 8.5.12, 8.4.27, 8.3.36 and 8.2.35 ship. October 23: a third flaw is disclosed, affecting only unusual setups, with no emergency release.</desc>
+    <path d="M10 10 V370" class="wire" />
+    {
+      steps.map((s, i) => {
+        const y = i * 68 + 10
+        const hot = s.alarm || s.accent
+        return (
+          <g>
+            <circle cx="10" cy={y} r={hot ? 8 : 6} class={hot ? 'dot-accent' : 'dot'} />
+            <text x="32" y={y + 5} class="t-strong">
+              <tspan class={hot ? 't-accent' : ''}>{s.when}</tspan> · {s.what}
+            </text>
+            <text x="32" y={y + 26} class="t-small t-muted">{s.note}</text>
+          </g>
+        )
+      })
+    }
+  </svg>
+</Figure>

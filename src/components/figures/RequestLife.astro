@@ -1,0 +1,33 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+const steps = ['Request arrives', 'Workspace is built', 'Page is made', 'Cleanup, next visitor']
+---
+
+<Figure caption="The life of one request. The normal path runs down the left. The highlighted branch is the emergency stop that matters in this story: it jumps straight to cleanup, leaving the work half done.">
+  <svg viewBox="0 0 420 300" role="img" aria-labelledby="f-life-t f-life-d">
+    <title id="f-life-t">The life of one request</title>
+    <desc id="f-life-d">Four steps from top to bottom: a request arrives, PHP builds a workspace in memory, PHP makes the page, then PHP cleans up and the same worker takes the next visitor. From the second step, a highlighted branch: the memory limit is hit, PHP makes an emergency stop and jumps straight to cleanup.</desc>
+    <defs><Arrow id="f-life-a" /><Arrow id="f-life-aa" accent /></defs>
+    {
+      steps.map((s, i) => {
+        const y = i * 76
+        return (
+          <g>
+            <rect x="0" y={y} width="200" height="52" rx="6" class="box" />
+            <text x="16" y={y + 31} class="t-strong">{i + 1}. {s}</text>
+            {i < steps.length - 1 && <path d={`M100 ${y + 54} V${y + 72}`} class="wire" marker-end="url(#f-life-a)" />}
+          </g>
+        )
+      })
+    }
+    <path d="M202 102 H232" class="wire-accent" marker-end="url(#f-life-aa)" />
+    <rect x="236" y="70" width="184" height="72" rx="6" class="box-accent" />
+    <text x="252" y="96" class="t-strong t-on-accent">Memory limit hit</text>
+    <text x="252" y="116" class="t-small t-on-accent">emergency stop:</text>
+    <text x="252" y="132" class="t-small t-on-accent">jump out mid-task</text>
+    <path d="M328 144 C328 220 300 254 204 254" class="wire-accent dash" marker-end="url(#f-life-aa)" />
+    <text x="236" y="290" class="t-small t-accent">straight to cleanup</text>
+  </svg>
+</Figure>

@@ -1,0 +1,30 @@
+---
+import Figure from './Figure.astro'
+
+const layers = [
+  { title: 'Your website', note: 'pages, posts, shop, forms' },
+  { title: 'Apps and frameworks', note: 'WordPress, Drupal, Joomla, Laravel' },
+  { title: 'The PHP engine', note: 'PHP2Shell lives here', accent: true },
+  { title: 'Server and operating system', note: 'Linux, Apache, nginx' },
+]
+---
+
+<Figure caption="Sites sit on apps, apps sit on the PHP engine. When the engine itself is flawed, it does not matter how carefully the site owner wrote their own code.">
+  <svg viewBox="0 0 420 264" role="img" aria-labelledby="f-stack-t f-stack-d">
+    <title id="f-stack-t">The layers of a PHP website</title>
+    <desc id="f-stack-d">Four stacked layers. At the top, your website. Below it, apps and frameworks such as WordPress, Drupal, Joomla and Laravel. Below that, the PHP engine, highlighted, where the PHP2Shell flaws are. At the bottom, the server and operating system.</desc>
+    {
+      layers.map((l, i) => {
+        const y = i * 66
+        const inset = (3 - i) * 14
+        return (
+          <g>
+            <rect x={inset} y={y} width={420 - inset * 2} height="56" rx="6" class={l.accent ? 'box-accent' : 'box'} />
+            <text x="210" y={y + 24} text-anchor="middle" class={l.accent ? 't-strong t-on-accent' : 't-strong'}>{l.title}</text>
+            <text x="210" y={y + 43} text-anchor="middle" class={l.accent ? 't-small t-on-accent' : 't-small t-muted'}>{l.note}</text>
+          </g>
+        )
+      })
+    }
+  </svg>
+</Figure>

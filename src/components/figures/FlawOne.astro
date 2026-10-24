@@ -1,0 +1,43 @@
+---
+import Figure from './Figure.astro'
+
+const lanes = [
+  {
+    title: 'Normal request',
+    steps: ['Header: built', 'Table: built', 'Page made', 'Cleanup frees both'],
+    bad: -1,
+  },
+  {
+    title: 'Out of memory mid-setup',
+    steps: ['Header: built', 'Table: half built', 'Emergency stop', 'Cleanup trusts both'],
+    bad: 1,
+  },
+]
+---
+
+<Figure caption="Flaw 1 (CVE-2026-109618). When the memory limit hits in the middle of setting up a request, some parts exist and others do not. Cleanup then treats the half-built part as if it were valid.">
+  <svg viewBox="0 0 420 288" role="img" aria-labelledby="f-f1-t f-f1-d">
+    <title id="f-f1-t">Cleanup trusts a half-built workspace</title>
+    <desc id="f-f1-d">Two lanes side by side. Normal request: header built, table built, page made, cleanup frees both. Out of memory in the middle of setup: header built, table only half built, emergency stop, and cleanup trusts both, including the half-built table, which an attacker can shape.</desc>
+    {
+      lanes.map((l, c) => {
+        const x = c * 216
+        return (
+          <g>
+            <text x={x + 102} y="16" text-anchor="middle" class="t-strong">{l.title}</text>
+            {l.steps.map((s, i) => {
+              const y = 32 + i * 64
+              const hot = c === 1 && i >= l.bad
+              return (
+                <g>
+                  <rect x={x} y={y} width="204" height="48" rx="6" class={hot ? 'box-accent' : 'box'} />
+                  <text x={x + 102} y={y + 29} text-anchor="middle" class={hot ? 't-strong t-on-accent' : 't-small'}>{s}</text>
+                </g>
+              )
+            })}
+          </g>
+        )
+      })
+    }
+  </svg>
+</Figure>

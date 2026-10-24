@@ -1,0 +1,37 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+const parts = [
+  { title: 'Browser', role: 'the customer' },
+  { title: 'Web server', role: 'the waiter' },
+  { title: 'PHP', role: 'the chef', accent: true },
+  { title: 'Database', role: 'the pantry' },
+]
+---
+
+<Figure caption="The request travels in through the web server to PHP, PHP may fetch data, and the finished page travels back. The visitor only ever sees the finished plate.">
+  <svg viewBox="0 0 420 300" role="img" aria-labelledby="f-flow-t f-flow-d">
+    <title id="f-flow-t">How a PHP page is served</title>
+    <desc id="f-flow-d">Four boxes from top to bottom: the browser, like a customer; the web server, like a waiter; PHP, like a chef who cooks each page on demand; and the database, like a pantry. The request travels down the left side, and the finished page travels back up the right side.</desc>
+    <defs><Arrow id="f-flow-a" /><Arrow id="f-flow-aa" accent /></defs>
+    {
+      parts.map((p, i) => {
+        const y = i * 76
+        return (
+          <g>
+            <rect x="90" y={y} width="240" height="52" rx="6" class={p.accent ? 'box-accent' : 'box'} />
+            <text x="210" y={y + 22} text-anchor="middle" class={p.accent ? 't-strong t-on-accent' : 't-strong'}>{p.title}</text>
+            <text x="210" y={y + 41} text-anchor="middle" class={p.accent ? 't-small t-on-accent' : 't-small t-muted'}>{p.role}</text>
+            {i < parts.length - 1 && <path d={`M150 ${y + 54} V${y + 72}`} class="wire" marker-end="url(#f-flow-a)" />}
+            {i < parts.length - 1 && <path d={`M270 ${y + 74} V${y + 56}`} class="wire-accent" marker-end="url(#f-flow-aa)" />}
+          </g>
+        )
+      })
+    }
+    <text x="0" y="104" class="t-small t-muted">request</text>
+    <text x="0" y="120" class="t-small t-muted">goes in</text>
+    <text x="342" y="104" class="t-small t-accent">page</text>
+    <text x="342" y="120" class="t-small t-accent">comes back</text>
+  </svg>
+</Figure>

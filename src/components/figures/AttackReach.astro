@@ -1,0 +1,36 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+const ends = [
+  ['Read secrets', 'database password, keys'],
+  ['Steal data', 'users, orders, sessions'],
+  ['Plant a backdoor', 'come back any time'],
+  ['Attack others', 'spam, mining, pivots'],
+]
+---
+
+<Figure caption="What an attacker can reach with the website's own rights. Not the all-powerful administrator of the machine, but usually enough to steal the data and go further.">
+  <svg viewBox="0 0 420 268" role="img" aria-labelledby="f-reach-t f-reach-d">
+    <title id="f-reach-t">One foothold, four outcomes</title>
+    <desc id="f-reach-d">On the left: the attacker runs code with the web server's rights, no login needed. From there, four outcomes: read secrets such as the database password and keys; steal data such as users, orders and sessions; plant a backdoor to come back any time; and attack others through spam, cryptocurrency mining or moving to other systems.</desc>
+    <defs><Arrow id="f-reach-a" /></defs>
+    <rect x="0" y="94" width="150" height="80" rx="6" class="box-accent" />
+    <text x="75" y="122" text-anchor="middle" class="t-strong t-on-accent">Code runs as</text>
+    <text x="75" y="140" text-anchor="middle" class="t-strong t-on-accent">the web server</text>
+    <text x="75" y="160" text-anchor="middle" class="t-small t-on-accent">no login needed</text>
+    {
+      ends.map(([t, n], i) => {
+        const y = i * 68
+        return (
+          <g>
+            <path d={`M152 134 C176 134 176 ${y + 28} 196 ${y + 28}`} class="wire" marker-end="url(#f-reach-a)" />
+            <rect x="200" y={y} width="220" height="56" rx="6" class="box" />
+            <text x="216" y={y + 24} class="t-strong">{t}</text>
+            <text x="216" y={y + 43} class="t-small t-muted">{n}</text>
+          </g>
+        )
+      })
+    }
+  </svg>
+</Figure>

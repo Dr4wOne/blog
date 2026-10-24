@@ -1,0 +1,36 @@
+---
+import Figure from './Figure.astro'
+
+// W3Techs, server-side programming languages, share of all websites, 24 October 2026.
+const langs = [
+  ['PHP', 69.3],
+  ['JavaScript', 8.2],
+  ['Ruby', 7.1],
+  ['Java', 5.5],
+  ['Scala', 5.0],
+  ['ASP.NET', 4.2],
+  ['Python', 1.1],
+  ['ColdFusion', 0.2],
+] as const
+const max = 280 / 70
+---
+
+<Figure caption="Share of websites whose server-side language is known, by language (W3Techs, 24 October 2026). PHP is more than eight times larger than the next language on the list.">
+  <svg viewBox="0 0 420 268" role="img" aria-labelledby="f-lang-t f-lang-d">
+    <title id="f-lang-t">PHP runs about 7 in 10 websites</title>
+    <desc id="f-lang-d">A bar chart. PHP 69.3 percent, JavaScript 8.2, Ruby 7.1, Java 5.5, Scala 5.0, ASP.NET 4.2, Python 1.1 and ColdFusion 0.2 percent.</desc>
+    {
+      langs.map(([name, pct], i) => {
+        const y = i * 32
+        const first = i === 0
+        return (
+          <g>
+            <text x="82" y={y + 17} text-anchor="end" class={first ? 't-strong' : 't-small'}>{name}</text>
+            <rect x="92" y={y + 4} width={Math.max(2, pct * max)} height="18" rx="3" class={first ? 'box-accent' : 'bar'} />
+            <text x={98 + pct * max} y={y + 18} class={first ? 't-strong t-accent' : 't-small t-muted'}>{pct.toFixed(1)}%</text>
+          </g>
+        )
+      })
+    }
+  </svg>
+</Figure>

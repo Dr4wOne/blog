@@ -1,0 +1,26 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+---
+
+<Figure caption="How unchecked input becomes a command. Most RCE in everyday PHP sites happens when visitor text reaches something that executes. PHP2Shell skips this step: the flaw is in the engine itself.">
+  <svg viewBox="0 0 420 236" role="img" aria-labelledby="f-rce-t f-rce-d">
+    <title id="f-rce-t">From visitor text to a command</title>
+    <desc id="f-rce-d">Visitor text arrives. Does it reach something that runs, such as a shell command, eval, an include or an uploaded PHP file? If no, it is only shown or stored as text, which is safe. If yes, the server runs the attacker's command: remote code execution.</desc>
+    <defs><Arrow id="f-rce-a" /><Arrow id="f-rce-aa" accent /></defs>
+    <rect x="110" y="0" width="200" height="44" rx="6" class="box" />
+    <text x="210" y="27" text-anchor="middle" class="t-strong">Visitor sends text</text>
+    <path d="M210 46 V68" class="wire" marker-end="url(#f-rce-a)" />
+    <rect x="60" y="72" width="300" height="56" rx="6" class="box" />
+    <text x="210" y="96" text-anchor="middle" class="t-strong">Does it reach something that runs?</text>
+    <text x="210" y="115" text-anchor="middle" class="t-small t-muted">shell, eval, include, an uploaded .php</text>
+    <path d="M130 130 C120 150 100 158 98 172" class="wire" marker-end="url(#f-rce-a)" />
+    <path d="M290 130 C300 150 320 158 322 172" class="wire-accent" marker-end="url(#f-rce-aa)" />
+    <rect x="0" y="176" width="196" height="56" rx="6" class="box" />
+    <text x="98" y="200" text-anchor="middle" class="t-strong">No: it stays text</text>
+    <text x="98" y="219" text-anchor="middle" class="t-small t-muted">shown or stored, safe</text>
+    <rect x="224" y="176" width="196" height="56" rx="6" class="box-accent" />
+    <text x="322" y="200" text-anchor="middle" class="t-strong t-on-accent">Yes: the server runs it</text>
+    <text x="322" y="219" text-anchor="middle" class="t-small t-on-accent">remote code execution</text>
+  </svg>
+</Figure>
