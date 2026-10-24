@@ -1,0 +1,42 @@
+---
+import Figure from './Figure.astro'
+
+const lanes = [
+  {
+    title: 'Shared hosting',
+    steps: ['Check your host', 'Pick fixed PHP', 'Verify version', 'Watch closely'],
+  },
+  {
+    title: 'Own server',
+    steps: ['Update packages', 'Restart PHP', 'Verify the fix', 'Look for traces'],
+  },
+  { title: 'Containers', steps: ['Patched image', 'Rebuild', 'Redeploy', 'Verify inside'] },
+]
+---
+
+<Figure caption="Fix paths by situation. Whatever your setup, the order is the same: get a fixed PHP running, prove it, then look for signs that someone got in first.">
+  <svg viewBox="0 0 420 304" role="img" aria-labelledby="f-fix-t f-fix-d">
+    <title id="f-fix-t">Three ways to the fix</title>
+    <desc id="f-fix-d">Three lanes. Shared hosting: check the host's status page, pick a fixed PHP version in the panel, verify the version in Site Health, watch closely for anything odd. Own server: update packages, restart PHP, verify the fix, look for traces of an attack. Containers: use a patched base image, rebuild, redeploy, verify PHP inside the container.</desc>
+    {
+      lanes.map((l, c) => {
+        const x = c * 142
+        return (
+          <g>
+            <text x={x + 67} y="16" text-anchor="middle" class="t-strong">{l.title}</text>
+            {l.steps.map((s, i) => {
+              const y = 32 + i * 68
+              return (
+                <g>
+                  <rect x={x} y={y} width="134" height="54" rx="6" class={i === 0 ? 'box-accent' : 'box'} />
+                  <text x={x + 12} y={y + 22} class={i === 0 ? 't-small t-on-accent' : 't-small t-muted'}>Step {i + 1}</text>
+                  <text x={x + 12} y={y + 41} class={i === 0 ? 't-strong t-on-accent' : 't-strong'}>{s}</text>
+                </g>
+              )
+            })}
+          </g>
+        )
+      })
+    }
+  </svg>
+</Figure>

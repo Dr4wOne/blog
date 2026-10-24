@@ -1,0 +1,33 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+---
+
+<Figure caption="Flaw 2 (CVE-2026-109619). A note from request 1 survives after its memory was given back. Request 2, on the same worker, follows the note into memory that now holds something else. This is a use-after-free.">
+  <svg viewBox="0 0 420 300" role="img" aria-labelledby="f-f2-t f-f2-d">
+    <title id="f-f2-t">A leftover pointer to freed memory</title>
+    <desc id="f-f2-d">On the left, request 1 stores its data in a memory slot and keeps a global note pointing at it. At the end of request 1 the slot is freed, but the note is not cleared. On the right, request 2 on the same worker reuses the slot for other data, possibly shaped by an attacker, and then follows the old note into it.</desc>
+    <defs><Arrow id="f-f2-a" /><Arrow id="f-f2-aa" accent /></defs>
+    <rect x="0" y="0" width="196" height="64" rx="6" class="box" />
+    <text x="98" y="26" text-anchor="middle" class="t-strong">Request 1</text>
+    <text x="98" y="46" text-anchor="middle" class="t-small t-muted">stores data, keeps a note</text>
+    <rect x="224" y="0" width="196" height="64" rx="6" class="box" />
+    <text x="322" y="26" text-anchor="middle" class="t-strong">Request 2</text>
+    <text x="322" y="46" text-anchor="middle" class="t-small t-muted">same worker, later</text>
+    <path d="M98 66 V112" class="wire" marker-end="url(#f-f2-a)" />
+    <text x="110" y="94" class="t-small t-muted">end: memory freed</text>
+    <rect x="0" y="116" width="196" height="56" rx="6" class="box-ground dash" />
+    <text x="98" y="149" text-anchor="middle" class="t-small t-muted">slot given back (empty)</text>
+    <path d="M322 66 V112" class="wire" marker-end="url(#f-f2-a)" />
+    <text x="334" y="94" class="t-small t-muted">reuses the slot</text>
+    <rect x="224" y="116" width="196" height="56" rx="6" class="box-accent" />
+    <text x="322" y="140" text-anchor="middle" class="t-strong t-on-accent">Someone else's data</text>
+    <text x="322" y="159" text-anchor="middle" class="t-small t-on-accent">maybe shaped by an attacker</text>
+    <rect x="80" y="220" width="260" height="56" rx="6" class="box" />
+    <text x="210" y="244" text-anchor="middle" class="t-strong">The old note (global pointer)</text>
+    <text x="210" y="263" text-anchor="middle" class="t-small t-muted">never cleared, still holds the address</text>
+    <path d="M300 218 C320 200 322 190 322 176" class="wire-accent" marker-end="url(#f-f2-aa)" />
+    <text x="334" y="198" class="t-small t-accent">request 2</text>
+    <text x="334" y="213" class="t-small t-accent">follows it</text>
+  </svg>
+</Figure>
