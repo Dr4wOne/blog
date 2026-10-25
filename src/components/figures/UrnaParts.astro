@@ -1,0 +1,32 @@
+---
+import Figure from './Figure.astro'
+---
+
+<Figure caption="The urna has two terminals joined by a cable. The poll worker enables the voter; the voter types numbers and confirms. The only external cable is power, and there is no network of any kind.">
+  <svg viewBox="0 0 420 250" role="img" aria-labelledby="f-parts-t f-parts-d">
+    <title id="f-parts-t">The two parts of the urna eletrônica</title>
+    <desc id="f-parts-d">On the left, the poll worker's terminal, which identifies the voter by fingerprint and enables them to vote. A cable links it to the voter's terminal on the right, which has a screen and a numeric keypad like a telephone's, with Braille, and a printer for the zero report and the results report. Below, a crossed-out list: no Wi-Fi, no Bluetooth, no Ethernet, no internet. The only external cable is power.</desc>
+    <rect x="0" y="40" width="130" height="120" rx="6" class="box" />
+    <text x="65" y="70" text-anchor="middle" class="t-strong">Poll worker's</text>
+    <text x="65" y="88" text-anchor="middle" class="t-strong">terminal</text>
+    <text x="65" y="114" text-anchor="middle" class="t-small t-muted">fingerprint reader</text>
+    <text x="65" y="132" text-anchor="middle" class="t-small t-muted">enables the voter</text>
+    <path d="M130 100 H200" class="wire" />
+    <text x="165" y="92" text-anchor="middle" class="t-small t-muted">cable</text>
+    <rect x="200" y="0" width="220" height="200" rx="6" class="box-accent" />
+    <text x="310" y="26" text-anchor="middle" class="t-strong t-on-accent">Voter's terminal</text>
+    <rect x="222" y="40" width="96" height="70" rx="4" class="box" />
+    <text x="270" y="72" text-anchor="middle" class="t-small">screen</text>
+    <text x="270" y="88" text-anchor="middle" class="t-small t-muted">photo + name</text>
+    {
+      [0, 1, 2, 3].map((r) =>
+        [0, 1, 2].map((c) => <rect x={334 + c * 22} y={40 + r * 18} width="18" height="14" rx="2" class="box" />),
+      )
+    }
+    <text x="367" y="126" text-anchor="middle" class="t-small t-on-accent">keypad + Braille</text>
+    <text x="310" y="156" text-anchor="middle" class="t-small t-on-accent">security chip · printer · battery</text>
+    <text x="310" y="176" text-anchor="middle" class="t-small t-on-accent">about 8 kg</text>
+    <text x="0" y="230" class="t-small t-accent">✕ Wi-Fi   ✕ Bluetooth   ✕ Ethernet   ✕ internet</text>
+    <text x="0" y="248" class="t-small t-muted">The only external cable is power.</text>
+  </svg>
+</Figure>
