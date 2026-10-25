@@ -1,9 +1,12 @@
 ---
+updated: 2026-10-25
+published: 2026-10-25
+issue: 6
 slug: brazil-electronic-voting-explained
-title: Brazil's voting machine, explained
+title: Brazil's voting machine
 summary: "Brazil votes on its own machine, the urna eletrônica, and knows the winner within hours. How it works, from keypress to national result, and how secure it really is."
 tags: [security, elections, hardware, cryptography]
-draft: true
+draft: false
 ---
 
 import Aside from '../../../components/Aside.astro'
@@ -15,15 +18,11 @@ import UrnaVoteJourney from '../../../components/figures/UrnaVoteJourney.astro'
 
 <Aside title="In short">
 
-Brazil has voted on its own electronic machine, the *urna eletrônica*, since 1996, and in every city since 2000. It is a small, rugged computer with no network connection, a Linux system written by the electoral court, and a security chip that refuses to start any software the court has not signed in public. In the 2022 presidential runoff (the second round, held when no candidate wins a majority in the first), 156 million voters were registered and the winner was known 2 hours and 56 minutes after the polls closed. Is it secure? Every independent check of the 2022 results found no fraud, and no source documents a proven fraud in a real election. Public hacking tests have still found real flaws, which the court says it fixed or judged harmless. And critics such as the Carter Center point out that, with no paper record, the result depends on trusting the software.
+Brazil has voted on its own machine, the *urna eletrônica*, since 1996, and in every city since 2000. It is a small computer with no network connection, running Linux written by the electoral court, with a security chip that refuses unsigned software. In the 2022 presidential runoff the winner was known 2 hours and 56 minutes after polls closed. Independent checks of 2022 found no fraud, and no source documents a proven fraud. Public hacking tests still found real flaws, and critics note that without a paper record the result rests on trusting the software.
 
 </Aside>
 
-<Aside title="Check everything here">
-
-This article explains how a system works; it is not here to take a political side. Every number has a footnote pointing to its source, most of them official documents from Brazil's Superior Electoral Court (TSE), the courts, Congress, auditors, election observers and the researchers who attacked the machine. Most sources are the electoral courts themselves, because they publish the technical details; the independent ones are the researchers who attacked the machine, the federal audit court (TCU), the Carter Center, the Organization of American States, the Defence Ministry and the Supreme Court. Where sources disagree, both are shown. Read them, check them, and share what you learn.
-
-</Aside>
+**Check everything here.** This article explains how a system works; it does not take a political side. Every number has a footnote. Most sources are the electoral courts, which publish the technical details; the independent ones are the researchers who attacked the machine, the federal audit court (TCU), the Carter Center, the Organization of American States, the Defence Ministry and the Supreme Court. Where sources disagree, both are shown. Check them, and share what you learn.
 
 ## What is the urna eletrônica?
 
@@ -106,7 +105,7 @@ The TSE's 2021 presentation for security researchers lists the algorithms:[^tps2
 | The QR code on the results printout | EdDSA (Curve25519) signature |
 | The vote record while voting is open | Encrypted with AES-256 (CBC mode) |
 
-## The chain of trust: how they know the software is the right one
+## The chain of trust
 
 Signatures only help if everyone can check what was signed. The process runs in public:
 
@@ -150,7 +149,7 @@ The machines are also reliable on the day: in the 2024 first round, 3,218 of 478
 
 This is where it gets interesting, because two simple answers are both wrong. "It is unhackable" is false. "It is rigged" is not supported by any evidence we found. The real picture comes from three kinds of evidence.
 
-### 1. Public hacking tests found real flaws
+### Public hacking tests found real flaws
 
 Since 2009 the TSE has run a *Teste Público de Segurança* (TPS): outside researchers attack the systems, with "several security barriers that would normally be present on election day removed".[^tps-page] What they found:
 
@@ -166,14 +165,14 @@ Since 2009 the TSE has run a *Teste Público de Segurança* (TPS): outside resea
 
 Two caveats cut both ways. The 2017 team writes that its vote-changing attack was never run on real hardware because the test ended first.[^aranha18] The same researchers argue that a few days of supervised testing "is not representative of a real fraud attempt", and that insiders are a bigger risk than outsiders.[^aranha18][^unb2012]
 
-### 2. Independent checks of 2022 found no fraud
+### Independent checks of 2022 found no fraud
 
 - **Integrity tests.** On election day, machines already prepared for real voting are drawn at random or chosen by party inspectors, taken to a public place, filmed, and fed votes from paper ballots; the printout must match the paper. In 2022, 641 machines were tested, up from 100,[^integ22][^oas] and the TSE reported no divergence in the first round.[^agbr] Divergences can happen: in Belém in 2024, 3 of 27 audited machines diverged, which the regional court attributed to human error in filling in the test ballots, found by reviewing the video.[^belem]
 - **The federal audit court (TCU)** compared thousands of printed results with the published figures and found no divergence.[^tcu-bu] It also concluded that the system "has oversight mechanisms that allow electronic voting to be audited at all stages".[^tcu]
 - **Observers.** The Organization of American States said the TSE "delivered results in a professional and timely manner".[^oas]
 - **The armed forces**, invited as inspectors in 2022, did not point to any fraud, according to the TSE.[^defesa-tse] Their minister's cover letter added two warnings: network access during compilation "may be a relevant risk", and from the integrity tests "it is not possible to affirm" the system is free of malicious code.[^defesa] The next day the ministry published a note saying the report "did not exclude the possibility of fraud".[^defesa-note]
 
-### 3. The real debate is the missing paper trail
+### The real debate is the missing paper trail
 
 The serious criticism is not about proven fraud. It is about *verifiability*. Computer scientist Ronald Rivest's test: a voting system is "software independent" if an undetected change or error in its software "cannot cause an undetectable change or error in an election outcome".[^rivest] A machine that records votes only electronically does not pass that test. The Carter Center, which observed 2022, put it plainly: the choice of a direct-recording system "makes the integrity of the election results depend entirely on the integrity of the system's software".[^carter] The same report credits the machine with ending paper-ballot fraud.[^carter]
 
