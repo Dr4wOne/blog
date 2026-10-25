@@ -1,0 +1,31 @@
+---
+import Figure from './Figure.astro'
+---
+
+<Figure caption="The urna has two terminals joined by a cable. The poll worker enables the voter; the voter types numbers and confirms. The only external cable is power, and there is no network of any kind.">
+  <svg viewBox="0 0 360 300" role="img" aria-labelledby="f-parts-t f-parts-d">
+    <title id="f-parts-t">The two parts of the urna eletrônica</title>
+    <desc id="f-parts-d">On the left, the poll worker's terminal, which identifies the voter, by fingerprint where biometrics are used, and enables them to vote. A cable links it to the voter's terminal on the right, which has a screen showing the candidate's photo and name and a numeric keypad like a telephone's, with Braille. The machine also holds a security chip, a printer and a battery, and weighs about 8 kg. Below, a crossed-out list: no Wi-Fi, no Bluetooth, no Ethernet, no internet.</desc>
+    <rect x="4" y="50" width="118" height="132" rx="6" class="box" />
+    <text x="63" y="78" text-anchor="middle" class="t-strong">Poll worker</text>
+    <text x="63" y="104" text-anchor="middle" class="t-small t-muted">fingerprint,</text>
+    <text x="63" y="120" text-anchor="middle" class="t-small t-muted">where biometrics</text>
+    <text x="63" y="136" text-anchor="middle" class="t-small t-muted">are used</text>
+    <text x="63" y="162" text-anchor="middle" class="t-small">enables the voter</text>
+    <path d="M122 116 H160" class="wire" />
+    <text x="141" y="108" text-anchor="middle" class="t-small t-muted">cable</text>
+    <rect x="160" y="4" width="196" height="224" rx="6" class="box-accent" />
+    <text x="258" y="30" text-anchor="middle" class="t-strong t-on-accent">Voter</text>
+    <rect x="176" y="44" width="164" height="62" rx="4" class="box" />
+    <text x="258" y="72" text-anchor="middle" class="t-small">screen</text>
+    <text x="258" y="90" text-anchor="middle" class="t-small t-muted">candidate photo + name</text>
+    {
+      [0, 1, 2, 3].map((r) =>
+        [0, 1, 2].map((c) => <rect x={222 + c * 26} y={116 + r * 18} width="20" height="13" rx="2" class="box" />),
+      )
+    }
+    <text x="258" y="206" text-anchor="middle" class="t-small t-on-accent">phone keypad + Braille</text>
+    <text x="4" y="256" class="t-small t-muted">Inside: security chip, printer, battery · about 8 kg</text>
+    <text x="4" y="284" class="t-small t-accent">No Wi-Fi, Bluetooth, Ethernet or internet</text>
+  </svg>
+</Figure>
