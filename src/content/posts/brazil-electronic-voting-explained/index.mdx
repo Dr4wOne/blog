@@ -15,13 +15,13 @@ import UrnaVoteJourney from '../../../components/figures/UrnaVoteJourney.astro'
 
 <Aside title="In short">
 
-Brazil has voted on its own electronic machine, the *urna eletrônica*, since 1996, and in every city since 2000. It is a small, rugged computer with no network connection, a Linux system written by the electoral court, and a security chip that refuses to start any software the court has not signed in public. In the 2022 presidential runoff, 156 million voters were registered and the winner was known 2 hours and 56 minutes after the polls closed. Is it secure? Every independent check of the 2022 results found no fraud, and no source documents a proven fraud in a real election. Public hacking tests have still found real flaws, all fixed. And because there is no paper record, the result depends on trusting the software.
+Brazil has voted on its own electronic machine, the *urna eletrônica*, since 1996, and in every city since 2000. It is a small, rugged computer with no network connection, a Linux system written by the electoral court, and a security chip that refuses to start any software the court has not signed in public. In the 2022 presidential runoff (the second round, held when no candidate wins a majority in the first), 156 million voters were registered and the winner was known 2 hours and 56 minutes after the polls closed. Is it secure? Every independent check of the 2022 results found no fraud, and no source documents a proven fraud in a real election. Public hacking tests have still found real flaws, which the court says it fixed or judged harmless. And critics such as the Carter Center point out that, with no paper record, the result depends on trusting the software.
 
 </Aside>
 
 <Aside title="Check everything here">
 
-This article explains how a system works; it is not here to take a political side. Every number has a footnote pointing to its source, most of them official documents from Brazil's Superior Electoral Court (TSE), the courts, Congress, auditors, election observers and the researchers who attacked the machine. Where sources disagree, both are shown. Read them, check them, and share what you learn.
+This article explains how a system works; it is not here to take a political side. Every number has a footnote pointing to its source, most of them official documents from Brazil's Superior Electoral Court (TSE), the courts, Congress, auditors, election observers and the researchers who attacked the machine. Most sources are the electoral courts themselves, because they publish the technical details; the independent ones are the researchers who attacked the machine, the federal audit court (TCU), the Carter Center, the Organization of American States, the Defence Ministry and the Supreme Court. Where sources disagree, both are shown. Read them, check them, and share what you learn.
 
 </Aside>
 
@@ -29,15 +29,17 @@ This article explains how a system works; it is not here to take a political sid
 
 The urna eletrônica ("electronic ballot box") is a purpose-built voting computer designed by Brazil's electoral court and made to its specification by private companies.[^empresas]
 
+That court needs a word of introduction. In Brazil, elections are run by a branch of the judiciary, the Electoral Justice: the Superior Electoral Court (TSE) in Brasília and a regional electoral court in each state. The TSE writes the rules, buys the machines, writes their software and counts the votes. From here on, "the TSE" means that court; the Supreme Court (STF) is a different one.
+
 It has two parts joined by a cable. The poll worker's terminal identifies the voter, by fingerprint where biometrics are in use. The voter's terminal is a screen and a telephone-style keypad where the vote is typed as a number.[^guia]
 
 <UrnaParts />
 
 Three design choices explain most of what follows:
 
-1. **Numbers, not names.** You vote by typing your candidate's number and pressing *CONFIRMA*. The keypad was copied from a telephone "precisely so that illiterate and visually impaired people could use it", and it has Braille on the keys.[^25anos][^jedet]
+1. **Numbers, not names.** You vote by typing your candidate's number and pressing *CONFIRMA*, once for each office on the ballot, such as president, governor, senator and deputies. The keypad was copied from a telephone "precisely so that illiterate and visually impaired people could use it", and it has Braille on the keys.[^25anos][^jedet]
 2. **No network, ever.** "It does not allow connection to a network (internet) or any form of wired or wireless connection. The only cable it has is the power cable."[^guia] The cable that links its two terminals is part of the machine; nothing connects the machine to anything outside.
-3. **Runs anywhere.** It weighs about 8 kg and can run on its battery for more than ten hours if the power fails.[^guia] Stored machines have to tolerate 45 °C and 90% humidity.[^logistica]
+3. **Runs anywhere.** It weighs about 8 kg and can run on its battery for more than ten hours if the power fails.[^guia] Stored machines can withstand 45 °C and 90% humidity.[^logistica]
 
 ## From one polling station to a whole country
 
@@ -45,15 +47,13 @@ The idea is old. Brazil's first Electoral Code, in 1932, already provided for "t
 
 <UrnaTimeline />
 
-What changed was computing. In 1985 the court built a single national voter registry of 70 million people,[^evol] and in 1989 a judge in Brusque, Santa Catarina, collected the votes of one polling station on a microcomputer.[^cron] Santa Catarina kept experimenting: in February 1995 all 14,000 voters of the town of Xaxim elected their mayor this way. The *zerésima*, the printout that proves a machine starts with zero votes, "was an idea inherited from the Santa Catarina system".[^cron]
+What changed was computing. In 1985 the TSE built a single national voter registry of 70 million people,[^evol] and in 1989 a judge in Brusque, Santa Catarina, collected the votes of one polling station on a microcomputer.[^cron] Santa Catarina kept experimenting: in February 1995 all 14,000 voters of the town of Xaxim elected their mayor this way. The *zerésima*, the printout that proves a machine starts with zero votes, "was an idea inherited from the Santa Catarina system", the state's pilot.[^cron]
 
-A 1995 law allowed electronic voting,[^lei9100] and a technical committee led by researchers from Brazil's space research institute (INPE) and the aerospace technical centre (CTA) designed the machine.[^25anos] The court's president at the time, Carlos Velloso, refused foreign off-the-shelf machines: "let's make a home-grown urna, simple and cheap."[^25anos]
+A 1995 law allowed electronic voting,[^lei9100] and a technical committee led by researchers from Brazil's space research institute (INPE) and the aerospace technical centre (CTA) designed the machine.[^25anos] The TSE's president at the time, Carlos Velloso, refused foreign off-the-shelf machines: "let's make a home-grown urna, simple and cheap."[^25anos]
 
-- **1996:** first use, in 57 cities, collecting the votes of more than 32 million people, a third of the electorate.[^25anos]
-- **2000:** the first election that was 100% electronic, in every municipality.[^cron]
-- **2008:** the first biometric pilot, in three towns, with just over 40,000 voters.[^90anos][^guia]
+It was first used in 1996, in 57 cities, collecting the votes of more than 32 million people, a third of the electorate.[^25anos] In 2000 every municipality voted electronically.[^cron] In 2008 came the first biometric pilot, in three towns, with just over 40,000 voters.[^90anos][^guia]
 
-Since then, 14 models have been produced, 1,487,115 machines in total, from four manufacturers chosen by public tender: Unisys, Procomp, Diebold (Procomp) and Positivo.[^empresas] A machine is retired after ten years or six ordinary elections.[^ata2021]
+Since 1996, 14 models have been produced, 1,487,115 machines in total, from four manufacturers chosen by public tender: Unisys, Procomp, Diebold (whose machines were also labelled Diebold Procomp) and Positivo.[^empresas] A machine is retired after ten years or six ordinary elections.[^ata2021]
 
 ## Inside the box: thirty years of hardware
 
@@ -68,34 +68,34 @@ The first machine stored data on two floppy disks.[^evol] The current one is a s
 | UE2020 | Positivo | Intel Atom E3940 | 4 GB | 224,999 |
 | UE2022 | Positivo | Intel Atom E3940, 1.6 GHz | 4 GB | 219,998 |
 
-All rows come from the court's technical sheets.[^jetec] One detail to know if you check them: a TSE news article gives the UE2022's clock as 1.16 GHz, while the technical sheet says 1.60 GHz.[^evol][^jetec]
+These are six of the 14 models; the other eight sit between them, and all 14 together add up to 1,487,115 machines. Every row comes from the TSE's technical sheets.[^jetec]
 
 What makes the newer machines different is not speed but the security hardware:
 
-- **A security module as the root of trust.** Since the 2009 model, a dedicated chip handles security and cryptography.[^evol] From the 2020 model it is certified under ICP-Brasil, Brazil's national public-key infrastructure. It "works as the single root of trust, implemented in hardware, of a secure start-up chain that cannot be disabled", it contains a true random number generator, and it fixes each machine's unique ID so it cannot be changed.[^jedet]
+- **A security module as the root of trust.** Since the 2009 model, a dedicated chip handles security and cryptography.[^evol] From the 2020 model it is certified under Brazil's national public-key infrastructure (ICP-Brasil). It "works as the single root of trust, implemented in hardware, of a secure start-up chain that cannot be disabled", it contains a true random number generator, and it fixes each machine's unique ID so it cannot be changed.[^jedet]
 - **Encrypted peripherals.** The voter's keypad has an epoxy-sealed crypto chip that produces a different cryptogram for every keypress. The fingerprint reader and the printer also have crypto chips, so only devices recognised by the electoral court work.[^jedet]
 - **A battery that lasts.** The 2020 model was the first with a lithium iron phosphate battery; earlier ones used lead-acid.[^jedet]
 
-The latest tender, for up to 176,000 UE2022 machines plus spare parts, software development, warranty and media, was won by Positivo at R$ 1,179,662,728.72.[^tender] The court publishes no per-unit price, and dividing that total by the number of machines would mix hardware with services.
+The latest tender, for up to 176,000 UE2022 machines plus spare parts, software development, warranty and media, was won by Positivo at R$ 1,179,662,728.72.[^tender] The TSE publishes no per-unit price, and dividing that total by the number of machines would mix hardware with services.
 
 ## The software stack
 
-The machine runs **Uenux**, a Linux distribution built by the court's own technical staff: bootloader, Linux kernel, drivers, libraries and applications.[^res23673] Linux arrived in 2008; before that, the machines ran a DOS-compatible system and then Windows CE.[^tps23][^aranha18]
+The machine runs **Uenux**, a Linux distribution built by the TSE's own technical staff: bootloader, Linux kernel, drivers, libraries and applications.[^res23673] Linux arrived in 2008; before that, the machines ran a DOS-compatible system and then Windows CE.[^tps23][^aranha18]
 
 <UrnaBootChain />
 
-What the court has published about the stack:
+What the TSE has published about the stack:
 
 - **Languages and tools:** C, C++, x86 assembly and ASN.1, built in 2021 with Linux 5.4.77 and GCC 9.2, checked with Cppcheck and Flawfinder.[^tps21]
-- **Applications:** the voting software (VOTA), the loader (SCUE), an application manager (GAP), a data recovery tool (RED), a fallback tally system (SA) and signature verifiers.[^tps21]
+- **Applications:** the voting software, a loader that installs the election onto each machine, signature verifiers, and a fallback tally system used if a machine fails during the day.[^tps21]
 - **Stripped down on purpose:** "all support for network devices, keyboard and mouse is removed… there is no command terminal… Uenux runs only drivers, libraries and applications that were signed in a public ceremony."[^jedet]
 - **Written in-house:** all programs used in the machines are developed and tested by the electoral court's own IT staff.[^trepr]
 
-How big is it? You may see "17 million lines of code" online. We could not trace that figure to an official source. The only verified count is academic: about 24 million lines for the machine's part of the 2017 codebase, most of it the Linux kernel and third-party libraries rather than code the court wrote.[^aranha18] A small detail: each election's software release gets a theme name, from star names in 2012 to animals in 2022.[^tps21]
+How big is it? You may see "17 million lines of code" online; Brazil's Defence Ministry used "more than 17 million" in a 2022 note,[^defesa-note] but the TSE itself publishes no count. The peer-reviewed count is academic: about 24 million lines for the machine's part of the 2017 codebase, a customised Linux distribution that includes the kernel and third-party libraries, not only code the TSE wrote.[^aranha18]
 
 ### The cryptography
 
-The court's 2021 presentation for security researchers lists the algorithms:[^tps21]
+The TSE's 2021 presentation for security researchers lists the algorithms:[^tps21]
 
 | What | How |
 | --- | --- |
@@ -110,9 +110,9 @@ The court's 2021 presentation for security researchers lists the algorithms:[^tp
 
 Signatures only help if everyone can check what was signed. The process runs in public:
 
-1. **Open source code, for inspection.** Accredited bodies can inspect the source code from 12 months before the first round, in a supervised room at the court.[^res23673] The window was six months until 2020 and became a year from 2021.[^tsecod] The list includes political parties, the Bar Association, prosecutors, Congress, the Federal Police, the Brazilian Computer Society, the federal audit court and accredited university IT departments.[^res23673]
-2. **A public signing and sealing ceremony.** The programs are compiled and digitally signed by representatives of those bodies. In September 2026 the court's IT secretary said afterwards: "None of the institutions can, from this moment on, change anything in the electoral systems. They are frozen."[^lacre]
-3. **Published fingerprints.** Hashes of every source file, program, signature file and public key are calculated, signed and published on the court's website.[^res23673] The media are sealed in signed envelopes and kept in a safe.[^res23673][^lacre]
+1. **Source code open to inspection (not open source).** Accredited bodies can inspect the source code from 12 months before the first round, in a supervised room at the TSE.[^res23673] The window was six months until 2020 and became a year from 2021.[^tsecod] The list includes political parties, the Bar Association, prosecutors, Congress, the Federal Police, the Brazilian Computer Society, the federal audit court and accredited university IT departments.[^res23673] Ordinary citizens cannot download the code.
+2. **A public signing and sealing ceremony.** The programs are compiled in public and receive digital signatures from technical representatives of those bodies; in 2026 the signers included the Federal Police, the Bar Association and the public prosecutors' council.[^lacre] After the September 2026 ceremony, the TSE's IT secretary said: "None of the institutions can, from this moment on, change anything in the electoral systems. They are frozen."[^lacre]
+3. **Published fingerprints.** Hashes of every source file, program, signature file and public key are calculated, signed and published on the TSE's website.[^res23673] The media (the discs and memory sticks that carry the software) are sealed in signed envelopes and kept in a safe.[^res23673][^lacre]
 4. **A machine that refuses foreign code.** When the machine is switched on, the security hardware and BIOS start first and each component checks the next. If any check fails, "the urna locks and switches itself off automatically."[^jedet]
 
 ## The life of a vote
@@ -122,29 +122,29 @@ Here is what happens to your vote, from the morning of the election to the natio
 <UrnaVoteJourney />
 
 1. **7:00, the zerésima.** Before anyone votes, the machine prints a report listing every candidate with zero votes. Poll workers and party inspectors sign it, it is posted at the polling station, and without it the machine cannot be enabled for voting.[^tresp]
-2. **You are identified.** The poll worker's terminal identifies you, by fingerprint where biometrics are in use. In 2024, 129.2 million of the 155.9 million voters were identified by fingerprint.[^est24]
-3. **You vote.** You type the numbers and confirm. The machine writes the vote to the *Registro Digital do Voto* (RDV), a file that keeps votes by office and not in the order people arrived, so votes cannot be linked to voters.[^res23673][^tps21]
-4. **17:00, the closing.** The machine prints the *Boletim de Urna* (BU), the results for that machine, in at least five copies. One is posted at the polling station for anyone to read.[^tresp] The BU carries a QR code anyone can scan to compare the result with what the court publishes.[^tresp]
+2. **You are identified.** The poll worker's terminal identifies you, by fingerprint where biometrics are in use. In 2024, 129.2 million of the 155.9 million voters had their fingerprints on file.[^est24]
+3. **You vote.** You type the numbers and confirm, once per office. The machine writes the vote to the *Registro Digital do Voto* (RDV), a file that keeps votes by office and not in the order people arrived, so votes cannot be linked to voters.[^res23673][^tps21]
+4. **17:00, the closing.** The machine prints the *Boletim de Urna* (BU), the results for that machine, in at least five copies. One is posted at the polling station for anyone to read.[^tresp] The BU carries a QR code anyone can scan to compare the result with what the TSE publishes.[^tresp]
 5. **The results stick leaves, the machine stays.** The results, the attendance list, the log of every operation, the RDV and their signatures go onto a USB result stick. The stick, not the machine, is taken to a transmission point.[^tps21][^trepr]
 6. **Transmission over a private network.** Software called JE-Connect sends the files over a virtual private network (VPN). It checks the machine's digital signature, and "without that signature, the media is not read by the system."[^tot26] Remote indigenous and riverside communities transmit by satellite.[^guia]
-7. **Central counting.** Since 2020 all results are totalled centrally at the court in Brasília.[^tps23] The results are published live, section by section.[^res26]
+7. **Central counting.** Since 2020 all results are totalled centrally at the TSE in Brasília; before that, the regional courts totalled their own states.[^tps23][^votseg] The results are published live, section by section.[^res26]
 
 ## How fast, and how big?
 
 The 2022 general election in numbers:
 
 - **156,454,011** registered voters, in 5,570 municipalities and 181 cities abroad.[^num22]
-- **577,125** voting machines distributed, including spares, for **472,075** polling sections.[^num22]
+- **577,125** voting machines distributed, including spares, for **472,075** polling sections. A section (*seção*) is one voting room with one machine; a school used as a polling place holds several.[^num22]
 - **1,809,227** poll workers, 857,317 of them volunteers.[^num22]
-- **989** machines shipped abroad. For places with customs problems, unstable power or very few voters, 29 canvas boxes went instead, for paper ballots.[^num22]
+- **989** machines shipped abroad. Places with customs problems, unstable power or very few voters got 29 boxes for paper ballots instead.[^num22]
 
 <UrnaElectionNight />
 
-The speed is the most visible result. In the 2022 presidential runoff, polls closed at 17:00 Brasília time. At 19:56, with 98.91% of machines counted, the court declared the winner.[^lula] By 00:18, all 472,075 sections were counted, the last one in Amazonas.[^tot22] In the 2024 municipal election, the first city's result came ten minutes after polls closed, and almost 98% of machines were counted by 21:00.[^bal24]
+The speed is the most visible result. In the 2022 presidential runoff, polls closed at 17:00 Brasília time.[^tps21] At 19:56, with 98.91% of machines counted, the TSE declared the winner.[^lula] By 00:18, all 472,075 sections were counted, the last one in Amazonas.[^tot22] In the 2024 municipal election, the first city's result came ten minutes after polls closed, and almost 98% of machines were counted by 21:00.[^bal24]
 
-Before 1994, the court says, counting in Brazil "lasted hours, days and even weeks" and, because everything was manual, "errors were common".[^guia] Its own list of paper-era fraud includes ballot boxes stuffed before voting, boxes swapped in transit, and counters filling in blank ballots.[^fraudes]
+Before 1994, the TSE says, counting in Brazil "lasted hours, days and even weeks" and, because everything was manual, "errors were common".[^guia] Its own list of paper-era fraud includes ballot boxes stuffed before voting, boxes swapped in transit, and counters filling in blank ballots.[^fraudes]
 
-The machines are also reliable on the day: in the 2024 first round, 3,218 of 478,026 machines (0.61%) had to be swapped for a spare.[^bal24] Getting them there is its own operation: helicopters, planes, boats and the armed forces carry machines to indigenous villages, quilombola communities and remote areas.[^logistica][^log26] In 2022, one polling section was set up in the Marubo village of Maronal, in the Javari Valley, a thousand kilometres from Manaus.[^num22]
+The machines are also reliable on the day: in the 2024 first round, 3,218 of 478,026 machines had to be swapped for a spare, about 0.7% (the TSE's release says 0.61%).[^bal24] Getting them there is its own operation: helicopters, planes, boats and the armed forces carry machines to indigenous villages, quilombola communities and remote areas.[^logistica][^log26] In 2022, one polling section was set up in the Marubo village of Maronal, in the Javari Valley, a thousand kilometres from Manaus.[^num22]
 
 ## Is it really secure?
 
@@ -152,53 +152,55 @@ This is where it gets interesting, because two simple answers are both wrong. "I
 
 ### 1. Public hacking tests found real flaws
 
-Since 2009 the court has run a *Teste Público de Segurança* (TPS): outside researchers attack the systems, with "several security barriers that would normally be present on election day removed".[^tps-page] What they found:
+Since 2009 the TSE has run a *Teste Público de Segurança* (TPS): outside researchers attack the systems, with "several security barriers that would normally be present on election day removed".[^tps-page] What they found:
 
-| Year | Main finding | Court's response |
+| Year | Main finding | TSE's response or position |
 | --- | --- | --- |
 | 2009 | A radio receiver picked up one keypad key, from 5 cm away | Keypad signals encrypted[^tps-page] |
-| 2012 | A University of Brasília team recovered the order of votes in the RDV, because the shuffle used a weak random generator seeded with the time[^unb2012] | The court says voters' arrival order was never obtained, so secrecy was not broken, and it strengthened the shuffle[^tps-page] |
+| 2012 | A University of Brasília team recovered the order of votes in the RDV, because the shuffle used a weak random generator seeded with the time[^unb2012] | The TSE says voters' arrival order was never obtained, so secrecy was not broken, and it strengthened the shuffle[^tps-page] |
 | 2016 | A results printout was altered and fed into the fallback tally system | Check code turned into an authenticator[^tps-page] |
 | 2017 | Researchers extracted a hard-coded encryption key, found two unsigned libraries and ran their own code on the machine[^aranha18] | Keys removed from the source code, signature check fixed[^tps-page] |
-| 2019 | Federal Police experts took control of a media-generation system, without reaching the machine's software | A TPM security chip adopted[^tps-page] |
+| 2019 | Federal Police experts took control of a media-generation system, without reaching the machine's software | TPM security chips adopted[^tps-page] |
 | 2023 | A BIOS bug on the 2020 model let a team expose the kernel decryption key, without changing the voting software or any vote[^tps2023] | Treated as unable to break vote integrity or secrecy[^tps2023] |
-| 2025 | 3 findings in 29 attack plans executed | "The integrity of the electoral process would not be compromised"[^tps2025] |
+| 2025 | 3 findings in 29 attack plans executed, not detailed in the TSE's summary | "Given the other protection barriers, the integrity of the electoral process would not be compromised"[^tps2025] |
 
 Two caveats cut both ways. The 2017 team writes that its vote-changing attack was never run on real hardware because the test ended first.[^aranha18] The same researchers argue that a few days of supervised testing "is not representative of a real fraud attempt", and that insiders are a bigger risk than outsiders.[^aranha18][^unb2012]
 
-### 2. Every independent check of 2022 matched
+### 2. Independent checks of 2022 found no fraud
 
-- **Integrity tests.** On election day, machines already prepared for real voting are drawn at random, taken to a public place, filmed, and fed votes from paper ballots; the printout must match the paper. In 2022, 641 machines were tested, up from 100,[^integ22][^oas] and the court reported no divergence in the first round.[^agbr] Divergences can happen: in Belém in 2024, 3 of 27 audited machines diverged, which the regional court attributed to human error in filling in the test ballots, found by reviewing the video.[^belem]
+- **Integrity tests.** On election day, machines already prepared for real voting are drawn at random or chosen by party inspectors, taken to a public place, filmed, and fed votes from paper ballots; the printout must match the paper. In 2022, 641 machines were tested, up from 100,[^integ22][^oas] and the TSE reported no divergence in the first round.[^agbr] Divergences can happen: in Belém in 2024, 3 of 27 audited machines diverged, which the regional court attributed to human error in filling in the test ballots, found by reviewing the video.[^belem]
 - **The federal audit court (TCU)** compared thousands of printed results with the published figures and found no divergence.[^tcu-bu] It also concluded that the system "has oversight mechanisms that allow electronic voting to be audited at all stages".[^tcu]
-- **Observers.** The Organization of American States said the court "delivered results in a professional and timely manner".[^oas]
-- **The armed forces**, invited as inspectors in 2022, reported no fraud. Their minister's cover letter added two warnings: network access during compilation "may be a relevant risk", and from the integrity tests "it is not possible to affirm" the system is free of malicious code.[^defesa]
+- **Observers.** The Organization of American States said the TSE "delivered results in a professional and timely manner".[^oas]
+- **The armed forces**, invited as inspectors in 2022, did not point to any fraud, according to the TSE.[^defesa-tse] Their minister's cover letter added two warnings: network access during compilation "may be a relevant risk", and from the integrity tests "it is not possible to affirm" the system is free of malicious code.[^defesa] The next day the ministry published a note saying the report "did not exclude the possibility of fraud".[^defesa-note]
 
 ### 3. The real debate is the missing paper trail
 
 The serious criticism is not about proven fraud. It is about *verifiability*. Computer scientist Ronald Rivest's test: a voting system is "software independent" if an undetected change or error in its software "cannot cause an undetectable change or error in an election outcome".[^rivest] A machine that records votes only electronically does not pass that test. The Carter Center, which observed 2022, put it plainly: the choice of a direct-recording system "makes the integrity of the election results depend entirely on the integrity of the system's software".[^carter] The same report credits the machine with ending paper-ballot fraud.[^carter]
 
-Brazil has tried printing. In 2002 about 6% of voters used machines with printers. The court's report concluded it "added nothing in terms of security or transparency" and caused longer queues, more blank and null votes, more failures and more fallbacks to paper ballots.[^impressao] A 2003 law replaced the printout with the digital vote record.[^lei10740] Printed-vote laws came back twice; the Supreme Court struck both down unanimously, in 2013 and 2020.[^adi4543][^adi5889] In 2021 a constitutional amendment for a printed vote got 229 votes to 218 in the Chamber of Deputies, short of the 308 it needed.[^pec]
+Brazil has tried printing. In 2002 a little over 6% of voters, plus all of the Federal District and Sergipe, used machines with printers. The TSE's report concluded it "added nothing in terms of security or transparency" and caused longer queues, more blank and null votes, more failures and more fallbacks to paper ballots.[^impressao] A 2003 law replaced the printout with the digital vote record.[^lei10740] Printed-vote laws came back twice; the Supreme Court struck both down unanimously, in 2013 and 2020.[^adi4543][^adi5889] In 2021 a constitutional amendment for a printed vote got 229 votes to 218 in the Chamber of Deputies, short of the 308 it needed.[^pec]
 
-### What is not true
+### Claims checked
 
-- **"Hackers got into the voting machines in 2018."** The 2018 intrusion was into the court's internal systems. The machines are never online, and the court said the incident posed no risk to the 2018 results.[^hack2018]
-- **"Fraud was proven in 2022."** The Liberal Party asked to void votes from older machines because of a field in their log files. The court rejected the request and fined the party R$ 22,991,544.60 for bad faith.[^pl]
-- **"The court says no fraud has ever been proven."** True, it does say that: "In 24 years of existence, no fraud in the equipment has ever been proven."[^nuncafraude] Remember that "never proven" is a claim about evidence, not proof that fraud is impossible.
+- **"The urna has never been hacked."** False. Public tests broke parts of it in 2012, 2017 and 2023, in lab conditions with some defences removed (see the table above).
+
+- **"Hackers got into the voting machines in 2018."** False. The 2018 intrusion was into the TSE's internal systems. The machines are never online, and the TSE said the incident posed no risk to the 2018 results.[^hack2018]
+- **"Fraud was proven in 2022."** False. The Liberal Party asked to void votes from about 279,000 older machines because a field in their log files repeated the same machine ID. The TSE rejected the request and fined the party R$ 22,991,544.60 for bad faith.[^pl]
+- **"The TSE says no fraud has ever been proven."** True, it does say that: "In 24 years of existence, no fraud in the equipment has ever been proven."[^nuncafraude] Remember that "never proven" is a claim about evidence, not proof that fraud is impossible.
 
 ## Is it still relevant?
 
-Very. Today, 25 October 2026, Brazil holds the second round of its general election on 563,910 machines for more than 158.7 million voters, and 77% of them are the newer 2020 and 2022 models.[^modelos26] The model has also travelled: in 2007 the court approved lending 20,000 machines to Paraguay for its 2008 presidential election.[^paraguai]
+Very. On 25 October 2026, the day this article was published, Brazil held the second round of its general election. For the 2026 election the TSE planned 563,910 machines for more than 158.7 million voters, and says 77% of the machines are the newer 2020 and 2022 models.[^modelos26]
 
-The bigger lesson is for anyone who builds systems people must trust. Brazil chose speed, accessibility and the end of ballot-box stuffing, and paid with a system that asks voters to trust software they cannot inspect themselves. The court's answer is to make everything around the software public: the code, the ceremonies, the printouts, the tests and the raw data.
+The bigger lesson is for anyone who builds systems people must trust. Brazil chose speed, accessibility and the end of ballot-box stuffing, and paid with a system that asks voters to trust software they cannot inspect themselves. The TSE's answer is to make everything around the software public: the code, the ceremonies, the printouts, the tests and the raw data.
 
 ## Check it yourself
 
 You do not have to take anyone's word, including ours:
 
-1. **Read the printout.** After 17:00, the BU is posted at every polling station. Compare it with the result for that section on the court's site.[^tresp]
-2. **Scan the QR code.** The court's Boletim na Mão tool, built into the e-Título app in 2026, reads the BU's QR code offline. Independent developers can build their own readers from the court's manual.[^res26][^tresp]
-3. **Download the raw files.** The court's Resultados site and app publish every section's BU, RDV and log for download and audit.[^res26]
-4. **Read the attacks.** The University of Brasília report and the 2017 paper are public, as are the court's test reports.[^unb2012][^aranha18][^tps2023]
+1. **Read the printout.** After 17:00, the BU is posted at every polling station. Compare it with the result for that section on the TSE's site.[^tresp]
+2. **Scan the QR code.** The TSE's Boletim na Mão tool, built into the e-Título app in 2026, reads the BU's QR code offline. Independent developers can build their own readers from the TSE's manual.[^res26][^tresp]
+3. **Download the raw files.** The TSE's Resultados site and app publish every section's BU, RDV and log for download and audit.[^res26]
+4. **Read the attacks.** The University of Brasília report and the 2017 paper are public, as are the TSE's test reports.[^unb2012][^aranha18][^tps2023]
 
 [^empresas]: TSE, "Conheça as quatro empresas que produziram as urnas eletrônicas ao longo de 30 anos", 29 July 2026. https://www.tse.jus.br/comunicacao/noticias/2026/Julho/conheca-as-quatro-empresas-que-produziram-as-urnas-eletronicas-ao-longo-de-30-anos
 [^guia]: TSE, "Guia da Urna" (PDF), 2022. https://www.tse.jus.br/institucional/catalogo-de-publicacoes/arquivos/guia-da-urna
@@ -210,7 +212,7 @@ You do not have to take anyone's word, including ours:
 [^lei9100]: Lei nº 9.100, de 29 de setembro de 1995, art. 18. https://www.planalto.gov.br/ccivil_03/leis/l9100.htm
 [^90anos]: TSE, "90 anos da Justiça Eleitoral: urna eletrônica revolucionou eleições no Brasil", 22 February 2022. https://www.tse.jus.br/imprensa/noticias-tse/2022/Fevereiro/90-anos-da-justica-eleitoral-urna-eletronica-revolucionou-eleicoes
 [^ata2021]: TSE, "Publicada ata de registro de preços para compra de até 176 mil urnas eletrônicas para as Eleições 2024", 30 December 2021. https://www.tse.jus.br/comunicacao/noticias/2021/Dezembro/publicada-ata-de-registro-de-precos-para-compra-de-ate-176-mil-urnas-eletronicas-para-as-eleicoes-2024
-[^jetec]: Justiça Eleitoral, "Informações técnicas dos modelos de urna eletrônica". https://www.justicaeleitoral.jus.br/urna-eletronica/informacoes-tecnicas.html
+[^jetec]: Justiça Eleitoral, "Informações técnicas dos modelos de urna eletrônica". If you check: a TSE news article gives the UE2022's clock as 1.16 GHz, while this sheet says 1.60 GHz. https://www.justicaeleitoral.jus.br/urna-eletronica/informacoes-tecnicas.html
 [^tender]: TSE, "TSE declara Positivo Tecnologia vencedora da licitação das urnas UE2022", 27 December 2021. https://www.tse.jus.br/comunicacao/noticias/2021/Dezembro/tse-declara-positivo-tecnologia-vencedora-da-licitacao-das-urnas-ue2022
 [^res23673]: Resolução TSE nº 23.673, de 14 de dezembro de 2021 (compiled text), arts. 2, 3, 6, 9 and 24–26. https://www.tse.jus.br/legislacao/compilada/res/2021/resolucao-no-23-673-14-de-dezembro-de-2021
 [^tps23]: TSE, "Visão Geral do Processo Eleitoral", presentation at the Public Security Test 2023 (PDF). https://www.justicaeleitoral.jus.br/tps/arquivos/2023/apresentacoes/teste-2023-CSEle-visao-geral-do-processo-eleitoral.pdf
@@ -249,6 +251,8 @@ You do not have to take anyone's word, including ours:
 [^pec]: Agência Câmara, "Câmara rejeita proposta que tornava obrigatório o voto impresso", 10 August 2021. https://www.camara.leg.br/noticias/792343-camara-rejeita-proposta-que-tornava-obrigatorio-o-voto-impresso/
 [^hack2018]: IstoÉ Dinheiro, quoting a TSE note, "Programa de urna eletrônica simplesmente não roda se for adulterado, afirma TSE", 5 August 2021. https://istoedinheiro.com.br/programa-de-urna-eletronica-simplesmente-nao-roda-se-for-adulterado-afirma-tse
 [^pl]: Poder360, "Moraes rejeita pedido para invalidar votos e multa PL em R$ 22 milhões", 23 November 2022. https://www.poder360.com.br/eleicoes/moraes-rejeita-pedido-para-invalidar-votos-e-multa-pl-em-r-22-milhoes/
+[^votseg]: TSE, "Votação segura" (undated; it describes processing at the regional courts, before centralisation). https://www.tse.jus.br/eleicoes/processo-eleitoral-brasileiro/votacao/votacao-segura
 [^nuncafraude]: TSE, "Série Desvendando a Urna: já foram comprovadas fraudes na urna eletrônica?", 22 October 2020 (updated 11 August 2022). https://www.tse.jus.br/comunicacao/noticias/2020/Outubro/serie-desvendando-a-urna-ja-foram-comprovadas-fraudes-na-urna-eletronica
 [^modelos26]: TSE, "Veja os modelos de urna que serão utilizados nas Eleições Gerais 2026", 20 August 2026. https://www.tse.jus.br/comunicacao/noticias/2026/Agosto/veja-os-modelos-de-urna-que-serao-utilizados-nas-eleicoes-gerais-2026
-[^paraguai]: TSE, Resolução nº 22.659, de 8 de novembro de 2007 (Petição 2.711). https://sintse.tse.jus.br/documentos/2007/Dez/21/diario-da-justica-secao-1/resolucao-no-22-659-de-8-de-novembro-de-2007-peticao-tribunal-superior-de-justica-eleitoral-da-repub
+[^defesa-tse]: Poder360, reproducing the TSE's note, "Relatório da Defesa destaca ausência de fraude na eleição, diz TSE", 9 November 2022. https://www.poder360.com.br/eleicoes/relatorio-da-defesa-destaca-ausencia-de-fraude-na-eleicao-diz-tse/
+[^defesa-note]: Ministério da Defesa, "Relatório das Forças Armadas não excluiu a possibilidade de fraude ou inconsistência nas urnas eletrônicas", 10 November 2022. https://www.gov.br/defesa/pt-br/centrais-de-conteudo/relatorio-das-forcas-armadas-nao-excluiu-a-possibilidade-de-fraude-ou-inconsistencia-nas-urnas-eletronicas

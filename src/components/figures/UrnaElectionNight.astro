@@ -2,31 +2,25 @@
 import Figure from './Figure.astro'
 
 // Minutes after 17:00 on 30 Oct 2022 (Brasília time).
-const marks = [
-  { t: 0, label: '17:00', note: 'polls close' },
-  { t: 176, label: '19:56', note: 'winner declared, 98.91% counted', accent: true },
-  { t: 438, label: '00:18', note: 'all 472,075 sections counted' },
-]
-const W = 400
-const x = (t: number) => 10 + (t / 438) * (W - 20)
+const x = (t: number) => 6 + (t / 438) * 348
 ---
 
 <Figure caption="Election night, 2022 presidential runoff. The winner was declared 2 hours and 56 minutes after the polls closed; every section was counted in 7 hours and 18 minutes.">
-  <svg viewBox="0 0 420 190" role="img" aria-labelledby="f-night-t f-night-d">
+  <svg viewBox="0 0 360 140" role="img" aria-labelledby="f-night-t f-night-d">
     <title id="f-night-t">How fast the 2022 runoff was counted</title>
     <desc id="f-night-d">A horizontal time axis from 17:00, when polls closed, to 00:18 the next day. At 19:56 the winner was declared with 98.91 percent of machines counted. At 00:18 all 472,075 sections had been counted.</desc>
-    <rect x={x(0)} y="70" width={x(176) - x(0)} height="18" rx="3" class="box-accent" />
-    <rect x={x(176)} y="70" width={x(438) - x(176)} height="18" rx="3" class="box" />
-    {
-      marks.map((m, i) => (
-        <g>
-          <path d={`M${x(m.t)} 60 V98`} class={m.accent ? 'wire-accent' : 'wire'} />
-          <text x={x(m.t)} y="48" text-anchor={i === 0 ? 'start' : i === 2 ? 'end' : 'middle'} class={m.accent ? 't-strong t-accent' : 't-strong'}>{m.label}</text>
-          <text x={x(m.t)} y={i === 1 ? 124 : 144} text-anchor={i === 0 ? 'start' : i === 2 ? 'end' : 'middle'} class="t-small t-muted">{m.note}</text>
-        </g>
-      ))
-    }
-    <text x={x(88)} y="84" text-anchor="middle" class="t-small t-on-accent">2 h 56 min</text>
-    <text x="10" y="180" class="t-small t-muted">30–31 October 2022, Brasília time</text>
+    <text x={x(0)} y="16" class="t-strong">17:00</text>
+    <text x={x(176)} y="16" text-anchor="middle" class="t-strong t-accent">19:56</text>
+    <text x={x(438)} y="16" text-anchor="end" class="t-strong">00:18</text>
+    <rect x={x(0)} y="34" width={x(176) - x(0)} height="26" rx="3" class="box-accent" />
+    <rect x={x(176)} y="34" width={x(438) - x(176)} height="26" rx="3" class="box-ground" />
+    <path d={`M${x(176)} 26 V68`} class="wire-accent" />
+    <text x={x(88)} y="52" text-anchor="middle" class="t-strong t-on-accent">2 h 56 min</text>
+    <text x={x(0)} y="92" class="t-small t-muted">polls close</text>
+    <text x={x(176)} y="92" text-anchor="middle" class="t-small t-muted">winner declared</text>
+    <text x={x(176)} y="108" text-anchor="middle" class="t-small t-muted">98.91% counted</text>
+    <text x={x(438)} y="92" text-anchor="end" class="t-small t-muted">all 472,075</text>
+    <text x={x(438)} y="108" text-anchor="end" class="t-small t-muted">sections counted</text>
+    <text x={x(0)} y="134" class="t-small t-muted">30–31 October 2022, Brasília time</text>
   </svg>
 </Figure>

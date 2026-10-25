@@ -4,30 +4,18 @@ import Figure from './Figure.astro'
 
 const steps = [
   { when: '7:00', what: 'Zerésima printed', note: 'Proof the machine holds zero votes' },
-  { when: 'Day', what: 'Voter identified', note: "Fingerprint at the poll worker's terminal" },
-  {
-    when: 'Day',
-    what: 'Vote typed and confirmed',
-    note: 'Stored in the RDV, not in arrival order',
-  },
+  { when: '8–17', what: 'Voter identified', note: 'Fingerprint, where biometrics are used' },
+  { when: '', what: 'Vote typed and confirmed', note: 'Stored in the RDV, not in arrival order' },
   {
     when: '17:00',
     what: 'Results printout (BU)',
-    note: '5+ copies, one posted, with QR code',
+    note: '5+ copies, one posted, QR code',
     accent: true,
   },
+  { when: '', what: 'Result stick taken away', note: 'The machine itself never goes online' },
+  { when: '', what: 'Signature checked, sent by VPN', note: 'Unsigned media is refused' },
   {
-    when: 'Night',
-    what: 'Result stick to transmission point',
-    note: 'The machine itself never goes online',
-  },
-  {
-    when: 'Night',
-    what: 'Signature checked, sent by VPN',
-    note: 'JE-Connect; unsigned media is refused',
-  },
-  {
-    when: 'Night',
+    when: '',
     what: 'Counted centrally at the TSE',
     note: 'Published live, section by section',
     accent: true,
@@ -36,20 +24,20 @@ const steps = [
 ---
 
 <Figure caption="The life of a vote, from the zero report in the morning to the national result at night. Anyone can compare the posted printout with the published result for that section.">
-  <svg viewBox="0 0 420 470" role="img" aria-labelledby="f-vote-t f-vote-d">
+  <svg viewBox="0 0 360 470" role="img" aria-labelledby="f-vote-t f-vote-d">
     <title id="f-vote-t">The life of a vote in Brazil</title>
-    <desc id="f-vote-d">Seven steps from top to bottom. At 7:00 the zero report, the zerésima, is printed to prove the machine holds no votes. During the day the voter is identified by fingerprint at the poll worker's terminal, then types and confirms the vote, which is stored in the digital vote record, not in arrival order. At 17:00 the machine prints the results report, the BU, in five or more copies, one posted, with a QR code. At night a USB result stick, not the machine, goes to a transmission point; its signature is checked and it is sent by VPN using JE-Connect; unsigned media is refused. Finally the votes are counted centrally at the TSE and published live, section by section.</desc>
+    <desc id="f-vote-d">Seven steps from top to bottom. At 7:00 the zero report, the zerésima, is printed to prove the machine holds no votes. Between 8:00 and 17:00 the voter is identified at the poll worker's terminal, by fingerprint where biometrics are used, then types and confirms the vote, which is stored in the digital vote record, not in arrival order. At 17:00 the machine prints the results report, the BU, in five or more copies, one posted, with a QR code. Then a USB result stick, not the machine, is taken to a transmission point; its signature is checked and it is sent by VPN; unsigned media is refused. Finally the votes are counted centrally at the TSE and published live, section by section.</desc>
     <defs><Arrow id="f-vote-a" /></defs>
     {
       steps.map((s, i) => {
-        const y = i * 66
+        const y = i * 66 + 2
         return (
           <g>
-            <text x="0" y={y + 30} class={s.accent ? 't-strong t-accent' : 't-strong t-muted'}>{s.when}</text>
-            <rect x="64" y={y} width="356" height="50" rx="6" class={s.accent ? 'box-accent' : 'box'} />
-            <text x="80" y={y + 21} class={s.accent ? 't-strong t-on-accent' : 't-strong'}>{s.what}</text>
-            <text x="80" y={y + 39} class={s.accent ? 't-small t-on-accent' : 't-small t-muted'}>{s.note}</text>
-            {i < steps.length - 1 && <path d={`M240 ${y + 51} V${y + 64}`} class="wire" marker-end="url(#f-vote-a)" />}
+            <text x="4" y={y + 30} class={s.accent ? 't-strong t-accent' : 't-strong t-muted'}>{s.when}</text>
+            <rect x="60" y={y} width="294" height="50" rx="6" class={s.accent ? 'box-accent' : 'box'} />
+            <text x="74" y={y + 21} class={s.accent ? 't-strong t-on-accent' : 't-strong'}>{s.what}</text>
+            <text x="74" y={y + 39} class={s.accent ? 't-small t-on-accent' : 't-small t-muted'}>{s.note}</text>
+            {i < steps.length - 1 && <path d={`M207 ${y + 51} V${y + 64}`} class="wire" marker-end="url(#f-vote-a)" />}
           </g>
         )
       })

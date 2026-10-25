@@ -2,12 +2,8 @@
 import Figure from './Figure.astro'
 
 const steps = [
-  {
-    when: '1932',
-    what: 'Electoral Code foresees "voting machines"',
-    note: 'None adopted for decades.',
-  },
-  { when: '1985', what: 'One national voter registry', note: '70 million voters.' },
+  { when: '1932', what: 'Code foresees "voting machines"', note: 'None adopted for decades.' },
+  { when: '1985', what: 'One national voter registry', note: '70 million voters.', gap: true },
   {
     when: '1989',
     what: 'Brusque: one polling station',
@@ -16,43 +12,40 @@ const steps = [
   {
     when: '1996',
     what: 'First urna, 57 cities',
-    note: 'More than 32 million voters, a third of the electorate.',
+    note: 'More than 32 million voters.',
     accent: true,
   },
   { when: '2000', what: 'First 100% electronic election', note: 'Every municipality.' },
   { when: '2008', what: 'Linux and biometrics', note: 'Biometric pilot in three towns.' },
-  {
-    when: '2009',
-    what: 'Security chip, chain of trust',
-    note: 'Each component checks the next at start-up.',
-  },
+  { when: '2009', what: 'Security chip', note: 'Each component checks the next.' },
   {
     when: '2026',
-    what: '563,910 machines',
+    what: '563,910 machines planned',
     note: '14 models, 1,487,115 made since 1996.',
     accent: true,
   },
 ]
+const y = (i: number) => i * 66 + 12 + (i >= 1 ? 20 : 0)
 ---
 
-<Figure caption="From a 1932 promise to a nationwide system. Each step is sourced in the text below.">
-  <svg viewBox="0 0 420 540" role="img" aria-labelledby="f-utl-t f-utl-d">
+<Figure caption="From a 1932 promise to a nationwide system. Each step is sourced in the article.">
+  <svg viewBox="0 0 360 540" role="img" aria-labelledby="f-utl-t f-utl-d">
     <title id="f-utl-t">Timeline of Brazil's electronic voting</title>
-    <desc id="f-utl-d">A vertical timeline. 1932: the Electoral Code foresees voting machines, none adopted for decades. 1985: a single national voter registry of 70 million. 1989: Brusque collects one polling station's votes on a microcomputer. 1996: the first urna, in 57 cities, with more than 32 million voters. 2000: the first fully electronic election. 2008: Linux and the first biometric pilot. 2009: a security chip and the chain of trust. 2026: 563,910 machines in use; 14 models and 1,487,115 machines made since 1996.</desc>
-    <path d="M10 10 V500" class="wire" />
+    <desc id="f-utl-d">A vertical timeline. 1932: the Electoral Code foresees voting machines, none adopted for decades. A break marks 53 years. 1985: a single national voter registry of 70 million. 1989: Brusque collects one polling station's votes on a microcomputer. 1996: the first urna, in 57 cities, with more than 32 million voters. 2000: the first fully electronic election. 2008: Linux and the first biometric pilot. 2009: a security chip; each component checks the next at start-up. 2026: 563,910 machines planned; 14 models and 1,487,115 machines made since 1996.</desc>
+    <path d={`M10 ${y(0)} V${y(0) + 34}`} class="wire" />
+    <path d={`M10 ${y(0) + 34} V${y(1) - 14}`} class="wire dash" />
+    <text x="32" y={y(1) - 22} class="t-small t-muted">⋯ 53 years later</text>
+    <path d={`M10 ${y(1) - 14} V${y(steps.length - 1)}`} class="wire" />
     {
-      steps.map((s, i) => {
-        const y = i * 68 + 10
-        return (
-          <g>
-            <circle cx="10" cy={y} r={s.accent ? 8 : 6} class={s.accent ? 'dot-accent' : 'dot'} />
-            <text x="32" y={y + 5} class="t-strong">
-              <tspan class={s.accent ? 't-accent' : ''}>{s.when}</tspan> · {s.what}
-            </text>
-            <text x="32" y={y + 26} class="t-small t-muted">{s.note}</text>
-          </g>
-        )
-      })
+      steps.map((s, i) => (
+        <g>
+          <circle cx="10" cy={y(i)} r={s.accent ? 8 : 6} class={s.accent ? 'dot-accent' : 'dot'} />
+          <text x="32" y={y(i) + 5} class="t-strong">
+            <tspan class={s.accent ? 't-accent' : ''}>{s.when}</tspan> · {s.what}
+          </text>
+          <text x="32" y={y(i) + 26} class="t-small t-muted">{s.note}</text>
+        </g>
+      ))
     }
   </svg>
 </Figure>
