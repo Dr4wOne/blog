@@ -13,15 +13,15 @@ const rows = [
     note: 'draws every frame',
     accent: true,
   },
-  { stage: 'Assembler, linker', video: 'FFmpeg', note: 'encodes, joins pieces' },
-  { stage: 'Incremental build', video: 'Segment cache', note: 'redraws changed scenes' },
+  { stage: 'Pack into one file', video: 'FFmpeg', note: 'encodes, joins pieces' },
+  { stage: 'Rebuild what changed', video: 'Segment cache', note: 'redraws changed scenes' },
 ]
 ---
 
 <Figure caption="My video pipeline has the same shape as a compiler. The storyboard is the source code, and render(t) does the code generation: it turns a plan into pictures.">
   <svg viewBox="0 0 400 386" role="img" aria-labelledby="f-vidc-t f-vidc-d">
     <title id="f-vidc-t">A video pipeline shaped like a compiler</title>
-    <desc id="f-vidc-d">Six rows, compiler stage on the left, video pipeline step on the right. Source code matches storyboard.json, the file with scenes, text and timings. Meaning check matches lint:blueprint, a required check of the storyboard and its plan before a video goes to review. In-between form matches the timeline, which gives each scene its start frame. Code generation matches render(t), which draws every frame. Assembler and linker match FFmpeg, which encodes the frames and joins the pieces. Incremental build matches the segment cache, which redraws only the scenes that changed.</desc>
+    <desc id="f-vidc-d">Six rows, compiler stage on the left, video pipeline step on the right. Source code matches storyboard.json, the file with scenes, text and timings. Meaning check matches lint:blueprint, a required check of the storyboard and its plan before a video goes to review. In-between form matches the timeline, which gives each scene its start frame. Code generation matches render(t), which draws every frame. Packing into one file matches FFmpeg, which encodes the frames and joins the pieces. Rebuilding only what changed matches the segment cache, which redraws only the scenes that changed.</desc>
     <text x="0" y="16" class="t-small t-muted">Compiler</text>
     <text x="172" y="16" class="t-small t-muted">dr4w-motion</text>
     {

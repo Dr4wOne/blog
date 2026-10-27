@@ -68,7 +68,7 @@ Every compiler, big or small, does roughly the same steps in the same order. The
 total = price + price * rate // 100
 ```
 
-(Python writes whole-number division as `//`; Java and Go write `/`.) The tool prints one token per row. The numbers on the left are positions: `1,0-1,5` means line 1, from character 0 to character 5.
+(Python writes whole-number division as `//`; Java and Go write `/`.) The tool prints one token per row, after its position in the line.
 
 ```text
 $ python3 -m tokenize line.py
@@ -106,7 +106,7 @@ BinOp(
 
 **3. Checking the meaning.** A sentence can be grammatical and still make no sense: "the price ate the tax". Here the compiler checks things like **types**, the kind of value each name holds. `price` and `rate` are whole numbers, so multiplying them is allowed and the result is a whole number. In Go or Java, passing a word where a number belongs is refused with an error message, and nothing is built. Go calls this step type checking.[^gocompile]
 
-**4. An in-between form.** The tree is now rewritten into a simpler language the compiler uses only for itself, called an **intermediate representation**, or IR. It looks like a list of tiny steps, each with a numbered scratch value: first `t1 = price * rate`, then `t2 = t1 / 100`, then `t3 = price + t2`. Go's version is called SSA (static single assignment), where each scratch value is written exactly once.[^gocompile] This form is far easier to improve and to translate than the original text.
+**4. An in-between form.** The tree is now rewritten into a simpler language the compiler uses only for itself, called an **intermediate representation**, or IR. It looks like a list of tiny steps, each with a numbered scratch value: first `t1 = price * rate`, then `t2 = t1 / 100`, then `t3 = price + t2`. Go's compiler uses a form like this, where each scratch value is written exactly once.[^gocompile] This form is far easier to improve and to translate than the original text.
 
 **5. Optimizing.** **Optimizing** means rewriting the steps so the program runs faster or smaller, without changing what it does. A small example from my Go program: dividing is slow for a processor, so the Go compiler replaced "divide by 100" with a multiplication by a large, carefully chosen number, followed by a "shift" (a cheap instruction that moves the digits of a number, like dividing by ten by dropping the last digit). It gives the same answer, faster.[^granlund] Another: it saw that `total(200, 10)` always gives 220 and wrote the number 220 straight into the program.
 
@@ -122,7 +122,7 @@ Not every language runs all six steps before you press "go". There are three com
 
 **Interpreting.** An **interpreter** is a program that reads instructions and carries them out one at a time, while the program runs, without producing a machine-code file. It is a translator who stands next to the cook and reads each line aloud as the cooking happens. It needs no separate build step and is flexible, but the translating never stops, so programs generally run more slowly.[^pyglossary]
 
-**Bytecode and a virtual machine.** Many popular languages mix the two. A compiler does the first steps and writes **bytecode**: instructions for an imaginary, simplified processor, designed so that any real computer can run them. A program called a **virtual machine** (VM) then runs that bytecode on the real chip. In the kitchen, the recipe is written in a shorthand that every local helper can read.
+**Bytecode and a virtual machine.** Many popular languages, Java and Python among them, mix the two. A compiler does the first steps and writes **bytecode**: instructions for an imaginary, simplified processor, designed so that any real computer can run them. A program called a **virtual machine** (VM) then runs that bytecode on the real chip. In the kitchen, the recipe is written in a shorthand that every local helper can read.
 
 **Just in time.** Java's VM goes one step further. At first it interprets the bytecode, one instruction at a time, just like Python. Meanwhile it watches which parts run most often, the "hot" parts, and compiles those into real machine code while the program is running. That is called **just-in-time** (JIT) compilation.[^javaman] The helper notices the same sauce being made every day and writes out a full translation of that one page.
 
@@ -148,7 +148,11 @@ public class Tax {
 }
 ```
 
-Java needs a little more ceremony: everything lives inside a `class`, and `System.out.println` prints. `javac Tax.java` compiles it into `Tax.class`, a file of Java bytecode, 456 bytes long.[^javac] The command `javap -c` shows what is inside, in readable form (trimmed to the `total` function):[^javap]
+Java needs a little more ceremony: everything lives inside a `class`, a named container for related functions, and `System.out.println` prints. `javac Tax.java` compiles it into `Tax.class`, a file of Java bytecode, 456 bytes long.[^javac] Inside, `total` has become eight small bytecode instructions: load, load, load, multiply, load 100, divide, add, return.
+
+<DeepDive title="Deep dive: Java's bytecode">
+
+The command `javap -c` shows the bytecode in readable form (trimmed to the `total` function).[^javap] `iload` puts a number on a pile (a "stack"), `bipush 100` puts the number 100 there, `imul` multiplies the top two, `idiv` divides, `iadd` adds, `ireturn` hands back the answer.[^jvms6]
 
 ```text
 $ javap -c Tax.class
@@ -164,9 +168,11 @@ $ javap -c Tax.class
        8: ireturn
 ```
 
-Eight instructions. `iload` puts a number on a pile (a "stack"), `bipush 100` puts the number 100 there, `imul` multiplies the top two, `idiv` divides, `iadd` adds, `ireturn` hands back the answer.[^jvms6] Notice that this is still not Intel or ARM code. The Java specification says it plainly: the Java Virtual Machine "knows nothing of the Java programming language, only of a particular binary format, the class file format".[^jvms1] The same `Tax.class` runs on any computer that has a Java VM.
+</DeepDive>
 
-To watch the JIT at work, I called `total` a million times in a loop. Java compiled it twice: first a quick version, then, because it stayed busy, a better one.[^tiered]
+Notice that this is still not Intel or ARM code. The Java specification says it plainly: the Java Virtual Machine "knows nothing of the Java programming language"; it only reads class files like this one.[^jvms1] The same `Tax.class` runs on any computer that has a Java VM.
+
+To watch the JIT at work, I called `total` a million times in a loop (a piece of code that repeats). Java compiled it twice: first a quick version, then, because it stayed busy, a better one.[^tiered]
 
 <DeepDive title="Deep dive: the JIT log">
 
@@ -203,7 +209,7 @@ print(total(200, 10))
      14 RETURN_VALUE
 ```
 
-Eight instructions again, and almost the same ones as Java: load, load, load, multiply, load 100, divide, add, return. The difference is what happens next. In Python 3.10 the interpreter carries out these instructions one by one, every time, and never turns them into machine code. Python 3.13 added an experimental JIT, switched off unless Python is built with it.[^pep744]
+Eight instructions again, doing the same steps as Java: load, load, load, multiply, load 100, divide, add, return. The difference is what happens next. In Python 3.10 the interpreter carries out these instructions one by one, every time, and never turns them into machine code. Python 3.13 added an experimental JIT, switched off unless Python is built with it.[^pep744]
 
 ### Go: machine code, ahead of time
 
@@ -305,7 +311,12 @@ I make videos with code, and I described how in [issue 4, Videos drawn with code
 | Binary, executable | A file of machine code for one kind of chip and one operating system |
 | Compiler | A program that translates source code before it runs |
 | Interpreter | A program that carries out instructions one at a time while the program runs |
+| Token | One word of a program, such as a name, a number or `+` |
+| Syntax tree | A diagram of which parts of a line belong together, and in what order |
+| IR | The compiler's own in-between form: a list of tiny steps |
+| Ahead of time | Translating the whole program before it runs |
 | Bytecode | Instructions for an imaginary processor, run by a virtual machine |
+| Virtual machine | A program that runs bytecode on the real chip |
 | JIT | Compiling the busy parts to machine code while the program runs |
 | Type | The kind of value a name holds, such as a whole number or text |
 
