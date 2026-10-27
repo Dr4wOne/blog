@@ -71,7 +71,7 @@ main {
   color: var(--ink);
 }
 .site-footer {
-  padding-block: 5rem 3rem;
+  padding-block: 5rem 2rem;
   font-size: var(--step-small);
   color: var(--muted);
 }

@@ -1,9 +1,12 @@
 ---
+updated: 2026-10-27
+published: 2026-10-27
+issue: 7
 slug: how-compilers-work
-title: How a compiler works, from zero
+title: Inside a compiler
 summary: "Computers cannot read the code people write. A compiler translates it, step by step. What each step does, and how Java, Python and Go run the same tiny program."
-tags: [programming, compilers, java, python, go]
-draft: true
+tags: [programming, compilers, java, python, golang]
+draft: false
 ---
 
 import Aside from '../../../components/Aside.astro'
@@ -227,7 +230,6 @@ $ ./tax
 
 That file is called an **executable**, or a **binary**: a program ready to start. It contains machine code for one family of chips, here x86-64, the family of Intel and AMD processors. It is packed in the file format that one operating system knows how to start: ELF on Linux, with different formats on Windows and macOS. So the same file will not run on a phone's ARM chip or on Windows. Go can build a separate binary for each, chosen with two settings: `GOOS` for the operating system and `GOARCH` for the chip.[^goenv]
 
-It is 2.3 MB for a program that prints one number, because Go copies everything the program needs into that one file, including the Go runtime, its built-in helper code, plus type and debugging information. Go's documentation calls this "statically-linked".[^gofaq] The good side: you can copy that single file to another Linux computer with the same kind of chip and run it, with nothing else installed.
 
 The Go compiler can also print the machine code it wrote. It confirms both tricks from step 5: the division became a multiply and a shift, and the compiler did the sum while building, so the finished program simply contains the answer, 220.[^gocmd]
 
@@ -249,7 +251,11 @@ main.total STEXT nosplit size=45 …
 
 </DeepDive>
 
+The `tax` file is 2.3 MB for a program that prints one number, because Go copies everything the program needs into that one file, including the Go runtime, its built-in helper code, plus type and debugging information. Go's documentation calls this "statically-linked".[^gofaq] The good side: you can copy that single file to another Linux computer with the same kind of chip and run it, with nothing else installed.
+
 **In one line:** Java and Python both make bytecode; Java's VM compiles the busy parts at run time, Python 3.10 interprets, and Go hands over a finished binary.
+
+All three print the same 220. The difference is when the work happens: before you run the program, while it runs, or a bit of both. That timing also decides when you find out about a mistake.
 
 ## Errors: caught early or caught late
 
