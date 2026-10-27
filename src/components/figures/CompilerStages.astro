@@ -1,0 +1,37 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+// One statement, seven stages. Tokens and tree mirror Python's tokenize and ast output for this line;
+// machine code from `go build -gcflags=-S` (projects/inbox/07-examples in dr4w-motion).
+const stages = [
+  { name: 'Source code', sample: 'price + price * rate / 100' },
+  { name: '1. Tokens', sample: 'price | + | price | * | rate | / | 100' },
+  { name: '2. Tree', sample: 'price + ((price * rate) / 100)' },
+  { name: '3. Meaning check', sample: 'price: int, rate: int, result: int' },
+  { name: '4. In-between form', sample: 't1 = price*rate; t2 = t1/100' },
+  { name: '5. Optimize', sample: '/100 becomes multiply and shift' },
+  { name: '6. Machine code', sample: 'IMULQ AX, BX ... RET', accent: true },
+]
+---
+
+<Figure caption="One line of code on its way through a compiler. Each stage keeps the meaning and changes the form, until only instructions the processor understands are left.">
+  <svg viewBox="0 0 400 470" role="img" aria-labelledby="f-stages-t f-stages-d">
+    <title id="f-stages-t">The stages of a compiler</title>
+    <desc id="f-stages-d">Seven boxes from top to bottom, each showing the same line, price plus price times rate divided by 100, in a new form. Source code: the characters as typed. Tokens: the words price, plus, price, times, rate, divide, 100. Tree: the grouping, price times rate first, then divided by 100, then added to price. Meaning check: price and rate are whole numbers, so the result is a whole number. In-between form: small numbered steps, t1 equals price times rate, t2 equals t1 divided by 100. Optimize: the division by 100 becomes a faster multiply and shift. Machine code: processor instructions, from IMULQ to RET.</desc>
+    <defs><Arrow id="f-stages-a" /></defs>
+    {
+      stages.map((s, i) => {
+        const y = i * 66 + 2
+        return (
+          <g>
+            <rect x="0" y={y} width="400" height="52" rx="6" class={s.accent ? 'box-accent' : 'box'} />
+            <text x="14" y={y + 21} class={s.accent ? 't-strong t-on-accent' : 't-strong'}>{s.name}</text>
+            <text x="14" y={y + 41} class={s.accent ? 't-mono t-on-accent' : 't-mono'}>{s.sample}</text>
+            {i < stages.length - 1 && <path d={`M200 ${y + 53} V${y + 64}`} class="wire" marker-end="url(#f-stages-a)" />}
+          </g>
+        )
+      })
+    }
+  </svg>
+</Figure>

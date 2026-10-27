@@ -1,0 +1,67 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+// Three ways to run the same program. Sizes come from projects/inbox/07-examples in dr4w-motion.
+const routes = [
+  {
+    lang: 'Go',
+    steps: [
+      { title: 'go build', lines: ['translates once,', 'ahead of time'] },
+      { title: 'tax', lines: ['2.3 MB file of', 'machine code'] },
+      { title: 'Processor', lines: ['runs it directly,', 'no helper needed'] },
+    ],
+  },
+  {
+    lang: 'Java',
+    steps: [
+      { title: 'javac', lines: ['translates to', 'bytecode'] },
+      { title: 'Tax.class', lines: ['456 bytes of', 'bytecode'] },
+      { title: 'Java VM', lines: ['interprets, then', 'compiles hot parts'] },
+    ],
+  },
+  {
+    lang: 'Python',
+    steps: [
+      { title: 'python3', lines: ['translates to', 'bytecode on start'] },
+      { title: 'bytecode', lines: ['kept in memory,', 'or cached as .pyc'] },
+      { title: 'Interpreter', lines: ['runs one', 'instruction at a time'] },
+    ],
+  },
+]
+const W = 128
+const GAP = 8
+---
+
+<Figure caption="The same program, three routes. Go hands the processor finished machine code. Java and Python stop halfway, at bytecode, and bring a program that runs it: Java's virtual machine compiles the busy parts while it runs; CPython 3.10 interprets every instruction.">
+  <svg viewBox="0 0 400 330" role="img" aria-labelledby="f-routes-t f-routes-d">
+    <title id="f-routes-t">Three ways to run code: Go, Java and Python</title>
+    <desc id="f-routes-d">Three columns. Go: go build translates once, ahead of time, into a 2.3 megabyte file of machine code, which the processor runs directly. Java: javac translates to bytecode, a 456 byte class file, which the Java virtual machine interprets and, for the parts that run often, compiles to machine code while the program runs. Python: python3 translates the program to bytecode each time it starts, keeps it in memory or caches it in a pyc file, and the interpreter runs one bytecode instruction at a time.</desc>
+    <defs><Arrow id="f-routes-a" /></defs>
+    {
+      routes.map((r, c) => {
+        const x = c * (W + GAP)
+        const cx = x + W / 2
+        return (
+          <g>
+            <text x={cx} y="18" text-anchor="middle" class="t-strong t-large">{r.lang}</text>
+            {r.steps.map((s, i) => {
+              const y = 34 + i * 100
+              const last = i === r.steps.length - 1
+              return (
+                <g>
+                  <rect x={x} y={y} width={W} height="72" rx="6" class={last ? 'box-accent' : 'box'} />
+                  <text x={cx} y={y + 22} text-anchor="middle" class={last ? 't-strong t-on-accent' : 't-strong'}>{s.title}</text>
+                  {s.lines.map((l, k) => (
+                    <text x={cx} y={y + 42 + k * 16} text-anchor="middle" class={last ? 't-small t-on-accent' : 't-small t-muted'}>{l}</text>
+                  ))}
+                  {!last && <path d={`M${cx} ${y + 73} V${y + 98}`} class="wire" marker-end="url(#f-routes-a)" />}
+                </g>
+              )
+            })}
+          </g>
+        )
+      })
+    }
+  </svg>
+</Figure>
