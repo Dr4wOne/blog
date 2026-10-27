@@ -7,6 +7,7 @@ draft: true
 ---
 
 import Aside from '../../../components/Aside.astro'
+import DeepDive from '../../../components/DeepDive.astro'
 import CompilerStages from '../../../components/figures/CompilerStages.astro'
 import ThreeRoutes from '../../../components/figures/ThreeRoutes.astro'
 import VideoCompiler from '../../../components/figures/VideoCompiler.astro'
@@ -84,7 +85,7 @@ The full output (trimmed here) has nine tokens: four names (`total`, `price`, `p
 
 **2. Building a tree.** Next comes **parsing**: arranging the tokens into a **syntax tree**, a diagram of what belongs to what, like the grammar diagrams some of us drew at school. The tree decides the order. Multiplication and division come before addition, so `price*rate` is grouped first, then divided by 100, then added to `price`.[^ast]
 
-<Aside title="Deep dive: Python's tree for this line">
+<DeepDive title="Deep dive: Python's tree for this line">
 
 Python prints its tree with `ast.dump`. Read it from the inside out: multiply, then divide, then add. `BinOp` means "an operation with two sides".
 
@@ -101,7 +102,7 @@ BinOp(
     right=Constant(value=100)))
 ```
 
-</Aside>
+</DeepDive>
 
 **3. Checking the meaning.** A sentence can be grammatical and still make no sense: "the price ate the tax". Here the compiler checks things like **types**, the kind of value each name holds. `price` and `rate` are whole numbers, so multiplying them is allowed and the result is a whole number. In Go or Java, passing a word where a number belongs is refused with an error message, and nothing is built. Go calls this step type checking.[^gocompile]
 
@@ -167,7 +168,7 @@ Eight instructions. `iload` puts a number on a pile (a "stack"), `bipush 100` pu
 
 To watch the JIT at work, I called `total` a million times in a loop. Java compiled it twice: first a quick version, then, because it stayed busy, a better one.[^tiered]
 
-<Aside title="Deep dive: the JIT log">
+<DeepDive title="Deep dive: the JIT log">
 
 `-XX:+PrintCompilation` prints a line each time a method is compiled.[^javaman] I kept only the `TaxLoop` lines. The third number is the level: 3 is the quick compiler with profiling, 4 the fully optimizing one.[^tiers] "9 bytes" is the size of `total`'s bytecode.
 
@@ -178,7 +179,7 @@ $ java -XX:+PrintCompilation TaxLoop | grep TaxLoop::
 …
 ```
 
-</Aside>
+</DeepDive>
 
 ### Python: bytecode, then an interpreter
 
@@ -224,7 +225,7 @@ It is 2.3 MB for a program that prints one number, because Go copies everything 
 
 The Go compiler can also print the machine code it wrote. It confirms both tricks from step 5: the division became a multiply and a shift, and the compiler did the sum while building, so the finished program simply contains the answer, 220.[^gocmd]
 
-<Aside title="Deep dive: Go's machine code">
+<DeepDive title="Deep dive: Go's machine code">
 
 From `go build -a -gcflags=-S` (directives, addresses and file names trimmed). The giant number replaces "divide by 100"; `SARQ` is the shift. In `main`, the call to `total` is gone: the compiler copied the function into place ("inlining") and worked out the result, so the code just says `MOVL $220, AX`, "put 220 in a slot".
 
@@ -240,7 +241,7 @@ main.total STEXT nosplit size=45 …
   RET
 ```
 
-</Aside>
+</DeepDive>
 
 **In one line:** Java and Python both make bytecode; Java's VM compiles the busy parts at run time, Python 3.10 interprets, and Go hands over a finished binary.
 
