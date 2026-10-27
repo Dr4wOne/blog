@@ -13,11 +13,11 @@ import VideoCompiler from '../../../components/figures/VideoCompiler.astro'
 
 <Aside title="In short">
 
-People write programs as text. A processor only understands long lists of tiny numbered instructions. A compiler is the program that translates one into the other, in a fixed order of steps: it splits the text into words, works out the grammar, checks that it makes sense, rewrites it into a simpler in-between form, improves it, and finally writes instructions. Go does all of this before the program ever runs. Java and Python stop halfway, at a form called bytecode, and bring a helper program that runs it. Every example here was run on my laptop, and the outputs are real.
+People write programs as text. A processor only understands long lists of tiny numbered instructions. A compiler is the program that translates one into the other, in a fixed order of steps: it splits the text into words, works out the grammar, checks that it makes sense, rewrites it into a simpler in-between form, improves it, and finally writes instructions. Go does all of this before the program ever runs. Java and Python stop halfway, at a form called bytecode, and bring a helper program that runs it. Every example here was run on my laptop, and the outputs are real. A short glossary sits at the end, in the [recap](#recap).
 
 </Aside>
 
-You use compiled programs all day: your browser, your phone's apps, the software in your car. None of them were written in the language the machine runs. This post explains, from zero, what happens in between. You do not need to have written a line of code.
+You use compiled programs all day: your browser, your phone's apps, the software in your car. Almost all of their code was written in a language the machine cannot run. This post explains, from zero, what happens in between. You do not need to have written a line of code.
 
 ## What code is
 
@@ -26,6 +26,10 @@ Code, or **source code**, is a set of instructions for a computer, written by a 
 Here is a complete program in Go, one of the three languages in this post. It works out a price with tax, in cents: 200 cents plus 10 percent.
 
 ```go
+package main
+
+import "fmt"
+
 func total(price, rate int) int {
 	return price + price*rate/100
 }
@@ -35,13 +39,13 @@ func main() {
 }
 ```
 
-`total` is a **function**: a named, reusable recipe that takes inputs (`price` and `rate`) and gives back a result. `int` means a whole number. `main` is where the program starts, and `fmt.Println` prints the answer on the screen: `220`.
+`func total` defines a **function**: a named, reusable recipe that takes inputs (`price` and `rate`) and gives back a result. `int` means a whole number. `*` means multiply, `/` means divide, and `return` hands the result back. `main` is where the program starts, and `fmt.Println` prints the answer on the screen: `220`. The first two lines say "this is a program" and "I will use the printing toolbox, `fmt`".
 
 A person can read this. A processor cannot.
 
 ## Why the computer can't read it
 
-The **processor** (or CPU) is the chip that does the work. It understands one thing only: **machine code**, a list of very small instructions, each stored as a few bytes (numbers from 0 to 255). Each instruction does almost nothing: copy a number into a slot, multiply two slots, jump to another instruction. Different families of processors, such as the Intel chip in my laptop and the ARM chip in a phone, understand different instructions.
+The **processor** (or CPU) is the chip that does the work. It understands one thing only: **machine code**, a list of very small instructions, each stored as a few bytes (numbers from 0 to 255). Each instruction does almost nothing: copy a number into one of the chip's few storage slots, multiply two slots, jump to another instruction. Different families of processors, such as the Intel chip in my laptop and the ARM chip in a phone, understand different instructions.
 
 So the word `price` means nothing to the chip. Neither does `+`, or the idea of a function. Someone has to translate.
 
@@ -57,7 +61,13 @@ Every compiler, big or small, does roughly the same steps in the same order. The
 
 <CompilerStages />
 
-**1. Splitting into tokens.** At first the compiler sees only characters: `p`, `r`, `i`, `c`, `e`, a space, `+`. The first step, called **lexing**, groups them into **tokens**, the words of the language. Python comes with a tool that shows this step.[^tokenize] For the Python version of the line, it prints (trimmed):
+**1. Splitting into tokens.** At first the compiler sees only characters: `p`, `r`, `i`, `c`, `e`, a space, `+`. The first step, called **lexing**, groups them into **tokens**, the words of the language. Python comes with a tool that shows this step.[^tokenize] Here is the Python version of our line, saved in a file called `line.py`:
+
+```python
+total = price + price * rate // 100
+```
+
+(Python writes whole-number division as `//`; Java and Go write `/`.) The tool prints one token per row. The numbers on the left are positions: `1,0-1,5` means line 1, from character 0 to character 5.
 
 ```text
 $ python3 -m tokenize line.py
@@ -70,9 +80,13 @@ $ python3 -m tokenize line.py
 1,32-1,35: NUMBER   '100'
 ```
 
-Nine tokens: four names, four operators and one number. Spaces are gone; they only separate words. (Python writes whole-number division as `//`; Java and Go write `/`.)
+The full output (trimmed here) has nine tokens: four names (`total`, `price`, `price`, `rate`), four operators (`=`, `+`, `*`, `//`) and one number. Spaces are gone; they only separate words.
 
-**2. Building a tree.** Next comes **parsing**: arranging the tokens into a **syntax tree**, a diagram of what belongs to what, like the grammar diagrams some of us drew at school. The tree decides the order. Multiplication and division come before addition, so `price*rate` is grouped first, then divided by 100, then added to `price`. Python can show its tree too:[^ast]
+**2. Building a tree.** Next comes **parsing**: arranging the tokens into a **syntax tree**, a diagram of what belongs to what, like the grammar diagrams some of us drew at school. The tree decides the order. Multiplication and division come before addition, so `price*rate` is grouped first, then divided by 100, then added to `price`.[^ast]
+
+<Aside title="Deep dive: Python's tree for this line">
+
+Python prints its tree with `ast.dump`. Read it from the inside out: multiply, then divide, then add. `BinOp` means "an operation with two sides".
 
 ```text
 BinOp(
@@ -87,13 +101,13 @@ BinOp(
     right=Constant(value=100)))
 ```
 
-`BinOp` means "an operation with two sides", and `ctx=Load()` means "read this value". Read it from the inside out: multiply, then divide, then add.
+</Aside>
 
-**3. Checking the meaning.** A sentence can be grammatical and still make no sense: "the price ate the tax". Here the compiler checks things like **types**, the kind of value each name holds. `price` and `rate` are whole numbers, so multiplying them is allowed and the result is a whole number. Trying to multiply a word by a number is refused, with an error message, and nothing is built. Go calls this step type checking.[^gocompile]
+**3. Checking the meaning.** A sentence can be grammatical and still make no sense: "the price ate the tax". Here the compiler checks things like **types**, the kind of value each name holds. `price` and `rate` are whole numbers, so multiplying them is allowed and the result is a whole number. In Go or Java, passing a word where a number belongs is refused with an error message, and nothing is built. Go calls this step type checking.[^gocompile]
 
-**4. An in-between form.** The tree is now rewritten into a simpler language the compiler uses only for itself, called an **intermediate representation**, or IR. It looks like a list of tiny steps, each with a numbered scratch value: first `t1 = price * rate`, then `t2 = t1 / 100`, then `t3 = price + t2`. Go uses a form called SSA, where each scratch value is written exactly once.[^gocompile] This form is far easier to improve and to translate than the original text.
+**4. An in-between form.** The tree is now rewritten into a simpler language the compiler uses only for itself, called an **intermediate representation**, or IR. It looks like a list of tiny steps, each with a numbered scratch value: first `t1 = price * rate`, then `t2 = t1 / 100`, then `t3 = price + t2`. Go's version is called SSA (static single assignment), where each scratch value is written exactly once.[^gocompile] This form is far easier to improve and to translate than the original text.
 
-**5. Optimizing.** **Optimizing** means rewriting the steps so the program runs faster or smaller, without changing what it does. A small example from my Go program: dividing is slow for a processor, so the Go compiler replaced "divide by 100" with a multiplication by a large, carefully chosen number followed by a shift, which gives the same answer faster.[^granlund] Another: it saw that `total(200, 10)` always gives 220 and wrote the number 220 straight into the program. More on that below.
+**5. Optimizing.** **Optimizing** means rewriting the steps so the program runs faster or smaller, without changing what it does. A small example from my Go program: dividing is slow for a processor, so the Go compiler replaced "divide by 100" with a multiplication by a large, carefully chosen number, followed by a "shift" (a cheap instruction that moves the digits of a number, like dividing by ten by dropping the last digit). It gives the same answer, faster.[^granlund] Another: it saw that `total(200, 10)` always gives 220 and wrote the number 220 straight into the program.
 
 **6. Generating code.** Finally, **code generation** turns the in-between form into instructions for one kind of processor, or into bytecode, which the next section explains. For my laptop's Intel chip, Go turned the function `total` into 12 machine instructions, 45 bytes in all.
 
@@ -105,9 +119,11 @@ Not every language runs all six steps before you press "go". There are three com
 
 **Ahead of time.** The compiler runs all the steps once, on the programmer's computer, and produces a file of machine code. You run that file; the compiler is not needed any more. This is **ahead-of-time** (AOT) compilation. Go works this way. In the cookbook picture, the whole book is translated before the cook opens it.
 
-**Interpreting.** An **interpreter** is a program that reads instructions and carries them out one at a time, while the program runs, without producing a machine-code file. It is a translator who stands next to the cook and reads each line aloud as the cooking happens. It starts fast and is flexible, but the translating never stops, so the cooking is slower.[^pyglossary]
+**Interpreting.** An **interpreter** is a program that reads instructions and carries them out one at a time, while the program runs, without producing a machine-code file. It is a translator who stands next to the cook and reads each line aloud as the cooking happens. It needs no separate build step and is flexible, but the translating never stops, so programs generally run more slowly.[^pyglossary]
 
-**Bytecode and a virtual machine.** Most popular languages today mix the two. A compiler does the first steps and writes **bytecode**: instructions for an imaginary, simplified processor, designed so that any real computer can run them. A program called a **virtual machine** (VM) then runs that bytecode on the real chip. Java's VM goes one step further. It watches which parts run most often, the "hot" parts, and compiles those into real machine code while the program is running. That is called **just-in-time** (JIT) compilation.[^javaman] Back in the kitchen, the recipe is written in a shorthand every local helper can read, and when the helper notices the same sauce being made every day, they write out a full translation of that one page.
+**Bytecode and a virtual machine.** Many popular languages mix the two. A compiler does the first steps and writes **bytecode**: instructions for an imaginary, simplified processor, designed so that any real computer can run them. A program called a **virtual machine** (VM) then runs that bytecode on the real chip. In the kitchen, the recipe is written in a shorthand that every local helper can read.
+
+**Just in time.** Java's VM goes one step further. At first it interprets the bytecode, one instruction at a time, just like Python. Meanwhile it watches which parts run most often, the "hot" parts, and compiles those into real machine code while the program is running. That is called **just-in-time** (JIT) compilation.[^javaman] The helper notices the same sauce being made every day and writes out a full translation of that one page.
 
 <ThreeRoutes />
 
@@ -115,7 +131,7 @@ Not every language runs all six steps before you press "go". There are three com
 
 ## The same program three ways
 
-Here is the price-with-tax program in all three languages, built and run on one laptop: OpenJDK 25, Python 3.10 and Go 1.27. Each one prints `220`.
+Here is the price-with-tax program in all three languages, built and run on one laptop with Java 25 (the OpenJDK edition), Python 3.10 and Go 1.27. Each one prints `220`. Lines that start with `$` are commands I typed.
 
 ### Java: bytecode, then a virtual machine
 
@@ -131,7 +147,7 @@ public class Tax {
 }
 ```
 
-`javac Tax.java` compiles it into `Tax.class`, a file of Java bytecode, 456 bytes long.[^javac] The command `javap -c` shows what is inside, in readable form:[^javap]
+Java needs a little more ceremony: everything lives inside a `class`, and `System.out.println` prints. `javac Tax.java` compiles it into `Tax.class`, a file of Java bytecode, 456 bytes long.[^javac] The command `javap -c` shows what is inside, in readable form (trimmed to the `total` function):[^javap]
 
 ```text
 $ javap -c Tax.class
@@ -147,18 +163,22 @@ $ javap -c Tax.class
        8: ireturn
 ```
 
-Eight instructions. `iload` puts a number on a pile (a "stack"), `imul` multiplies the top two, `idiv` divides, `iadd` adds, `ireturn` hands back the answer.[^jvms6] Notice that this is still not Intel or ARM code. The Java specification says it plainly: the Java Virtual Machine "knows nothing of the Java programming language, only of a particular binary format, the class file format".[^jvms1] The same `Tax.class` runs on any computer that has a Java VM.
+Eight instructions. `iload` puts a number on a pile (a "stack"), `bipush 100` puts the number 100 there, `imul` multiplies the top two, `idiv` divides, `iadd` adds, `ireturn` hands back the answer.[^jvms6] Notice that this is still not Intel or ARM code. The Java specification says it plainly: the Java Virtual Machine "knows nothing of the Java programming language, only of a particular binary format, the class file format".[^jvms1] The same `Tax.class` runs on any computer that has a Java VM.
 
-To watch the JIT at work, I called `total` a million times in a loop and asked Java to report what it compiles:[^javaman]
+To watch the JIT at work, I called `total` a million times in a loop. Java compiled it twice: first a quick version, then, because it stayed busy, a better one.[^tiered]
+
+<Aside title="Deep dive: the JIT log">
+
+`-XX:+PrintCompilation` prints a line each time a method is compiled.[^javaman] I kept only the `TaxLoop` lines. The third number is the level: 3 is the quick compiler with profiling, 4 the fully optimizing one.[^tiers] "9 bytes" is the size of `total`'s bytecode.
 
 ```text
-$ java -XX:+PrintCompilation TaxLoop
+$ java -XX:+PrintCompilation TaxLoop | grep TaxLoop::
 13    8       3       TaxLoop::total (9 bytes)
 13    9       4       TaxLoop::total (9 bytes)
 …
 ```
 
-Early in the run, the VM compiled `total`, all 9 bytes of its bytecode, first with a quick compiler (level 3) and then with its strongest optimizer (level 4). Java calls this tiered compilation: a fast first version, then a better one for the code that stays busy.[^tiered]
+</Aside>
 
 ### Python: bytecode, then an interpreter
 
@@ -169,7 +189,7 @@ def total(price, rate):
 print(total(200, 10))
 ```
 
-Python is often called "interpreted", but it compiles too. The official glossary says so: "Python source code is compiled into bytecode", and that bytecode is cached in `.pyc` files so the next start is faster.[^pyglossary] Compiled into such a file, this program's bytecode takes 254 bytes. The `dis` module shows the bytecode:[^dis]
+`def` defines the function, and `print` prints. Python is often called "interpreted", but it compiles too. The official glossary says so: "Python source code is compiled into bytecode", and that bytecode can be cached (saved for reuse) in `.pyc` files so the next start is faster.[^pyglossary] Compiled with `python3 -m py_compile`, the cached `.pyc` file for this program is 254 bytes. The `dis` tool shows the bytecode of `total`:[^dis]
 
 ```text
   2   0 LOAD_FAST        0 (price)
@@ -182,30 +202,36 @@ Python is often called "interpreted", but it compiles too. The official glossary
      14 RETURN_VALUE
 ```
 
-Eight instructions again, and almost the same ones as Java: load, load, load, multiply, load 100, divide, add, return. The difference is what happens next. In Python 3.10 the interpreter carries out these instructions one by one, every time, and never turns them into machine code. Newer versions of Python have started experimenting with a JIT of their own.[^pep744]
+Eight instructions again, and almost the same ones as Java: load, load, load, multiply, load 100, divide, add, return. The difference is what happens next. In Python 3.10 the interpreter carries out these instructions one by one, every time, and never turns them into machine code. Python 3.13 added an experimental JIT, switched off unless Python is built with it.[^pep744]
 
 ### Go: machine code, ahead of time
 
 ```text
 $ go build -o tax tax.go
 $ ls -l tax
--rwxrwxr-x 1 danielbaumann danielbaumann 2346857 out 26 23:29 tax
+… 2346857 out 26 23:29 tax
 $ file tax
 tax: ELF 64-bit LSB executable, x86-64, … statically linked, …
 $ ./tax
 220
 ```
 
-`go build` runs every step at once and writes `tax`, a file of real Intel machine code.[^gobuild] It is 2.3 MB for a program that prints one number, because Go copies everything the program needs into that one file, including the Go runtime, its built-in helper code. Go's documentation calls this "statically-linked" and explains the size the same way.[^gofaq] The good side: you can copy that single file to another Linux computer with the same kind of chip and run it, with nothing else installed.
+`go build` runs every step at once and writes `tax`, a file of real machine code.[^gobuild] `ls -l` shows its size in bytes, `file` describes it, and `./tax` runs it.
 
-The flag `-gcflags=-S` asks the compiler to print the machine code it wrote, in readable form, called assembly (addresses and file names trimmed):[^gocmd]
+That file is called an **executable**, or a **binary**: a program ready to start. It contains machine code for one family of chips, here x86-64, the family of Intel and AMD processors. It is packed in the file format that one operating system knows how to start: ELF on Linux, with different formats on Windows and macOS. So the same file will not run on a phone's ARM chip or on Windows. Go can build a separate binary for each, chosen with two settings: `GOOS` for the operating system and `GOARCH` for the chip.[^goenv]
+
+It is 2.3 MB for a program that prints one number, because Go copies everything the program needs into that one file, including the Go runtime, its built-in helper code, plus type and debugging information. Go's documentation calls this "statically-linked".[^gofaq] The good side: you can copy that single file to another Linux computer with the same kind of chip and run it, with nothing else installed.
+
+The Go compiler can also print the machine code it wrote. It confirms both tricks from step 5: the division became a multiply and a shift, and the compiler did the sum while building, so the finished program simply contains the answer, 220.[^gocmd]
+
+<Aside title="Deep dive: Go's machine code">
+
+From `go build -a -gcflags=-S` (directives, addresses and file names trimmed). The giant number replaces "divide by 100"; `SARQ` is the shift. In `main`, the call to `total` is gone: the compiler copied the function into place ("inlining") and worked out the result, so the code just says `MOVL $220, AX`, "put 220 in a slot".
 
 ```text
 main.total STEXT nosplit size=45 …
   IMULQ  AX, BX
-  MOVQ   BX, CX
-  SARQ   $63, BX
-  MOVQ   AX, DX
+  …
   MOVQ   $-6640827866535438581, AX
   …
   SARQ   $6, CX
@@ -214,15 +240,15 @@ main.total STEXT nosplit size=45 …
   RET
 ```
 
-Twelve instructions and 45 bytes. That giant negative number is the trick from step 5: it replaces "divide by 100" with a multiply and a shift (`SARQ`).[^granlund] And in `main`, the compiler skipped the call entirely. It worked out the answer while building, and the machine code just says `MOVL $220, AX`: put 220 in a slot, then print it. Asking for the compiler's decisions with `-gcflags=-m` confirms it: "inlining call to total".[^gocmd]
+</Aside>
 
-**In one line:** Java and Python both make bytecode; Java's VM compiles the busy parts at run time, Python 3.10 interprets, and Go hands over finished machine code.
+**In one line:** Java and Python both make bytecode; Java's VM compiles the busy parts at run time, Python 3.10 interprets, and Go hands over a finished binary.
 
 ## Errors: caught early or caught late
 
-The meaning check in step 3 is where many mistakes are caught. I made the same mistake in all three programs: passing the price as text, `"200"` (in quotes), instead of the number 200.
+The meaning check in step 3 is where many mistakes are caught. I made the same mistake in all three programs: passing the price as text, `"200"` (in quotes), instead of the number 200. Programmers call a piece of text a "string".
 
-Java and Go refuse to build at all:[^jls][^gospec]
+Java and Go refuse to build at all (output trimmed):[^jls][^gospec]
 
 ```text
 $ javac Tax.java
@@ -231,7 +257,7 @@ $ go build -o tax tax.go
 ./tax.go:10:20: cannot use "200" (untyped string constant) as int value in argument to total
 ```
 
-No program file is produced, so the mistake cannot reach anyone. Python checks types only when the line actually runs. My broken Python program printed "Starting..." first, and failed only when it reached the bad line:
+No program file is produced, so the mistake cannot reach anyone. Python checks types only when a line actually runs. My broken Python program printed "Starting..." first, and failed only when it reached the bad line. A "traceback" is Python's report of where it was when it failed:
 
 ```text
 Starting...
@@ -250,22 +276,14 @@ You will probably never run a compiler. Its work still shows up in your day.
 
 - **Speed.** Optimized machine code does the same work with fewer, cheaper instructions, like the division trick above. The JIT is why a long-running Java program speeds up after it starts.[^tiered]
 - **Errors caught early.** Every mistake a compiler refuses is one that never reaches your screen.
-- **One program, many machines.** Bytecode lets one Java file run on any computer that has a Java VM, whatever its chip.[^jvms1] Go goes the other way: it can build a separate machine-code file for each kind of computer, chosen with two settings, `GOOS` for the operating system and `GOARCH` for the chip.[^goenv]
-- **Memory.** Bringing a helper costs something. On my laptop, the tiny Java program needed about 41 MB of memory while running, the Python one about 8.6 MB, and the Go one under 2 MB. The VM and the interpreter come along for the ride.
+- **One program, many machines.** Bytecode lets one Java file run on any computer that has a Java VM, whatever its chip.[^jvms1] Go goes the other way and builds one binary per kind of computer.[^goenv]
+- **Memory.** Bringing a helper costs something. On my laptop, at their peak, the tiny Java program used about 42 MB of memory, the Python one about 9 MB, and the Go one about 2 MB. The VM and the interpreter come along for the ride.
 
 ## What my video pipeline taught me
 
-I make videos with code: a small program draws every frame, and I described the whole pipeline in [issue 4, Videos drawn with code](/04-videos-drawn-with-code/). Writing this post, I realised that pipeline is shaped like a compiler.
+I make videos with code, and I described how in [issue 4, Videos drawn with code](/04-videos-drawn-with-code/). That pipeline turned out to be shaped like a compiler: a text file describing every scene is the source code, a required check refuses a bad plan before the video goes to review, and one drawing function turns the plan into pictures, the way code generation turns a plan into instructions.[^dr4w] Like a compiler that only rebuilds the parts you changed, it only redraws the scenes I edited. And like a compiler, it must give exactly the same result for the same input, or none of that reuse would be safe.
 
 <VideoCompiler />
-
-The **source code** is `storyboard.json`, a text file that lists every scene with its text and how long it lasts. A checking step, `lint:blueprint`, reads it before anything is drawn and refuses a bad one, the way a type checker does: a topic title longer than three words, or the parts of the video in the wrong order, stops the build with an error.[^dr4w] Next, a timeline gives every scene its exact start frame, an **in-between form** that is easier to work with than the storyboard. Then comes **code generation**: one function per scene, `render(t)`, which takes a time and draws the picture for that moment. Finally FFmpeg, a standard video tool, encodes the pictures into small video pieces and joins them into one file, much like a linker joins compiled pieces, called object files, into one program.[^gocmd]
-
-Two compiler ideas turned out to matter most.
-
-**Only rebuild what changed.** Large programs are compiled in pieces, and only the pieces that changed are compiled again; this is called **incremental compilation**. Go, for one, keeps a cache of earlier build results and reuses them.[^gocache] My pipeline does the same. Each scene gets a fingerprint, a hash, of its storyboard entry, its drawing code, the engine, the fonts and the style. If the fingerprint has not changed, the finished video pieces are reused. Fixing one scene redraws only that scene.[^dr4w]
-
-**The same input must give the same output.** A compiler that produced a different program every time would be impossible to trust. For the same reason, `render(t)` is not allowed to read the clock or use real randomness, and one of my automatic checks draws the same frames in two separate browser sessions, one walking backwards, and compares the pixels.[^dr4w] Without that rule, the reuse above would be unsafe: a reused piece must look exactly like a fresh one.
 
 **In one line:** anything that turns a description into a result, step by step, ends up looking like a compiler.
 
@@ -273,8 +291,8 @@ Two compiler ideas turned out to matter most.
 
 - Source code is text written by people; a processor only runs machine code, tiny numbered instructions.
 - A compiler translates in fixed steps: tokens, tree, meaning check, in-between form, optimizing, code generation.
-- Go compiles ahead of time into one machine-code file; the compiler is not needed to run it.
-- Java compiles to bytecode, and its virtual machine compiles the busy parts to machine code while running (JIT).
+- Go compiles ahead of time into one binary, for one kind of chip and one operating system.
+- Java compiles to bytecode; its virtual machine interprets it, then compiles the busy parts to machine code (JIT).
 - Python compiles to bytecode too, and in version 3.10 interprets it one instruction at a time.
 - Compilers that check types turn some crashes into error messages before you ever see the program.
 - The same ideas work outside programming: check the input early, rebuild only what changed, and keep the output repeatable.
@@ -283,6 +301,7 @@ Two compiler ideas turned out to matter most.
 | --- | --- |
 | Source code | Instructions written by a person as text |
 | Machine code | Instructions a processor runs directly |
+| Binary, executable | A file of machine code for one kind of chip and one operating system |
 | Compiler | A program that translates source code before it runs |
 | Interpreter | A program that carries out instructions one at a time while the program runs |
 | Bytecode | Instructions for an imaginary processor, run by a virtual machine |
@@ -301,38 +320,38 @@ All commands, outputs and file sizes in this post come from runs on 26 October 2
 
 [^ast]: Python 3.10 documentation, "ast: Abstract Syntax Trees". https://docs.python.org/3.10/library/ast.html
 
-[^granlund]: Torbjörn Granlund and Peter L. Montgomery, "Division by Invariant Integers using Multiplication", PLDI 1994. https://doi.org/10.1145/178243.178249
+[^granlund]: Torbjörn Granlund and Peter L. Montgomery, "Division by Invariant Integers using Multiplication", PLDI 1994. https://doi.org/10.1145/178243.178249 (free copy: https://gmplib.org/~tege/divcnst-pldi94.pdf)
 
 [^pyglossary]: Python documentation, Glossary, entries "bytecode" and "interpreted". https://docs.python.org/3/glossary.html
 
-[^javaman]: Oracle, "The java Command", Java SE 25: the JIT options, `-XX:+PrintCompilation` ("printing a message to the console every time a method is compiled") and `-Xint` (interpreter only). https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html
+[^javaman]: Oracle, "The java Command", Java SE 25: the JIT options, `-Xmixed` (hot methods "compiled to native code") and `-XX:+PrintCompilation` ("printing a message to the console every time a method is compiled"). https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html
 
 [^javac]: Oracle, "The javac Command", Java SE 25. https://docs.oracle.com/en/java/javase/25/docs/specs/man/javac.html
 
 [^javap]: Oracle, "The javap Command", Java SE 25. https://docs.oracle.com/en/java/javase/25/docs/specs/man/javap.html
 
-[^jvms6]: *The Java Virtual Machine Specification*, Java SE 25 Edition, chapter 6, "The Java Virtual Machine Instruction Set" (iload, imul, idiv, iadd, ireturn). https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-6.html
+[^jvms6]: *The Java Virtual Machine Specification*, Java SE 25 Edition, chapter 6, "The Java Virtual Machine Instruction Set" (iload, bipush, imul, idiv, iadd, ireturn). https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-6.html
 
 [^jvms1]: *The Java Virtual Machine Specification*, Java SE 25 Edition, chapter 1, "Introduction". https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-1.html
 
 [^tiered]: Oracle, "Java HotSpot Virtual Machine Performance Enhancements", Java SE 25, section "Tiered Compilation". https://docs.oracle.com/en/java/javase/25/vm/java-hotspot-virtual-machine-performance-enhancements.html
 
+[^tiers]: OpenJDK, HotSpot source, `compilationPolicy.hpp`: "level 3 - C1 with full profiling", "level 4 - C2 with full profile guided optimization". https://github.com/openjdk/jdk/blob/master/src/hotspot/share/compiler/compilationPolicy.hpp
+
 [^dis]: Python 3.10 documentation, "dis: Disassembler for Python bytecode". https://docs.python.org/3.10/library/dis.html
 
-[^pep744]: Brandt Bucher and Savannah Ostrowski, "PEP 744: JIT Compilation", an experimental JIT first shipped in Python 3.13. https://peps.python.org/pep-0744/
+[^pep744]: Brandt Bucher and Savannah Ostrowski, "PEP 744: JIT Compilation" (experimental, Python 3.13), https://peps.python.org/pep-0744/ ; and "What's New In Python 3.13", "An experimental just-in-time (JIT) compiler": built only with `--enable-experimental-jit`, not part of the default build. https://docs.python.org/3/whatsnew/3.13.html#an-experimental-just-in-time-jit-compiler
 
 [^gobuild]: The Go Authors, "go build: Compile packages and dependencies". https://pkg.go.dev/cmd/go#hdr-Compile_packages_and_dependencies
 
-[^gofaq]: The Go Authors, "Frequently Asked Questions": "Why is my trivial program such a large binary?" https://go.dev/doc/faq#Why_is_my_trivial_program_such_a_large_binary
+[^goenv]: The Go Authors, "Installing Go from source", section "Optional environment variables": `GOOS` and `GOARCH` are "the name of the target operating system and compilation architecture". https://go.dev/doc/install/source#environment
+
+[^gofaq]: The Go Authors, "Frequently Asked Questions": "Why is my trivial program such a large binary?" (the runtime plus type and debugging information). https://go.dev/doc/faq#Why_is_my_trivial_program_such_a_large_binary
 
 [^gocmd]: The Go Authors, "cmd/compile": `-S` "Print assembly listing to standard output", `-m` "Print optimization decisions". https://pkg.go.dev/cmd/compile
-
-[^gocache]: The Go Authors, "go: Build and test caching". https://pkg.go.dev/cmd/go#hdr-Build_and_test_caching
 
 [^jls]: *The Java Language Specification*, Java SE 25 Edition, chapter 5, "Conversions and Contexts". https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html
 
 [^gospec]: The Go Authors, "The Go Programming Language Specification", section "Assignability". https://go.dev/ref/spec#Assignability
 
-[^goenv]: The Go Authors, "Installing Go from source", section "Optional environment variables" (`GOOS`, `GOARCH`). https://go.dev/doc/install/source#environment
-
-[^dr4w]: dr4w-motion source code, files `engine/blueprint/lint.mjs` (the checks, exit code 1 on any error), `engine/timeline.mjs`, `engine/render.mjs` (per-scene hash and segment cache) and `engine/qa/determinism.mjs` (two sessions, one in reverse, compared by pixel hash).
+[^dr4w]: dr4w-motion source code: `engine/blueprint/lint.mjs` (run as `npm run lint:blueprint`, a required step before a video goes to review; it checks the storyboard, its roadmap and script, and exits with an error on any problem), `engine/timeline.mjs`, `engine/render.mjs` (a fingerprint per scene from its storyboard entry, drawing code, engine, style and the list of font files; unchanged scenes are reused) and `engine/qa/determinism.mjs` (the same frames drawn twice in separate sessions must match pixel for pixel).

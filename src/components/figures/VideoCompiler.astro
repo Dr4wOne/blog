@@ -4,7 +4,7 @@ import Figure from './Figure.astro'
 // Compiler stage on the left, the matching step in dr4w-motion on the right (checked against its engine/).
 const rows = [
   { stage: 'Source code', video: 'storyboard.json', code: true, note: 'scenes, text, timings' },
-  { stage: 'Meaning check', video: 'lint:blueprint', code: true, note: 'refuses a bad board' },
+  { stage: 'Meaning check', video: 'lint:blueprint', code: true, note: 'required plan check' },
   { stage: 'In-between form', video: 'Timeline', note: 'start frame per scene' },
   {
     stage: 'Code generation',
@@ -21,7 +21,7 @@ const rows = [
 <Figure caption="My video pipeline has the same shape as a compiler. The storyboard is the source code, and render(t) does the code generation: it turns a plan into pictures.">
   <svg viewBox="0 0 400 386" role="img" aria-labelledby="f-vidc-t f-vidc-d">
     <title id="f-vidc-t">A video pipeline shaped like a compiler</title>
-    <desc id="f-vidc-d">Six rows, compiler stage on the left, video pipeline step on the right. Source code matches storyboard.json, the file with scenes, text and timings. Meaning check matches lint:blueprint, which refuses a bad storyboard. In-between form matches the timeline, which gives each scene its start frame. Code generation matches render(t), which draws every frame. Assembler and linker match FFmpeg, which encodes the frames and joins the pieces. Incremental build matches the segment cache, which redraws only the scenes that changed.</desc>
+    <desc id="f-vidc-d">Six rows, compiler stage on the left, video pipeline step on the right. Source code matches storyboard.json, the file with scenes, text and timings. Meaning check matches lint:blueprint, a required check of the storyboard and its plan before a video goes to review. In-between form matches the timeline, which gives each scene its start frame. Code generation matches render(t), which draws every frame. Assembler and linker match FFmpeg, which encodes the frames and joins the pieces. Incremental build matches the segment cache, which redraws only the scenes that changed.</desc>
     <text x="0" y="16" class="t-small t-muted">Compiler</text>
     <text x="172" y="16" class="t-small t-muted">dr4w-motion</text>
     {

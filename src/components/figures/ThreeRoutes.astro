@@ -17,14 +17,14 @@ const routes = [
     steps: [
       { title: 'javac', lines: ['translates to', 'bytecode'] },
       { title: 'Tax.class', lines: ['456 bytes of', 'bytecode'] },
-      { title: 'Java VM', lines: ['interprets, then', 'compiles hot parts'] },
+      { title: 'Java VM', lines: ['interprets, then', 'compiles busy parts'] },
     ],
   },
   {
     lang: 'Python',
     steps: [
-      { title: 'python3', lines: ['translates to', 'bytecode on start'] },
-      { title: 'bytecode', lines: ['kept in memory,', 'or cached as .pyc'] },
+      { title: 'python3', lines: ['translates to', 'bytecode'] },
+      { title: 'bytecode', lines: ['kept in memory,', 'often saved as .pyc'] },
       { title: 'Interpreter', lines: ['runs one', 'instruction at a time'] },
     ],
   },
@@ -36,7 +36,7 @@ const GAP = 8
 <Figure caption="The same program, three routes. Go hands the processor finished machine code. Java and Python stop halfway, at bytecode, and bring a program that runs it: Java's virtual machine compiles the busy parts while it runs; CPython 3.10 interprets every instruction.">
   <svg viewBox="0 0 400 330" role="img" aria-labelledby="f-routes-t f-routes-d">
     <title id="f-routes-t">Three ways to run code: Go, Java and Python</title>
-    <desc id="f-routes-d">Three columns. Go: go build translates once, ahead of time, into a 2.3 megabyte file of machine code, which the processor runs directly. Java: javac translates to bytecode, a 456 byte class file, which the Java virtual machine interprets and, for the parts that run often, compiles to machine code while the program runs. Python: python3 translates the program to bytecode each time it starts, keeps it in memory or caches it in a pyc file, and the interpreter runs one bytecode instruction at a time.</desc>
+    <desc id="f-routes-d">Three columns. Go: go build translates once, ahead of time, into a 2.3 megabyte file of machine code, which the processor runs directly. Java: javac translates to bytecode, a 456 byte class file, which the Java virtual machine interprets and, for the parts that run often, compiles to machine code while the program runs. Python: python3 translates the program to bytecode, keeps it in memory and often saves it in a pyc file for the next start, and the interpreter runs one bytecode instruction at a time.</desc>
     <defs><Arrow id="f-routes-a" /></defs>
     {
       routes.map((r, c) => {
