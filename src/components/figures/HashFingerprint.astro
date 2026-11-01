@@ -1,0 +1,40 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+// Real SHA-256 outputs (first 16 hex characters), computed with Node 24 crypto in dr4w-motion projects/inbox/08-examples.
+const rows = [
+  { input: 'sunshine', out: 'a941a4c4fd0c01cd', note: 'first time' },
+  { input: 'Sunshine', out: 'e807b101a1033737', note: 'one capital letter', accent: true },
+  { input: 'sunshine', out: 'a941a4c4fd0c01cd', note: 'same input again' },
+]
+---
+
+<Figure caption="A hash is a fingerprint of the input. The same password always gives the same fingerprint; change one letter and the whole fingerprint changes. Nothing in the fingerprint leads back to the password. These are the first 16 of 64 characters of real SHA-256 outputs.">
+  <svg viewBox="0 0 400 230" role="img" aria-labelledby="f-hash-t f-hash-d">
+    <title id="f-hash-t">The same input gives the same hash; one changed letter changes all of it</title>
+    <desc id="f-hash-d">Three rows. The password sunshine goes into SHA-256 and comes out as a941a4c4fd0c01cd. The password Sunshine, with a capital S, comes out as e807b101a1033737, completely different. The password sunshine again comes out as a941a4c4fd0c01cd, the same as the first time.</desc>
+    <defs><Arrow id="f-hash-a" /></defs>
+    <text x="60" y="18" text-anchor="middle" class="t-small t-muted">password</text>
+    <text x="200" y="18" text-anchor="middle" class="t-small t-muted">one-way</text>
+    <text x="320" y="18" text-anchor="middle" class="t-small t-muted">hash (first 16 of 64)</text>
+    {
+      rows.map((r, i) => {
+        const y = 32 + i * 66
+        return (
+          <g>
+            <rect x="0" y={y} width="120" height="40" rx="6" class="box" />
+            <text x="60" y={y + 25} text-anchor="middle" class="t-mono">{r.input}</text>
+            <path d={`M122 ${y + 20} H156`} class="wire" marker-end="url(#f-hash-a)" />
+            <rect x="160" y={y} width="80" height="40" rx="6" class="box-alt" />
+            <text x="200" y={y + 25} text-anchor="middle" class="t-strong">SHA-256</text>
+            <path d={`M242 ${y + 20} H256`} class="wire" marker-end="url(#f-hash-a)" />
+            <rect x="260" y={y} width="140" height="40" rx="6" class={r.accent ? 'box-accent' : 'box'} />
+            <text x="330" y={y + 25} text-anchor="middle" class={r.accent ? 't-mono t-on-accent' : 't-mono'}>{r.out}</text>
+            <text x="60" y={y + 56} text-anchor="middle" class="t-small t-muted">{r.note}</text>
+          </g>
+        )
+      })
+    }
+  </svg>
+</Figure>

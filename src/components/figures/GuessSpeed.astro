@@ -1,0 +1,51 @@
+---
+import Figure from './Figure.astro'
+
+// Guesses per second, log scale. Laptop rows: projects/inbox/08-examples/results/bench.json in dr4w-motion.
+// GPU rows: Chick3nman's RTX 5090 hashcat v6.2.6-851 gist; bcrypt cost 12 = 304.8 kH/s at cost 5 ÷ 2^7.
+const rows = [
+  { group: 'One laptop core' },
+  { label: 'MD5', v: 425546, text: '425,546' },
+  { label: 'SHA-256', v: 391321, text: '391,321' },
+  { label: 'Argon2id', v: 35, text: '35', slow: true },
+  { label: 'bcrypt 12', v: 5, text: '5', slow: true },
+  { group: 'One RTX 5090 card' },
+  { label: 'MD5', v: 220.6e9, text: '220 billion' },
+  { label: 'bcrypt 12', v: 2400, text: '≈ 2,400', slow: true },
+]
+const X0 = 84
+const W = 230
+const MAX = 12 // log10 of the right edge: one trillion
+const x = (v = 1) => X0 + (Math.log10(Math.max(v, 1)) / MAX) * W
+let y = 0
+const laid = rows.map((r) => {
+  y += r.group ? 28 : 26
+  return { ...r, y }
+})
+---
+
+<Figure caption="Guesses per second, on a scale where each step is ten times more. Fast hashes give an attacker hundreds of thousands of guesses per second on one laptop core and hundreds of billions on one graphics card. Slow password hashes cut that to a few dozen or fewer per second on the laptop and a few thousand on the card.">
+  <svg viewBox="0 0 400 250" role="img" aria-labelledby="f-speed-t f-speed-d">
+    <title id="f-speed-t">How many password guesses per second each method allows</title>
+    <desc id="f-speed-d">Bar chart on a logarithmic scale. One laptop core: MD5 425,546 guesses per second, SHA-256 391,321, Argon2id with the OWASP minimum settings 35, bcrypt at cost 12 5. One RTX 5090 graphics card running hashcat: MD5 about 220 billion guesses per second, bcrypt at cost 12 about 2,400.</desc>
+    {[0, 3, 6, 9, 12].map((p) => (
+      <g>
+        <path d={`M${X0 + (p / MAX) * W} 18 V228`} class="wire dash" style="stroke-width:1;opacity:.5" />
+        <text x={X0 + (p / MAX) * W} y="244" text-anchor="middle" class="t-small t-muted">{p === 0 ? '1' : `10^${p}`}</text>
+      </g>
+    ))}
+    {
+      laid.map((r) =>
+        r.group ? (
+          <text x="0" y={r.y} class="t-small t-strong">{r.group}</text>
+        ) : (
+          <g>
+            <text x={X0 - 6} y={r.y} text-anchor="end" class="t-small">{r.label}</text>
+            <rect x={X0} y={r.y - 12} width={Math.max(x(r.v) - X0, 2)} height="16" rx="3" class={r.slow ? 'box-accent' : 'bar'} />
+            <text x={x(r.v) + 6} y={r.y} class="t-small t-mono">{r.text}</text>
+          </g>
+        ),
+      )
+    }
+  </svg>
+</Figure>

@@ -54,7 +54,7 @@ const htmlFiles = (dir) =>
     .filter((f) => f.endsWith('.html'))
     .map((f) => join(dir, f))
 const pagePaths = LIVE
-  ? ['/', ...articles, '/about/', '/404.html']
+  ? ['/', ...articles, '/about/', '/issues/', '/404.html']
   : htmlFiles('dist').map(
       (f) =>
         `/${relative('dist', f)
