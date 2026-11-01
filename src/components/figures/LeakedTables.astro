@@ -1,0 +1,39 @@
+---
+import Figure from './Figure.astro'
+
+// The same five made-up users stored three ways. Hashes are real SHA-256 outputs (first 8 hex characters);
+// the salted column uses the fixed salts shown. Crack results from projects/inbox/08-examples/crack.mjs.
+const cols = [
+  { head: 'Plain text', rows: ['123456', '123456', 'sunshine', 'rank 5,000', 'purple-otter-…'] },
+  { head: 'SHA-256, no salt', rows: ['8d969eef', '8d969eef', 'a941a4c4', '…', '…'], same: [0, 1] },
+  { head: 'SHA-256 + salt', rows: ['k3P9 f90c8ed9', 'Qx7m 3df1db6e', '…', '…', '…'] },
+]
+const users = ['ana', 'bruno', 'carla', 'dara', 'eli']
+---
+
+<Figure caption="What an attacker sees after a leak. In plain text there is nothing to crack. Without salt, ana and bruno have the same hash, so they have the same password, and one pass over a list of common passwords finds both. With a salt in front of each password, equal passwords no longer look equal.">
+  <svg viewBox="0 0 400 236" role="img" aria-labelledby="f-leak-t f-leak-d">
+    <title id="f-leak-t">Five users stored as plain text, as unsalted hashes and as salted hashes</title>
+    <desc id="f-leak-d">Three columns for the users ana, bruno, carla, dara and eli. Plain text shows the passwords themselves: 123456 for ana and bruno, sunshine for carla. The unsalted SHA-256 column shows the hash 8d969eef for both ana and bruno, highlighted, because equal passwords give equal hashes. The salted column shows ana with salt k3P9 and hash f90c8ed9, and bruno with salt Qx7m and hash 3df1db6e: the same password now gives two different hashes.</desc>
+    {users.map((u, i) => <text x="0" y={58 + i * 36} class="t-small t-muted">{u}</text>)}
+    {
+      cols.map((c, k) => {
+        const x = 48 + k * 118
+        return (
+          <g>
+            <text x={x + 55} y="20" text-anchor="middle" class="t-small t-strong">{c.head}</text>
+            {c.rows.map((r, i) => {
+              const hot = c.same?.includes(i)
+              return (
+                <g>
+                  <rect x={x} y={36 + i * 36} width="110" height="30" rx="5" class={hot ? 'box-accent' : 'box'} />
+                  <text x={x + 55} y={56 + i * 36} text-anchor="middle" class={hot ? 't-mono t-small t-on-accent' : 't-mono t-small'}>{r}</text>
+                </g>
+              )
+            })}
+          </g>
+        )
+      })
+    }
+  </svg>
+</Figure>

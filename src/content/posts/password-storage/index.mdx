@@ -1,0 +1,253 @@
+---
+updated: 2026-11-01
+published: 2026-11-01
+issue: 8
+slug: password-storage
+title: Password storage
+summary: "If your users table leaked tonight, how many passwords would an attacker read by morning? What hashing, salt and slow hashes do, measured on a laptop, and what to use today."
+tags: [security, passwords, programming, java]
+draft: false
+---
+
+import Aside from '../../../components/Aside.astro'
+import DeepDive from '../../../components/DeepDive.astro'
+import HashFingerprint from '../../../components/figures/HashFingerprint.astro'
+import LeakedTables from '../../../components/figures/LeakedTables.astro'
+import GuessSpeed from '../../../components/figures/GuessSpeed.astro'
+import LoginFlow from '../../../components/figures/LoginFlow.astro'
+
+<Aside title="In short">
+
+A website should never keep your password. It keeps a fingerprint of it, called a hash, and checks the fingerprint each time you log in. A plain hash is not enough: attackers hash lists of common passwords and compare. A salt, a random value stored next to each hash, makes equal passwords look different. A slow hash such as Argon2id or bcrypt makes every single guess expensive. On my laptop, one core (one of the six workers inside its processor) tried the 10,000 most common passwords against five unsalted users in 16 milliseconds; with Argon2id, trying the whole list for each of the five would take an estimated 22 minutes. Every number here comes from code I ran, or from a source in the footnotes. A short glossary sits at the end, in the [recap](#recap).
+
+</Aside>
+
+## The question
+
+Imagine the database behind your app leaks tonight. A database is where an app keeps its data; picture a big spreadsheet with one row per user. Someone copies the users table, that spreadsheet: names, emails, and whatever you saved in the password column. How long until they can log in as most of your users? Minutes? Days? Never?
+
+The honest answer depends on one decision a developer makes once, usually on the first day of a project, and rarely looks at again: how the password is stored. This post walks through that decision from the simplest version to the one security guides recommend today. I learned the shape of this story from a Portuguese video by Renato Augusto, which goes through the same steps for programmers.[^renato] I re-ran the hashing and cracking steps myself, checked the claims against the current guides, and wrote it for someone who has never stored a password.
+
+## Rule zero: don't keep the password
+
+The simplest way to build a login is to save the password as typed, and compare it when the user comes back. It works. It is also the worst possible choice, because a leak then hands every password to the attacker, readable, with no work at all.
+
+This is not only a story from the early web. In 2009 the company RockYou was breached and 32 million passwords were taken, stored in plain text.[^rockyou] That list still circulates, and it matters because people reuse passwords: the password someone used on a game site is often the password of their email.
+
+Encrypting the passwords sounds like the fix, but it only moves the problem. Encryption can be undone with a key, and the key has to live somewhere the server can reach, often on the same server as the database. An attacker who gets one often gets the other. A login never needs to read the password back, so the safe choice is a method that cannot be undone at all.
+
+## A fingerprint instead: hashing
+
+A **hash function** takes any text and turns it into a fixed-size string of characters, like a fingerprint. Three properties make it useful for passwords:
+
+1. **Same input, same output.** Hash "sunshine" today or in ten years and you get the same result. So the server can hash what you type at login and compare it with what it saved.
+2. **One small change, a completely different output.** "Sunshine" with a capital S has nothing in common with "sunshine".
+3. **One-way.** There is no calculation that turns the fingerprint back into the password. The only way back is to guess a password, hash it, and see if it matches.
+
+Think of a meat grinder: steak goes in, mince comes out, and nothing turns the mince back into steak. But the same steak always gives the same mince.
+
+<HashFingerprint />
+
+So the server stores `a941a4c4…` instead of `sunshine`. At login, it hashes whatever you typed; if the two fingerprints match, you typed the right password. Common hash functions are MD5, SHA-1 and SHA-256. That looks finished. It is not.
+
+## Why a plain hash fails
+
+Property 1, the one that makes logins work, is also the weakness. If "123456" always hashes to `8d969eef…`, an attacker can hash a list of common passwords once and look every stolen hash up in it. Websites that "decrypt" MD5 do exactly this: they don't decrypt anything, they keep a giant list of passwords with their hashes.[^renato]
+
+I tried it. I made a users table with five made-up people, stored their passwords as unsalted SHA-256, and attacked it with a public list of the 10,000 most common passwords.[^seclists] Two of the users, ana and bruno, both chose `123456`; carla chose `sunshine`; dara picked the password at position 5,000 on the list; eli used a long passphrase that is not on the list.
+
+| Stored as | Guesses the attacker made | Time on one laptop core | Cracked |
+|---|---|---|---|
+| SHA-256, no salt | 10,001 | 16 ms | 4 of 5 |
+
+Sixteen milliseconds. And before cracking anything, the attacker already knew something: ana and bruno have the same hash, so they have the same password. Crack one, get both.
+
+<LeakedTables />
+
+## Salt: same password, different fingerprint
+
+A **salt** is a random value the server creates for each user at sign-up. It is mixed into the password before hashing, like a different spice packet for each user before the grinder, and stored in plain sight next to the hash. It is not a secret. Its job is to make every user's hash unique: ana's `123456` and bruno's `123456` now hash to completely different strings.
+
+That breaks the lookup trick. A list of pre-computed hashes is useless, because nobody pre-computed "123456 with salt k3P9". The attacker has to start over for each user, hashing the whole list with that user's salt.
+
+| Stored as | Guesses the attacker made | Time on one laptop core | Cracked |
+|---|---|---|---|
+| SHA-256, no salt | 10,001 | 16 ms | 4 of 5 |
+| SHA-256 with salt | 15,052 | 19 ms | 4 of 5 |
+
+Look at the second row again. Salt did its job, but it barely slowed the attack down: 19 milliseconds instead of 16. The problem is that SHA-256 is fast. It was designed to fingerprint whole files quickly, so it is great at that job and terrible at protecting short passwords. The attacker's real enemy has to be time per guess.
+
+## Slow on purpose
+
+Password hashing functions are hash functions built to be slow, and you choose how slow. The ones the guides recommend are **Argon2id**, **scrypt**, **bcrypt** and **PBKDF2**.[^owasp] Some of them also use a lot of memory on purpose. That hurts attackers who use graphics cards: a graphics card is like thousands of small, cheap calculators working at once, but each one has little memory of its own. (The settings in the table below, like "19 MiB, 2 passes", matter only to whoever sets this up. You can skip them.)
+
+I measured how many guesses per second one core of my laptop (an Intel i5-10500H) makes with each method:[^bench]
+
+<GuessSpeed />
+
+<Aside title="MiB">
+
+A mebibyte: 1,048,576 bytes of memory. Argon2id with 19 MiB fills that much memory for every single guess, which is what makes it expensive on graphics cards. For scale: the whole list of 10,000 common passwords I used is a file of 0.07 MiB.
+
+</Aside>
+
+| Method | Guesses per second, one core | Time for one guess |
+|---|---|---|
+| MD5 | 425,546 | 0.002 ms |
+| SHA-256 | 391,321 | 0.003 ms |
+| Argon2id, 19 MiB, 2 passes | 35 | 29 ms |
+| bcrypt, cost 10 | 21 | 49 ms |
+| bcrypt, cost 12 | 5 | 194 ms |
+| PBKDF2-SHA256, 600,000 rounds | 4 | 227 ms |
+| scrypt, 128 MiB | 3 | 303 ms |
+
+<Aside title="Core">
+
+One of the independent workers inside a processor. My laptop's processor has six (twelve hardware threads), so a program using all of them could run roughly six to twelve guesses at once; a real attacker would use graphics cards instead.
+
+</Aside>
+
+For a user logging in, 29 milliseconds is nothing: you cannot feel it. For an attacker trying ten thousand passwords for each of a million users, it is everything. Back in my small leaked table, with Argon2id, trying all 10,000 passwords for each of the five users would take an estimated **22 minutes** on one core, instead of 16 milliseconds (I timed 200 guesses and multiplied).[^bench] Each guess is about 11,000 times slower than with SHA-256, and the salt adds the rest: the attacker has to start over for each user. The cost grows with every user and every extra guess.
+
+<Aside title="Hashcat">
+
+Free, open-source software that guesses passwords at high speed, mostly on graphics cards. Security teams use it to test their own systems; attackers use it too.
+
+</Aside>
+
+Attackers don't use one laptop core. In the benchmark of hashcat, a popular cracking tool, one RTX 5090 graphics card runs about **220 billion** MD5 guesses per second.[^hashcat] At that speed, my whole 10,000-password list takes well under a millionth of a second. The same benchmark runs bcrypt at cost 5, about 305,000 guesses per second; each step up in cost doubles the work, and seven steps, from cost 5 to cost 12, double it seven times: 128 times slower, roughly 2,400 guesses per second, about 90 million times slower than MD5 on the same card.[^hashcat]
+
+This is not theory. In 2012 LinkedIn lost its password hashes, stored as unsalted SHA-1. When the full set of about 177 million hashes appeared in 2016, the security company KoreLogic cracked 65% of them in about two hours.[^linkedin]
+
+A slow hash does not save a password that is first on every list. `123456` falls on the first or second guess, however slow each guess is. What slowness buys is that attackers can only afford to try the most common passwords, and everyone with a less common one stays safe much longer.
+
+One caution about my own table: my MD5 and SHA-256 rates are low next to purpose-built tools. My test calls Node.js once per guess, and for a hash this fast that overhead most likely costs more than the hash itself. Cracking tools written for speed run billions of MD5 guesses per second on one graphics card. The slow methods don't have this gap, because the time goes into the hash's own work, not into the overhead. So the real distance between fast and slow hashes is much larger than my table shows, not smaller.
+
+
+## Which one to use
+
+<Aside title="OWASP">
+
+The Open Worldwide Application Security Project, a nonprofit that publishes free guides on building secure software. Its cheat sheets are short, practical rule lists.
+
+</Aside>
+
+The OWASP Password Storage Cheat Sheet, a widely used security guide, gives an order and the minimum settings for each:[^owasp]
+
+| Choice | Minimum settings (OWASP) | When |
+|---|---|---|
+| Argon2id | 19 MiB memory, 2 passes, 1 lane | first choice for new systems |
+| scrypt | N = 2^17, r = 8, p = 1 | when Argon2id is not available |
+| bcrypt | cost 10 or more | older systems; reads only the first 72 bytes of a password |
+| PBKDF2-HMAC-SHA256 | 600,000 iterations | when a certified algorithm (FIPS-140) is required |
+
+<Aside title="Work factor">
+
+The setting that makes a slow hash slower: the cost in bcrypt, the memory and passes in Argon2id, the iterations in PBKDF2. In bcrypt, one more step of cost doubles the time.
+
+</Aside>
+
+Two things I wish someone had told me early. First, don't write any of this yourself: every major language has a well-tested library, and the library also makes the salt for you. Second, the setting is a dial, not a constant. Guides suggest tuning it so one hash takes as long as your servers can afford, and raising it as hardware gets faster.
+
+A common claim online is that bcrypt "is no longer secure". The guides don't say that. OWASP still lists bcrypt with a work factor of 10 or more for older systems, and prefers Argon2id for new ones.[^owasp]
+
+## What it looks like in code
+
+<Aside title="Library">
+
+Code someone else wrote, tested and published so you can reuse it. For password hashing, use your language's well-known library instead of writing your own.
+
+</Aside>
+
+This section is for developers; if you don't write code, skip to the pepper. Here is the whole idea in Node.js, using only the built-in `crypto` module (Node 24.7 and later have Argon2 built in):
+
+```js
+import crypto from 'node:crypto'
+
+const settings = { parallelism: 1, tagLength: 32, memory: 19456, passes: 2 } // OWASP minimum for Argon2id
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16)
+  const hash = crypto.argon2Sync('argon2id', { message: password, nonce: salt, ...settings })
+  return { salt: salt.toString('base64'), hash: hash.toString('base64') } // store both
+}
+
+function checkPassword(typed, stored) {
+  const salt = Buffer.from(stored.salt, 'base64')
+  const hash = crypto.argon2Sync('argon2id', { message: typed, nonce: salt, ...settings })
+  return crypto.timingSafeEqual(hash, Buffer.from(stored.hash, 'base64'))
+}
+```
+
+Most libraries pack everything into one string, so the database needs one column. The salt, the method and its settings travel with the hash, which means you can raise the settings later without breaking old passwords:
+
+<LoginFlow />
+
+In a Spring Boot application, Spring Security does the same with a `PasswordEncoder`.[^spring] The usual choice is the delegating encoder, which writes the method's name in front of each hash, so a database can hold hashes made by different methods side by side. It writes new hashes with bcrypt by default; to write new ones with Argon2 you build the delegating encoder yourself with Argon2 as the encoding method (it needs the BouncyCastle library), and old bcrypt hashes keep working:
+
+```java
+@Bean
+PasswordEncoder passwordEncoder() {
+    return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+}
+
+// at sign-up
+String stored = passwordEncoder.encode(rawPassword);   // "{bcrypt}$2a$10$…"
+// at login
+boolean ok = passwordEncoder.matches(typed, stored);
+```
+
+Notice the comparison in the Node example uses `timingSafeEqual` instead of `==`. A normal comparison stops at the first difference. Imagine a guard who checks a PIN digit by digit and says no at the first wrong digit: by timing how fast the no comes, a patient listener learns when the first digit is right, then the second. A constant-time comparison is a guard who always checks every digit before answering.
+
+## Pepper: a secret the database doesn't have
+
+A salt is stored with the hash, so a leaked table includes the salts. A **pepper** is a second secret value, the same for every user, kept outside the database: in a secrets vault or a hardware security module, not in the database or the app's config files.[^owasp] If only the database leaks, the attacker cannot test a single guess without the pepper.
+
+Think of the salt as a note stuck on each jar, and the pepper as one master secret locked in a safe in another building. OWASP describes the careful way to use it: as the key of an HMAC (a hash that needs a secret key to compute), kept in a secrets vault or a hardware security module, a device built to hold keys.[^owasp] NIST also asks for the secret to be stored apart from the hashes, ideally in hardware.[^nist] A pepper pasted into a config file next to the code is much weaker, because the attacker who reaches the server often reaches that file too. One honest drawback applies to every version: if the pepper is ever lost or must be changed, every user has to set a new password. Pepper is an extra layer on top of a slow, salted hash, never a replacement for one.
+
+## The rules around the hash
+
+Storage is half of it. The other half is what you accept as a password and how you let people try. NIST, the US standards body, publishes rules that US federal agencies must follow and many companies adopt, and they surprise people:[^nist]
+
+- **Length beats complexity.** At least 15 characters when the password is the only proof (8 when the login also asks for a second proof, like a code from your phone), and allow at least 64, including spaces, so people can use passphrases.
+- **No forced mixtures.** Rules like "one capital, one digit, one symbol" lead to `Password1!`. NIST says not to impose them.
+- **No forced changes on a calendar.** Ask for a new password when there is evidence it leaked, not every 90 days.
+- **Check against known leaked passwords.** Refuse passwords that appear in breach lists or lists of common passwords.
+- **Limit failed attempts.** An attacker trying passwords against your live login page should be stopped: NIST allows at most 100 failed attempts in a row on one account.
+
+Checking breach lists sounds like it needs your user's password to leave the server. It doesn't. The Pwned Passwords service lets you send only the first five characters of the password's SHA-1 hash; it returns every leaked hash starting with those five characters, often hundreds of them, and your server checks the rest locally.[^hibp] It is like asking a librarian for every book whose code starts with `ab3f1`: you walk out with a whole shelf, and she cannot tell which book you wanted.
+
+## What you can do as a user
+
+You can't see how a website stores your password, so assume the worst. Use a different password for every site, so one leak opens one door. A password manager makes that possible, and a long random passphrase beats a short clever one. Turn on a second step, like a code from your phone, where it is offered. The table above shows why: a common password falls at once however well it is stored, and a long, unique one holds up far better, even when the storage is poor.
+
+## What's next
+
+A checked password answers one question: is this person who they say they are, right now? The next one is harder. How does the application remember you on the next click, without asking for the password again, and how does another service trust that you logged in somewhere else? That is the story of sessions, tokens, JWT, OAuth and OpenID Connect, and it is the next issue.
+
+## Recap
+
+- **Never store the password.** Plain text leaks everything; encryption leaks everything with the key.
+- **Hash:** a one-way fingerprint. Same input, same output; one letter changes it all.
+- **Plain hashes fail** because attackers hash lists of common passwords once and look stolen hashes up. My test cracked 4 of 5 users in 16 ms.
+- **Salt:** a random, public value per user that makes equal passwords look different and forces attackers to start over for each user.
+- **Slow hash:** Argon2id (first choice), scrypt, bcrypt or PBKDF2, tuned with a setting. The same attack went from 16 ms to an estimated 22 minutes.
+- **Pepper:** an optional secret kept outside the database, used as the key of an HMAC.
+- **Rules:** length over complexity, no calendar changes, block leaked passwords, limit attempts.
+
+<DeepDive title="Deep dive: run it yourself">
+
+The benchmark and the cracking test are two short Node.js files with no dependencies except Python's `bcrypt` module for the bcrypt rows. `bench.mjs` measures guesses per second for each method on one core; `crack.mjs` builds the five-user table three ways and attacks it with the 10,000-password list. Results vary with your processor. The settings I used are the OWASP minimums listed above.
+
+</DeepDive>
+
+[^renato]: Renato Augusto, "O que ninguém te ensinou sobre armazenar senhas no banco de dados!", YouTube, 2026-03-04 (in Portuguese). https://www.youtube.com/watch?v=VW2mywTTz80
+[^rockyou]: John Leyden, "RockYou password snafu exposes webmail accounts", The Register, 2009-12-16. https://www.theregister.com/2009/12/16/rockyou_password_snafu/
+[^seclists]: Daniel Miessler et al., SecLists, "10k-most-common.txt". https://github.com/danielmiessler/SecLists/blob/master/Passwords/Common-Credentials/10k-most-common.txt
+[^bench]: My measurements, 2026-10-31: Intel Core i5-10500H, Node.js 24.21, one thread; bcrypt via Python's bcrypt 3.2.0.
+[^owasp]: OWASP Cheat Sheet Series, "Password Storage Cheat Sheet". https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+[^nist]: NIST, "Digital Identity Guidelines: Authentication and Authenticator Management", SP 800-63B-4, July 2025. https://pages.nist.gov/800-63-4/sp800-63b.html
+[^hibp]: Have I Been Pwned, API v3, "Searching by hash range using k-anonymity". https://haveibeenpwned.com/API/v3
+[^hashcat]: Chick3nman, "RTX 5090 hashcat benchmarks", hashcat v6.2.6-851, February 2025 (bcrypt measured at 32 iterations, cost 5). https://gist.github.com/Chick3nman/09bac0775e6393468c2925c1e1363d5c
+[^linkedin]: KoreLogic, "LinkedIn Revisited - Full 2012 Hash Dump Analysis", 2016-05-18 (figures as of 2016-05-19). https://korelogic.com/blog/2016/05/19/linkedin-2012-hash-analysis
+[^spring]: Spring Security Reference, "Password Storage". https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html

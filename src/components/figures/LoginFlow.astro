@@ -1,0 +1,46 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+// Sign-up and login with Argon2id; the stored line shows the real format with salt and hash as placeholders.
+---
+
+<Figure caption="Sign-up and login. At sign-up the server makes a random salt, runs the slow hash and stores one line that holds the method, its settings, the salt and the result. At login it reads that line, runs the same method on what was typed, and compares. The password itself is never stored.">
+  <svg viewBox="0 0 400 300" role="img" aria-labelledby="f-login-t f-login-d">
+    <title id="f-login-t">How a server stores a password at sign-up and checks it at login</title>
+    <desc id="f-login-d">Top lane, sign-up: the typed password and a new random salt go into Argon2id, and the database stores one line: dollar argon2id, version 19, memory 19456 kibibytes, 2 passes, parallelism 1, then the salt, then the hash. Bottom lane, login: the typed password and the salt read back from that stored line go into Argon2id again; if the new result equals the stored hash, the user is let in, otherwise not.</desc>
+    <defs><Arrow id="f-login-a" /></defs>
+    <text x="0" y="16" class="t-strong">Sign-up</text>
+    <rect x="0" y="28" width="96" height="40" rx="6" class="box" />
+    <text x="48" y="53" text-anchor="middle" class="t-mono t-small">123456</text>
+    <rect x="0" y="76" width="96" height="40" rx="6" class="box" />
+    <text x="48" y="101" text-anchor="middle" class="t-small">random salt</text>
+    <path d="M98 48 H144 V66" class="wire" />
+    <path d="M98 96 H144 V78" class="wire" />
+    <path d="M144 72 H156" class="wire" marker-end="url(#f-login-a)" />
+    <rect x="160" y="52" width="90" height="40" rx="6" class="box-alt" />
+    <text x="205" y="77" text-anchor="middle" class="t-strong">Argon2id</text>
+    <path d="M252 72 H268" class="wire" marker-end="url(#f-login-a)" />
+    <rect x="272" y="36" width="128" height="72" rx="6" class="box-accent" />
+    <text x="336" y="56" text-anchor="middle" class="t-mono t-small t-on-accent">$argon2id$v=19$</text>
+    <text x="336" y="74" text-anchor="middle" class="t-mono t-small t-on-accent">m=19456,t=2,p=1$</text>
+    <text x="336" y="92" text-anchor="middle" class="t-mono t-small t-on-accent">salt$hash</text>
+    <text x="400" y="126" text-anchor="end" class="t-small t-muted">in the database</text>
+
+    <text x="0" y="170" class="t-strong">Login</text>
+    <rect x="0" y="182" width="96" height="40" rx="6" class="box" />
+    <text x="48" y="207" text-anchor="middle" class="t-small">stored salt</text>
+    <rect x="0" y="230" width="96" height="40" rx="6" class="box" />
+    <text x="48" y="255" text-anchor="middle" class="t-mono t-small">typed text</text>
+    <path d="M284 110 V140 H60 V178" class="wire dash" marker-end="url(#f-login-a)" />
+    <path d="M98 202 H144 V220" class="wire" />
+    <path d="M98 250 H144 V232" class="wire" />
+    <path d="M144 226 H156" class="wire" marker-end="url(#f-login-a)" />
+    <rect x="160" y="206" width="90" height="40" rx="6" class="box-alt" />
+    <text x="205" y="231" text-anchor="middle" class="t-strong">Argon2id</text>
+    <path d="M252 226 H268" class="wire" marker-end="url(#f-login-a)" />
+    <rect x="272" y="198" width="128" height="56" rx="6" class="box" />
+    <text x="336" y="220" text-anchor="middle" class="t-small t-strong">same as stored?</text>
+    <text x="336" y="240" text-anchor="middle" class="t-small">yes: let in · no: refuse</text>
+  </svg>
+</Figure>

@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro'
+import { dateFormat } from '../lib/article.ts'
+import { publishedPosts } from '../lib/posts.ts'
+
+const posts = await publishedPosts()
+---
+
+<Base title="All issues" description="Every issue of the blog, newest first.">
+  <div class="column page">
+    <section class="index" aria-labelledby="issues-h">
+      <h1 id="issues-h">All issues</h1>
+      <ol>
+        {
+          posts.map((p) => (
+            <li>
+              <span class="n">No. {p.issue}</span>
+              <a href={p.path}>{p.data.title}</a>
+              <time class="when" datetime={p.published.toISOString().slice(0, 10)}>
+                {dateFormat.format(p.published)}
+              </time>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+  </div>
+</Base>

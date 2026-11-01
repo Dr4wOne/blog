@@ -6,6 +6,9 @@ import { SITE } from '../site.ts'
 
 const posts = await publishedPosts()
 const [latest] = posts
+// Home keeps a fixed height: the newest issues only, the rest on /issues/ (empty-screens judge, 2026-10-31).
+const RECENT = 4
+const recent = posts.slice(0, RECENT)
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Blog',
@@ -49,10 +52,10 @@ const jsonLd = {
       )
     }
     <section id="issues" class="index" aria-labelledby="issues-h">
-      <h2 id="issues-h">All issues</h2>
+      <h2 id="issues-h">Recent issues</h2>
       <ol>
         {
-          posts.map((p) => (
+          recent.map((p) => (
             <li>
               <span class="n">No. {p.issue}</span>
               <a href={p.path}>{p.data.title}</a>
@@ -63,6 +66,7 @@ const jsonLd = {
           ))
         }
       </ol>
+      {posts.length > RECENT && <p class="all-issues"><a href="/issues/">All {posts.length} issues</a></p>}
     </section>
   </div>
 </Base>
