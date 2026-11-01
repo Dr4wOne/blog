@@ -1,0 +1,31 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+// The hotel picture for authentication, authorization and offline token checks.
+---
+
+<Figure caption="A hotel key card. The front desk checks your passport once (authentication) and writes on the card what you may open and until when (authorization). The door reads the card by itself and never calls the desk. A token works the same way: the login server checks you once, and the API reads the token on its own.">
+  <svg viewBox="0 0 400 200" role="img" aria-labelledby="f-card-t f-card-d">
+    <title id="f-card-t">Front desk issues a key card; the door checks it alone</title>
+    <desc id="f-card-d">Left: the front desk checks a passport, labelled authentication. Middle: a key card that says room 312, until Thursday, labelled the token and its authorization. Right: a door with a card reader that decides on its own, with a crossed-out dashed line back to the desk showing that the door does not call the desk.</desc>
+    <defs><Arrow id="f-card-a" /></defs>
+    <rect x="0" y="40" width="110" height="80" rx="6" class="box" />
+    <text x="55" y="66" text-anchor="middle" class="t-strong">Front desk</text>
+    <text x="55" y="88" text-anchor="middle" class="t-small">checks passport</text>
+    <text x="55" y="108" text-anchor="middle" class="t-small t-muted">authentication</text>
+    <path d="M112 80 H142" class="wire" marker-end="url(#f-card-a)" />
+    <rect x="146" y="50" width="104" height="60" rx="6" class="box-accent" />
+    <text x="198" y="74" text-anchor="middle" class="t-strong t-on-accent">Room 312</text>
+    <text x="198" y="94" text-anchor="middle" class="t-small t-on-accent">until Thursday</text>
+    <text x="198" y="140" text-anchor="middle" class="t-small t-muted">token: what and until when</text>
+    <path d="M252 80 H282" class="wire" marker-end="url(#f-card-a)" />
+    <rect x="286" y="30" width="114" height="100" rx="6" class="box" />
+    <text x="343" y="62" text-anchor="middle" class="t-strong">Door 312</text>
+    <text x="343" y="84" text-anchor="middle" class="t-small">reads the card</text>
+    <text x="343" y="102" text-anchor="middle" class="t-small">decides alone</text>
+    <path d="M343 132 V182 H55 V122" class="wire dash" />
+    <text x="150" y="174" text-anchor="middle" class="t-small t-muted">no call back to the desk</text>
+    <path d="M282 174 L298 190 M298 174 L282 190" class="wire-accent" />
+  </svg>
+</Figure>

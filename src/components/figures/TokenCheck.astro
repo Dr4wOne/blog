@@ -1,0 +1,44 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+// The resource server's checks, in order, with the real answers from projects/inbox/09-examples.
+const checks = [
+  { t: 'key by kid (JWKS, cached)', fail: '' },
+  { t: 'signature', fail: '401' },
+  { t: 'issuer (iss)', fail: '401' },
+  { t: 'time (exp, nbf)', fail: '401' },
+  { t: 'audience (aud)', fail: '401' },
+  { t: 'scope', fail: '403' },
+]
+---
+
+<Figure caption="What the API checks, in order. It finds the signing key by its kid in the JWKS (downloaded from the JWKS, then kept in memory for a few minutes), checks the signature, the issuer, the time, the audience and finally the scope. A failure in the first checks gives 401, unknown caller; a missing scope gives 403, known caller without permission.">
+  <svg viewBox="0 0 400 270" role="img" aria-labelledby="f-check-t f-check-d">
+    <title id="f-check-t">How a resource server validates a JWT</title>
+    <desc id="f-check-d">A vertical chain of six checks. First the key is found by its kid in the JWKS, which the API downloads from the login server and then caches for a few minutes. Then the signature, the issuer, the time and the audience are checked; a failure in any of these gives 401 Unauthorized. Last the scope is checked; a missing scope gives 403 Forbidden. If every check passes, the API answers 200 OK.</desc>
+    <defs><Arrow id="f-check-a" /></defs>
+    <rect x="0" y="0" width="110" height="44" rx="6" class="box-alt" />
+    <text x="55" y="20" text-anchor="middle" class="t-small t-strong">Login server</text>
+    <text x="55" y="36" text-anchor="middle" class="t-mono t-small">/oauth2/jwks</text>
+    <path d="M112 22 H124" class="wire dash" marker-end="url(#f-check-a)" />
+    <text x="60" y="62" text-anchor="middle" class="t-small t-muted">fetched, then cached</text>
+    {
+      checks.map((c, i) => {
+        const y = i * 38
+        return (
+          <g>
+            <rect x="128" y={y} width="170" height="30" rx="5" class="box" />
+            <text x="213" y={y + 20} text-anchor="middle" class="t-small">{`${i + 1}. ${c.t}`}</text>
+            {c.fail && <path d={`M300 ${y + 15} H330`} class="wire" marker-end="url(#f-check-a)" />}
+            {c.fail && <text x="336" y={y + 20} class={c.fail === '403' ? 't-small t-strong t-accent' : 't-small t-strong'}>{c.fail}</text>}
+            {i < checks.length - 1 && <path d={`M213 ${y + 31} V${y + 36}`} class="wire" />}
+          </g>
+        )
+      })
+    }
+    <path d="M213 221 V238" class="wire" marker-end="url(#f-check-a)" />
+    <rect x="148" y="242" width="130" height="26" rx="5" class="box-accent" />
+    <text x="213" y="260" text-anchor="middle" class="t-small t-strong t-on-accent">200 OK</text>
+  </svg>
+</Figure>
