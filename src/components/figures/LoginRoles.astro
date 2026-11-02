@@ -1,0 +1,52 @@
+---
+import Arrow from './Arrow.astro'
+import Figure from './Figure.astro'
+
+// The four OAuth 2.0 roles and the authorization code flow with PKCE, as run in projects/inbox/09-examples.
+const steps = [
+  { y: 80, from: 0, to: 2, text: '1. log in here, with a PKCE hash' },
+  { y: 114, from: 2, to: 1, text: '2. one-time code' },
+  { y: 148, from: 1, to: 2, text: '3. code + PKCE secret' },
+  { y: 182, from: 2, to: 1, text: '4. access token (+ ID token)' },
+  { y: 216, from: 1, to: 3, text: '5. Bearer token' },
+]
+const cols = [
+  { name: 'You', sub: ['resource owner'] },
+  { name: 'App', sub: ['client'] },
+  { name: 'Login server', sub: ['authorization', 'server'] },
+  { name: 'API', sub: ['resource server'] },
+]
+const cx = (i: number) => 50 + i * 100
+---
+
+<Figure caption="The four roles of OAuth 2.0 in a login with a browser. You log in at the authorization server, never in the app. The app gets a one-time code, trades it for tokens with the PKCE secret, and sends the access token to the API with each request.">
+  <svg viewBox="0 0 400 246" role="img" aria-labelledby="f-roles-t f-roles-d">
+    <title id="f-roles-t">The OAuth 2.0 authorization code flow with PKCE</title>
+    <desc id="f-roles-d">Four columns: you, the resource owner; the app, the client; the login server, the authorization server; the API, the resource server. Step 1: you log in at the login server, and the app's request carries a PKCE hash. Step 2: the login server sends the app a one-time code. Step 3: the app sends the code and the PKCE secret to the login server. Step 4: the login server returns an access token and, with OpenID Connect, an ID token. Step 5: the app sends the access token to the API as a bearer token.</desc>
+    <defs><Arrow id="f-roles-a" /></defs>
+    {
+      cols.map((c, i) => (
+        <g>
+          <rect x={cx(i) - 46} y="0" width="92" height="54" rx="6" class={i === 2 ? 'box-accent' : 'box'} />
+          <text x={cx(i)} y="20" text-anchor="middle" class={i === 2 ? 't-strong t-on-accent' : 't-strong'}>{c.name}</text>
+          {c.sub.map((l, k) => <text x={cx(i)} y={35 + k * 13} text-anchor="middle" class={i === 2 ? 't-small t-on-accent' : 't-small t-muted'}>{l}</text>)}
+          <path d={`M${cx(i)} 56 V240`} class="wire dash" />
+        </g>
+      ))
+    }
+    {
+      steps.map((s) => {
+        const a = cx(s.from)
+        const b = cx(s.to)
+        const dir = b > a ? -6 : 6
+        return (
+          <g>
+            <path d={`M${a} ${s.y} H${b + dir}`} class="wire" marker-end="url(#f-roles-a)" />
+            <rect x={(a + b) / 2 - s.text.length * 3.3 - 5} y={s.y - 21} width={s.text.length * 6.6 + 10} height="18" rx="4" class="box" />
+            <text x={(a + b) / 2} y={s.y - 8} text-anchor="middle" class="t-small">{s.text}</text>
+          </g>
+        )
+      })
+    }
+  </svg>
+</Figure>

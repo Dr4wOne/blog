@@ -1,0 +1,52 @@
+---
+import Figure from './Figure.astro'
+
+// The real access token from projects/inbox/09-examples (dr4w-motion), shortened, and what each part holds.
+const parts = [
+  {
+    name: 'Header',
+    raw: 'eyJraWQiOiIx…',
+    lines: ['alg: RS256', 'kid: 119c8acc…'],
+    note: 'how it was signed',
+  },
+  {
+    name: 'Payload',
+    raw: 'eyJzdWIiOiJk…',
+    lines: ['iss, sub, aud', 'exp, scope'],
+    note: 'readable by anyone',
+    accent: true,
+  },
+  {
+    name: 'Signature',
+    raw: 'yWgEG2c5PUrp…',
+    lines: ['256 bytes', 'private key made it'],
+    note: 'proves no edits',
+  },
+]
+const W = 124
+const G = 14
+---
+
+<Figure caption="A JWT is three parts joined by dots: a header, a payload of claims and a signature. The first two are only encoded, so anyone can read them; the signature proves that nobody changed a character. These are the first characters of a real token my authorization server issued.">
+  <svg viewBox="0 0 400 210" role="img" aria-labelledby="f-jwt-t f-jwt-d">
+    <title id="f-jwt-t">The three parts of a JSON Web Token</title>
+    <desc id="f-jwt-d">Three columns joined by dots. Header, starting eyJraWQiOiIx, holds alg RS256 and the key id 119c8acc, and says how the token was signed. Payload, starting eyJzdWIiOiJk, highlighted, holds the claims iss, sub, aud, exp and scope and is readable by anyone. Signature, starting yWgEG2c5PUrp, is 256 bytes made with the private key and proves that nothing changed.</desc>
+    {
+      parts.map((p, i) => {
+        const x = i * (W + G)
+        const cx = x + W / 2
+        return (
+          <g>
+            <text x={cx} y="18" text-anchor="middle" class="t-strong">{p.name}</text>
+            <rect x={x} y="30" width={W} height="34" rx="5" class={p.accent ? 'box-accent' : 'box'} />
+            <text x={cx} y="52" text-anchor="middle" class={p.accent ? 't-mono t-small t-on-accent' : 't-mono t-small'}>{p.raw}</text>
+            {i < 2 && <text x={x + W + G / 2} y="54" text-anchor="middle" class="t-strong t-large">.</text>}
+            <rect x={x} y="78" width={W} height="64" rx="5" class="box-alt" />
+            {p.lines.map((l, k) => <text x={cx} y={102 + k * 22} text-anchor="middle" class="t-small">{l}</text>)}
+            <text x={cx} y="168" text-anchor="middle" class="t-small t-muted">{p.note}</text>
+          </g>
+        )
+      })
+    }
+  </svg>
+</Figure>

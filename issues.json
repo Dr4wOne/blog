@@ -40,6 +40,11 @@
       "issue": 8,
       "slug": "password-storage",
       "published": "2026-11-01"
+    },
+    {
+      "issue": 9,
+      "slug": "how-login-works",
+      "published": "2026-11-01"
     }
   ]
 }

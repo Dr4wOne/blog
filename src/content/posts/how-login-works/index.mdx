@@ -1,0 +1,268 @@
+---
+updated: 2026-11-01
+published: 2026-11-01
+issue: 9
+slug: how-login-works
+title: How login works
+summary: "How does an app know it is you on every click, and what you may do? Sessions, tokens, JWT, OAuth 2.0, OpenID Connect and JWKS, shown with two real Spring Boot servers."
+tags: [security, oauth, java, spring]
+draft: false
+---
+
+import Aside from '../../../components/Aside.astro'
+import DeepDive from '../../../components/DeepDive.astro'
+import KeyCard from '../../../components/figures/KeyCard.astro'
+import JwtParts from '../../../components/figures/JwtParts.astro'
+import LoginRoles from '../../../components/figures/LoginRoles.astro'
+import TokenCheck from '../../../components/figures/TokenCheck.astro'
+
+<Aside title="In short">
+
+Logging in answers two questions: who are you, and what may you do? Today an app usually answers them with a token: a short, signed note from a trusted server that says who you are, what you may do and when the note expires. OAuth 2.0 is the set of rules for getting such a token, OpenID Connect adds a standard way to say who the user is, and a JWT is the usual format of the note. The API that receives the token checks the signature with public keys it downloads from a list called a JWKS and keeps in memory. I ran two small Spring Boot servers to show every step with real output. A short glossary sits at the end, in the [recap](#recap).
+
+</Aside>
+
+## The question
+
+In the [last issue](/08-password-storage/) a server checked a password. That answers one question, once: is this person who they say they are, right now? But you click again a second later, and again after that. The app can't ask for your password on every click. And often the part of the system that checked your password is not the part that serves your data.
+
+So there are really two questions:
+
+- **Authentication**: who are you?
+- **Authorization**: what are you allowed to do?
+
+This post follows one login from the start, through the server that checks who you are, to the note it gives you, to the API that reads that note. I ran every step on my laptop with two small Spring Boot applications, and the outputs below are real.
+
+## A hotel key card
+
+The easiest picture is a hotel. At the front desk you show your passport: that is authentication. The desk gives you a key card for room 312, valid until Thursday: that is a token, and "room 312 until Thursday" is the authorization written on it.
+
+<KeyCard />
+
+The important part is what happens at the door. The door doesn't call the front desk every time you come back. It reads the card and decides on its own. That is what makes key cards fast, and it is the same reason modern logins use tokens: the API can check the token by itself, without asking the login server on every request.
+
+## Remembering you: sessions and tokens
+
+There are two common ways for a website to remember you after you log in.
+
+A **session** keeps the memory on the server. After your password is checked, the server stores a record ("visitor 7f3a… is alice, logged in at 10:02") and sends your browser a random session id in a cookie. On every click the browser sends the cookie back and the server looks the id up. The cookie itself means nothing; the server's memory is the truth.
+
+A **token** puts the memory in the note itself. The note says "this is alice, she may read messages, valid until 10:07", and it is signed so nobody can change it. Any server that trusts the signer can read it without looking anything up.
+
+Both are fine. Sessions are simple when one application does everything. Tokens shine when many services must trust the same login, or when the service that checks the password is a separate server, which is where OAuth comes in.
+
+<Aside title="Cookie">
+
+A small piece of text a website asks your browser to keep and send back on every request to that site. Sessions use one to carry a random id.
+
+</Aside>
+
+## Inside a token: the JWT
+
+The most common token format is the **JWT**, JSON Web Token, usually said "jot". On the wire it is a long string with two dots in it: three parts, each written in base64url, a way of turning bytes into plain letters and digits.[^rfc7515] Encoding is only another alphabet: anyone can translate it back. Encryption is different, because it needs a key.
+
+<JwtParts />
+
+Here is the access token my authorization server issued, decoded:[^demo]
+
+```json
+{ "kid": "119c8acc-6bb3-4689-8752-dc7151f88618", "alg": "RS256" }
+```
+
+```json
+{
+  "sub": "demo-client",
+  "aud": "demo-client",
+  "nbf": 1793504607,
+  "scope": ["messages.read"],
+  "iss": "http://localhost:9000",
+  "exp": 1793504907,
+  "iat": 1793504607,
+  "jti": "6fd24625-1812-4339-930a-e01b7153c6cf"
+}
+```
+
+The first part is the **header**: `alg` says how it was signed (RS256, a common signing method) and `kid` says which key signed it. The second part is the **payload**, a set of **claims**:[^rfc7519]
+
+| Claim | Means | In my token |
+|---|---|---|
+| `iss` | issuer: who made the token | `http://localhost:9000` |
+| `sub` | subject: who the token is about | `demo-client` |
+| `aud` | audience: who the token is meant for | `demo-client` |
+| `exp` | expires: not valid from this time on | 300 seconds after `iat` |
+| `iat` / `nbf` | issued at / not valid before | the moment it was made |
+| `scope` | what the holder may do | `messages.read` |
+
+The times are seconds since 1 January 1970. This token lived for 300 seconds, five minutes.[^demo] The third part is the **signature**: 256 bytes, made with the server's private RSA key.
+
+One thing surprises almost everyone: the payload is not secret. It is only encoded, not encrypted, so anyone who gets the token can read every claim.[^owasp] I decoded mine with ten lines of JavaScript. Never put a password or anything private in a JWT. What the signature gives you is not secrecy but proof: nobody can change a single character without the signature breaking.
+
+<Aside title="Signature">
+
+Think of a wax seal. Only the sender has the seal stamp (the private key); everyone has a picture of the seal (the public key) and can check that the wax is unbroken and genuine, but cannot make a new one.
+
+</Aside>
+
+## Who gives out the token: OAuth 2.0
+
+OAuth 2.0 is the standard set of rules for handing out these tokens.[^rfc6749] It names four roles:
+
+- the **resource owner**: the user, alice;
+- the **client**: the app that wants to act, for example a web page or another service;
+- the **authorization server**: the front desk, which checks who you are and issues tokens;
+- the **resource server**: the API with the data, which accepts tokens.
+
+<LoginRoles />
+
+OAuth defines several ways, called grants, to get a token. Two matter today:
+
+**Client credentials** is for machines. A service logs in with its own id and secret and gets a token for itself; no person is involved. This is the token you saw above, which is why its `sub` is `demo-client`.
+
+**Authorization code with PKCE** is for people. The app sends you to the authorization server's login page. You log in there, never in the app, and the server sends the browser back to the app with a one-time code. That is a redirect: the server tells the browser to open the app's address, and the code rides along in the link, where it can be seen. The app then exchanges the code for tokens. PKCE (said "pixy") protects that exchange: the app first makes a random secret, sends only its hash (a one-way fingerprint, as in the [last issue](/08-password-storage/)) with the login request, and must show the original secret when it trades the code.[^rfc7636] A thief who catches the code in the redirect can't use it without the secret. In my test, trying to use the same code a second time failed with `invalid_grant`.[^demo]
+
+Two older grants are now ruled out. The password grant, where an app collects your password itself, must not be used, and the implicit grant, which handed tokens straight to the browser, should not be used.[^rfc9700] The next version of the standard, OAuth 2.1, drops both and is still a draft.[^oauth21]
+
+## Who you are: OpenID Connect
+
+OAuth was designed for access: "this app may read your messages". It says nothing standard about who the user is. **OpenID Connect** adds that layer on top of OAuth.[^oidc] When the app asks for the `openid` scope, it gets a second token, the **ID token**, a JWT about the login itself: who logged in (`sub`), when (`auth_time`), and for which app (`aud`). The ID token is for the app, to know who you are; the access token is for the API, to know what you may do.
+
+OpenID Connect also standardised **discovery**: an OpenID Connect server that supports it publishes a small JSON file at `/.well-known/openid-configuration` that lists its addresses, including where its public keys are.[^oidcdisc] Mine listed `"jwks_uri": "http://localhost:9000/oauth2/jwks"`.[^demo]
+
+<Aside title="JWKS">
+
+JSON Web Key Set: a public list of the keys a server signs with, each with an id (`kid`). Anyone may download it; it holds only public keys.[^rfc7517]
+
+</Aside>
+
+## How the API checks a token
+
+Now the door. When a request arrives with `Authorization: Bearer eyJ…` (bearer means whoever carries the token may use it), the resource server checks the token in a fixed order:
+
+<TokenCheck />
+
+1. **Find the key.** Read `kid` from the header and look it up in the JWKS. The first time, the server downloads the JWKS; after that it keeps the keys in memory for a few minutes (five in Spring) and downloads them again when they expire.
+2. **Check the signature** with that public key. If one character of the token changed, this fails.
+3. **Check the issuer** (`iss`): did my trusted authorization server make this?
+4. **Check the time** (`exp`, `nbf`): is it still valid?
+5. **Check the audience** (`aud`): was it made for me?
+6. **Check the scope**: may the holder do this particular thing?
+
+This is what my resource server answered:[^demo]
+
+| Request | Answer |
+|---|---|
+| no token | 401 Unauthorized |
+| valid token with `messages.read` | 200 OK |
+| same token with one character changed | 401, "Invalid signature" |
+| token signed with a different key | 401, "Invalid signature" |
+| valid token without `messages.read` | 403 Forbidden, "insufficient_scope" |
+
+401 means "I don't know who you are"; 403 means "I know who you are, and you may not do this".
+
+After the first request, the keys were already in memory. That first request with a token took about 216 milliseconds, because the resource server fetched the discovery file and the keys; the next calls took about 3 milliseconds. Over 55 requests, the resource server asked for the keys exactly once.[^demo] That is the key card at the door: no phone call to the front desk.
+
+The `kid` is what makes changing keys painless. When the authorization server starts signing with a new key, it publishes both keys for a while; a token names its key, and a resource server that sees an unknown `kid` downloads the set again.[^oidc]
+
+## The same thing in Spring Boot
+
+Both servers took very little code. The authorization server, using Spring Authorization Server (now part of Spring Security 7), has no Java configuration, only the standard Spring Boot main class. The clients live in `application.yml`:[^springas]
+
+```yaml
+spring:
+  security:
+    oauth2:
+      authorizationserver:
+        issuer: http://localhost:9000
+        client:
+          demo-client:
+            registration:
+              client-id: demo-client
+              client-secret: "{noop}demo-secret"
+              client-authentication-methods: client_secret_basic
+              authorization-grant-types: client_credentials
+              scopes: messages.read
+```
+
+`{noop}` means the secret is stored as plain text, which is fine for a demo and nothing else: the [previous issue](/08-password-storage/) is about why. The resource server needs one property:[^springrs]
+
+```yaml
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000
+```
+
+With only `issuer-uri`, Spring reads the discovery file at that address plus `/.well-known/openid-configuration`, finds `jwks_uri` in it, downloads the keys and checks signature, issuer and time on every request. Spring calls a permission an authority; each scope becomes one with the prefix `SCOPE_`, so the rules read like this:[^springrs]
+
+```java
+http
+    .authorizeHttpRequests(auth -> auth
+        .requestMatchers("/hello").permitAll()
+        .requestMatchers("/messages").hasAuthority("SCOPE_messages.read")
+        .anyRequest().authenticated())
+    .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+```
+
+One default to know: Spring checks the audience only if you configure it, with the `audiences` property.[^springrs] Without it, a token your authorization server made for a different API would also be accepted. Set it. Spring also trusts only RS256 signatures by default and allows 60 seconds of clock difference between servers.[^springrs]
+
+<Aside title="Scope">
+
+A named permission the client asked for and the authorization server granted, such as `messages.read`. The API decides what each scope allows.
+
+</Aside>
+
+<DeepDive title="Deep dive: run it yourself">
+
+The two applications are a few dozen lines each: an authorization server whose clients live in `application.yml`, and a resource server with one security rule. Scripts start both, request a token with curl, decode it, change one character, sign a token with a different key and call the API with each. I used Spring Boot 4.1.2, Spring Security 7.1.2 and Java 25. The resource server ran on port 8082 because another program was using 8080. The RSA key is generated at every start, so your `kid` and signature will differ.
+
+</DeepDive>
+
+## What goes wrong
+
+Most token disasters come from skipping a check, not from broken mathematics.
+
+**Trusting the token's own `alg`.** Some libraries once accepted a token whose header said `"alg": "none"`, an unsigned token, as if it were signed.[^mclean] Others could be tricked into accepting an HMAC-signed token, checked with the server's public RSA key as the HMAC secret, so anyone could forge tokens; in the Node.js library `jsonwebtoken` this was CVE-2015-9235.[^nvd][^rfc8725] The fix is to tell your library which algorithm you expect, and reject everything else. Spring does that by default.
+
+**Skipping the audience.** A token for one API should not open another.
+
+**Tokens that live too long.** A bearer token works for whoever holds it, like cash.[^rfc6750] Keep access tokens short, minutes not days, and use a **refresh token** to get a new one.[^rfc6749] For apps that can't keep a secret, refresh tokens must be rotated or bound to the client: each use returns a new refresh token and kills the old one.[^rfc9700]
+
+**Tokens in the browser's storage.** Anything in `localStorage` can be read by any script that runs on the page.[^rfc10017] The safest pattern for browser apps today is a backend for frontend: a small server of your own does the OAuth work and keeps the tokens, and the browser only holds a cookie marked `Secure`, `HttpOnly` and `SameSite=Strict`.[^rfc10017]
+
+**Revocation.** Because the API checks tokens on its own, it keeps accepting a revoked token until the token expires. That is the price of not calling the front desk, and another reason to keep tokens short. If you must check every time, OAuth also defines introspection: the API asks the authorization server whether a token is still active.[^rfc7662]
+
+## What you can do
+
+If you build an API: don't write token checking yourself; use your framework's resource server support, set the issuer and the audience, require a scope for every endpoint, and keep access tokens to minutes. If you build a web app: use authorization code with PKCE, and keep tokens out of `localStorage`. If you just use apps: the login page you type your password into should belong to the service you know, not to the app that sent you there. That is the whole point of OAuth.
+
+## Recap
+
+- **Authentication** asks who you are; **authorization** asks what you may do.
+- A **session** keeps your login on the server; a **token** carries it in a signed note.
+- A **JWT** is header, payload and signature. The payload is readable by anyone; the signature proves nobody changed it.
+- **OAuth 2.0** hands out tokens: client credentials for machines, authorization code with **PKCE** for people. The password grant must not be used, and the implicit grant should not be.
+- **OpenID Connect** adds the **ID token** (who logged in) and discovery.
+- The API checks the token alone: key from the **JWKS** by `kid`, signature, issuer, time, audience, scope. My resource server fetched the keys once and then answered in about 3 ms.
+- In Spring Boot, `issuer-uri` does most of it; add `audiences` and `SCOPE_` rules yourself.
+
+[^demo]: My demo, 2026-11-01: Spring Boot 4.1.2, Spring Security 7.1.2, OpenJDK 25; authorization server on port 9000, resource server on port 8082.
+[^rfc7515]: IETF, RFC 7515, "JSON Web Signature (JWS)", 2015. https://www.rfc-editor.org/rfc/rfc7515
+[^rfc7519]: IETF, RFC 7519, "JSON Web Token (JWT)", 2015. https://www.rfc-editor.org/rfc/rfc7519
+[^owasp]: OWASP Cheat Sheet Series, "JSON Web Token Cheat Sheet". https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_Cheat_Sheet.html
+[^rfc6749]: IETF, RFC 6749, "The OAuth 2.0 Authorization Framework", 2012. https://www.rfc-editor.org/rfc/rfc6749
+[^rfc7636]: IETF, RFC 7636, "Proof Key for Code Exchange by OAuth Public Clients", 2015. https://www.rfc-editor.org/rfc/rfc7636
+[^rfc9700]: IETF, RFC 9700, "Best Current Practice for OAuth 2.0 Security", January 2025. https://www.rfc-editor.org/rfc/rfc9700
+[^oauth21]: IETF, "The OAuth 2.1 Authorization Framework", draft-ietf-oauth-v2-1-17, October 2026. https://www.ietf.org/archive/id/draft-ietf-oauth-v2-1-17.txt
+[^oidc]: OpenID Foundation, "OpenID Connect Core 1.0" (errata set 2), 2023. https://openid.net/specs/openid-connect-core-1_0.html
+[^oidcdisc]: OpenID Foundation, "OpenID Connect Discovery 1.0" (errata set 2), 2023. https://openid.net/specs/openid-connect-discovery-1_0.html
+[^rfc7517]: IETF, RFC 7517, "JSON Web Key (JWK)", 2015. https://www.rfc-editor.org/rfc/rfc7517
+[^springas]: Spring Security Reference 7.1, "OAuth 2.1 Authorization Server: Getting Started". https://docs.spring.io/spring-security/reference/servlet/oauth2/authorization-server/getting-started.html
+[^springrs]: Spring Security Reference 7.1, "OAuth 2.0 Resource Server JWT". https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html
+[^mclean]: Tim McLean, "Critical vulnerabilities in JSON Web Token libraries", Auth0 blog, 2015. https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/
+[^nvd]: NIST National Vulnerability Database, CVE-2015-9235. https://nvd.nist.gov/vuln/detail/CVE-2015-9235
+[^rfc8725]: IETF, RFC 8725, "JSON Web Token Best Current Practices", 2020. https://www.rfc-editor.org/rfc/rfc8725
+[^rfc6750]: IETF, RFC 6750, "The OAuth 2.0 Authorization Framework: Bearer Token Usage", 2012. https://www.rfc-editor.org/rfc/rfc6750
+[^rfc10017]: IETF, RFC 10017, "OAuth 2.0 for Browser-Based Applications", August 2026. https://www.rfc-editor.org/rfc/rfc10017
+[^rfc7662]: IETF, RFC 7662, "OAuth 2.0 Token Introspection", 2015. https://www.rfc-editor.org/rfc/rfc7662
