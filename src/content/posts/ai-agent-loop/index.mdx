@@ -1,0 +1,204 @@
+---
+updated: 2026-11-06
+published: 2026-11-06
+issue: 10
+slug: ai-agent-loop
+title: "Your AI agent is just a loop"
+summary: "What happens between \"you ask\" and \"the agent answers\"? A model call, a tool call, a result and a loop around them: every step, the Java to build one, and the stop rules to add."
+tags: [ai, agents, java]
+draft: false
+---
+
+import Aside from '../../../components/Aside.astro'
+import AgentLoop from '../../../components/figures/AgentLoop.astro'
+
+What actually happens between "you ask" and "the agent answers"? A model call, a tool call, a result, and a loop around them. Here is every step, the Java to build one, and the stop rules a backend engineer adds before shipping it.
+
+## The picture in your head is wrong
+
+Watch Claude Code fix a failing test and it looks like something is thinking: it runs the tests, reads a file, edits it, runs the tests again. It is easy to picture a mind that plans, works and keeps going on its own.
+
+That picture is wrong in a useful way. Anthropic's own definition of an agent is short: agents "are typically just LLMs using tools based on environmental feedback in a loop."[^1] The Claude Code docs describe the same thing as an "agentic loop" of gathering context, taking action and verifying results.[^2] Strip the product away and what is left is a `while` loop that you could write this afternoon. Once I saw it that way, agents stopped feeling like magic and started feeling like any other service I would build, test and put limits on.
+
+## The model is a function
+
+Start with the piece that feels the most like magic: the model.
+
+From your code's point of view, a model call is an HTTP request. You send text in, you get text back. The Messages API docs say it plainly: "The Messages API is stateless, which means that you always send the full conversational history to the API."[^3] The model does not remember the last call. Your code keeps the list of messages and sends all of it, every time.
+
+<Aside title="Deep dive: message threads">
+
+There is a beta feature, message threads, that lets the API keep the conversation for a few minutes so you only send new messages.[^3] It changes where the history is stored, not how the loop works.
+
+</Aside>
+
+So between two calls, nothing is running for you on the model side. No planning, no background thought. The "memory" of an agent is a `List<MessageParam>` in your process.
+
+## Tools are a menu, not hands
+
+A tool is a description you send with the request: a name, a sentence about what it does, and a JSON schema for its input.[^4] The model never gets your code. The docs: "The model never runs anything on its own. It emits a structured request, your code (or Anthropic's servers) runs the operation, and the result flows back into the conversation."[^5]
+
+OpenAI's function calling works the same way: "When the model calls a function, you must execute it and return the result."[^6]
+
+So a tool call is the model saying "please run `get_order_status` with `{"orderId": "A-1042"}`". Your code decides whether to run it, runs it, and pastes the answer back.
+
+## The loop, step by step
+
+Put the two together and you have the whole agent. The Claude docs list five steps:[^5]
+
+1. Send a request with your `tools` and the user's message.
+2. The model answers with `stop_reason: "tool_use"` and one or more `tool_use` blocks.
+3. Your code runs each tool and wraps the output in a `tool_result` block.
+4. Send a new request: the old messages, the model's answer, and the tool results.
+5. Repeat while `stop_reason` is `"tool_use"`.
+
+The loop ends on any other stop reason, such as `end_turn` (the model finished), `max_tokens` or `refusal`.[^5][^7] That is it. Claude Code, the Claude Agent SDK and the OpenAI Agents SDK all describe this same cycle of model call, tool calls, results, repeat.[^2][^8][^9]
+
+## The loop in Java
+
+Here is a minimal agent with one tool and three stop rules. It uses the official Java SDK (`com.anthropic:anthropic-java`, version 3.6.0, the latest on Maven Central on 5 Nov 2026)[^10] and follows the shape of Anthropic's own Java tutorial.[^11]
+
+```java
+import com.anthropic.client.AnthropicClient;
+import com.anthropic.client.okhttp.AnthropicOkHttpClient;
+import com.anthropic.core.JsonValue;
+import com.anthropic.models.messages.ContentBlock;
+import com.anthropic.models.messages.ContentBlockParam;
+import com.anthropic.models.messages.Message;
+import com.anthropic.models.messages.MessageCreateParams;
+import com.anthropic.models.messages.MessageParam;
+import com.anthropic.models.messages.Model;
+import com.anthropic.models.messages.StopReason;
+import com.anthropic.models.messages.Tool;
+import com.anthropic.models.messages.ToolResultBlockParam;
+import com.anthropic.models.messages.ToolUseBlock;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+public class AgentLoop {
+    static final int MAX_TURNS = 10;             // stop rule 2: a hard cap on model calls
+    static final long MAX_TOKENS_TOTAL = 200_000; // stop rule 3: a budget for the whole run
+
+    public static void main(String[] args) {
+        AnthropicClient client = AnthropicOkHttpClient.fromEnv(); // reads ANTHROPIC_API_KEY
+
+        Tool orderTool = Tool.builder()
+            .name("get_order_status")
+            .description("Look up the shipping status of one order by its id.")
+            .inputSchema(Tool.InputSchema.builder()
+                .properties(JsonValue.from(Map.of("orderId", Map.of("type", "string"))))
+                .required(List.of("orderId"))
+                .build())
+            .build();
+
+        List<MessageParam> messages = new ArrayList<>(); // the agent's whole "memory"
+        messages.add(MessageParam.ofUser("Where is order A-1042?"));
+        long tokensUsed = 0;
+
+        for (int turn = 1; turn <= MAX_TURNS; turn++) {
+            Message response = client.messages().create(MessageCreateParams.builder()
+                .model(Model.CLAUDE_SONNET_5_5)
+                .maxTokens(1024L)
+                .addTool(orderTool)
+                .messages(messages)   // the full history, every time
+                .build());
+            tokensUsed += response.usage().inputTokens() + response.usage().outputTokens();
+
+            boolean wantsTools = response.stopReason().map(StopReason.TOOL_USE::equals).orElse(false);
+            if (!wantsTools) {        // stop rule 1: the model says it is done
+                response.stopReason().filter(r -> !r.equals(StopReason.END_TURN))
+                    .ifPresent(r -> System.out.println("Stopped early: " + r)); // max_tokens, refusal, ...
+                response.content().stream()
+                    .flatMap(block -> block.text().stream())
+                    .forEach(text -> System.out.println(text.text()));
+                return;
+            }
+            if (tokensUsed > MAX_TOKENS_TOTAL) break;
+
+            List<ContentBlockParam> results = new ArrayList<>();
+            for (ContentBlock block : response.content()) {
+                block.toolUse().ifPresent(call -> results.add(ContentBlockParam.ofToolResult(
+                    ToolResultBlockParam.builder()
+                        .toolUseId(call.id())
+                        .content(runTool(call))
+                        .build())));
+            }
+            messages.add(response.toParam());                          // what the model asked for
+            messages.add(MessageParam.ofUserOfContentBlockParams(results)); // what your code answered
+        }
+        System.out.println("Stopped by a limit, not by the model. Tokens used: " + tokensUsed);
+    }
+
+    @SuppressWarnings("unchecked")
+    static String runTool(ToolUseBlock call) {
+        // Your code runs here, never the model's. Swap in a real database or HTTP call.
+        if (call.name().equals("get_order_status")) {
+            Map<String, JsonValue> input = (Map<String, JsonValue>) call._input().asObject().get();
+            String id = input.get("orderId").asStringOrThrow();
+            return "{\"orderId\":\"" + id + "\",\"status\":\"shipped\",\"eta\":\"2026-11-20\"}";
+        }
+        return "{\"error\":\"unknown tool " + call.name() + "\"}";
+    }
+}
+```
+
+It needs Java 9 or later. The order data is fake on purpose: `runTool` is where your repository or REST client goes. Everything else is the agent. The `for` loop is the part that matters, and it has no clever bits: call, check, run, append, repeat.
+
+## Why agents loop forever
+
+Look at what the basic loop in the docs waits for: it keeps going *while* the model asks for tools.[^5] The model decides when the loop ends. If the model keeps asking, the loop keeps calling.
+
+And it does keep asking, for ordinary reasons: a tool returns an error and the model tries again, a search finds nothing and it searches with other words, or the task ("improve this codebase") has no clear finish line. The Agent SDK docs say it directly: without limits, the loop "can run long on open-ended prompts".[^8] In that SDK, both the turn cap and the budget cap default to "No limit".[^8]
+
+Long loops get expensive faster than you think, because of the stateless API. Every turn re-sends the whole history, so each turn costs more than the one before.
+
+**Example math** (not a measured run). Claude Sonnet 5.5 lists at $2 per million input tokens and $10 per million output tokens (claude.com/pricing, checked 5 Nov 2026).[^12] Assume 3,000 tokens of system prompt and tool definitions, a 50-token question, 150 output tokens per turn and a 1,000-token tool result per turn, with no caching:
+
+| Turns | Input tokens on the last turn | Total cost of the run |
+|---|---|---|
+| 1 | 3,050 | $0.0076 |
+| 5 | 7,650 | $0.061 |
+| 10 | 13,400 | $0.18 |
+| 40 | 47,900 | $2.10 |
+
+Eight times the turns, about 34 times the cost. Forty turns send just over a million input tokens in total. Prompt caching cuts the price of the repeated part a lot (cache reads on Sonnet 5.5 are 0.05 times the base input price[^13]), but it does not change the shape: the history still grows every turn.
+
+## The stop rules I add
+
+Anthropic's agent guide says it is "common to include stopping conditions (such as a maximum number of iterations) to maintain control."[^1] These are the ones I put in every loop, in the order the code checks them:
+
+1. **The model's own stop.** Any `stop_reason` other than `tool_use` ends the loop. Handle `max_tokens` and `refusal` on purpose instead of treating them as an answer.[^7]
+2. **A turn cap.** `MAX_TURNS` in the code. The Agent SDK has the same idea as `max_turns`, and the OpenAI Agents SDK raises `MaxTurnsExceeded` when its limit is passed.[^8][^9]
+3. **A budget.** Count `usage` tokens from every response, or dollars. The Agent SDK calls this `max_budget_usd`.[^8]
+4. **A wall-clock timeout,** like any other outbound call in your service.
+5. **No identical repeats.** If the model asks for the same tool with the same input twice in a row, stop and return what you have. (My own rule, not from a doc.)
+6. **A human for side effects.** Reading is cheap; sending email or writing to a database waits for a yes.
+
+<AgentLoop />
+
+> None of these is AI. They are the limits you already put on retries, queues and HTTP clients.
+
+## In short
+
+An agent is a loop around a stateless model call. The model only ever asks; your code runs the tools, keeps the history and decides when to stop. Left alone, the loop stops only when the model says so, and every extra turn costs more than the last. So give it a turn cap, a budget and a timeout before it reaches production.
+
+<Aside title="Next issue">
+
+Context windows, and where your tokens go before you type a word.
+
+</Aside>
+
+[^1]: Anthropic, "Building effective agents", 19 Dec 2024. https://www.anthropic.com/engineering/building-effective-agents
+[^2]: Claude Code docs, "How Claude Code works". https://code.claude.com/docs/en/how-claude-code-works
+[^3]: Claude docs, "Using the Messages API". https://platform.claude.com/docs/en/build-with-claude/working-with-messages
+[^4]: Claude docs, "Tool use with Claude". https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview
+[^5]: Claude docs, "How tool use works". https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works
+[^6]: OpenAI docs, "Function calling". https://developers.openai.com/api/docs/guides/function-calling
+[^7]: Claude docs, "Handling stop reasons". https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons
+[^8]: Claude Agent SDK docs, "How the agent loop works". https://code.claude.com/docs/en/agent-sdk/agent-loop
+[^9]: OpenAI Agents SDK docs, "Running agents". https://openai.github.io/openai-agents-python/running_agents/
+[^10]: anthropic-sdk-java README. https://github.com/anthropics/anthropic-sdk-java
+[^11]: Claude docs, "Tutorial: Build a tool-using agent". https://platform.claude.com/docs/en/agents-and-tools/tool-use/build-a-tool-using-agent
+[^12]: Claude pricing, checked 2026-11-05. https://claude.com/pricing
+[^13]: Claude docs, "Prompt caching". https://platform.claude.com/docs/en/build-with-claude/prompt-caching

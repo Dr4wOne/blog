@@ -45,6 +45,11 @@
       "issue": 9,
       "slug": "how-login-works",
       "published": "2026-11-01"
+    },
+    {
+      "issue": 10,
+      "slug": "ai-agent-loop",
+      "published": "2026-11-06"
     }
   ]
 }
