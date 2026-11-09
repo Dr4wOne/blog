@@ -1,0 +1,178 @@
+---
+updated: 2026-11-06
+published: 2026-11-06
+issue: 11
+slug: context-windows-arent-memory
+title: "Context isn't memory"
+summary: "Where do your tokens go before you type a word, and why does the model \"forget\" in a long chat? The context window drawn as what it is: one request body, rebuilt every call."
+tags: [ai, agents, java]
+draft: false
+---
+
+import Aside from '../../../components/Aside.astro'
+import ContextWindow from '../../../components/figures/ContextWindow.astro'
+
+<Aside title="In short">
+
+A context window is not memory. It is everything the model can see for one response, rebuilt and re-sent on every call. Your instructions, tools and history fill it before your question does, and every turn pays for all of it again. A fuller window costs more and is recalled worse. So keep it small on purpose, and keep the things that must last in files.
+
+</Aside>
+
+Your AI coding tool can spend thousands of tokens before you type a word. Where do they go, why does the model "forget" things in a long chat, and what does a backend engineer do about it? Here is the context window drawn as what it is: one request body, rebuilt every call.
+
+## "Memory" is the wrong word
+
+Anthropic's own glossary calls the context window a "working memory" for the model.[^1] That phrase is accurate and it still sent me the wrong way. "Memory" makes me think of something that persists: a session store, a database row, a cache that is still warm tomorrow.
+
+The context window is none of those. The docs define it as "all the text a language model can reference when generating a response, including the response itself."[^2] [Last issue](/10-ai-agent-loop/) showed that the Messages API is stateless: your code sends the full history every time.[^3] Put the two together and the picture is simple. The context window is the request body. It exists for one call. The next call builds a new one from whatever your code decides to send.
+
+So "working memory" is right in the way a function's stack frame is memory. It holds what the function needs right now, and it is gone when the function returns.
+
+## What a token is
+
+The window is measured in tokens: words, parts of words, characters or bytes.[^1] On older Claude models a token was about 3.5 English characters; Claude 4.7 and later use a tokenizer that makes about 30 percent more tokens from the same text.[^1][^4] So do not reuse a count from one model for another. Count again.
+
+Claude Sonnet 5.5 and Opus 5.5 have a 1M-token window.[^2] That sounds like plenty. The rest of this issue is about why it fills faster than you expect, and why you should not want it full anyway.
+
+## Everything in the request counts
+
+The docs list what goes into the window: "the system prompt, every message in `messages` (including tool results, images, and documents), and your tool definitions. The output Claude generates for the turn, including its extended thinking, counts too."[^2]
+
+<ContextWindow />
+
+Two of those are easy to miss:
+
+1. **Tool definitions.** Every tool's name, description and JSON schema is sent on every call. On top of that, as soon as you pass any tools, the API adds its own tool-use system prompt: 286 tokens on Sonnet 5.5.[^5]
+2. **Tool results.** A tool that returns a whole file or a page of JSON puts all of it into the history, and it is sent again on every later turn.
+
+The token counting docs have two small examples, and they are two different requests. "Hello, Claude" with a one-line system prompt counts 14 tokens. A one-line weather question with one small tool counts 403.[^4]
+
+## Count them before you send
+
+You do not have to guess. The token counting endpoint takes the same input as a real request and returns `input_tokens`. It is free, within its own rate limits, and the result is an estimate.[^4] Here is a small Java program that counts the same question four ways, with the official SDK (`com.anthropic:anthropic-java` 3.6.0, the same version as last issue).[^6]
+
+```java
+import com.anthropic.client.AnthropicClient;
+import com.anthropic.client.okhttp.AnthropicOkHttpClient;
+import com.anthropic.core.JsonValue;
+import com.anthropic.models.messages.MessageCountTokensParams;
+import com.anthropic.models.messages.Model;
+import com.anthropic.models.messages.Tool;
+import java.util.List;
+import java.util.Map;
+
+public class WhereTokensGo {
+    static final Model MODEL = Model.CLAUDE_SONNET_5_5; // counts depend on the model's tokenizer
+
+    public static void main(String[] args) {
+        AnthropicClient client = AnthropicOkHttpClient.fromEnv(); // reads ANTHROPIC_API_KEY
+        String question = "Where is order A-1042?";
+        String system = "You are the support agent of a small online shop. Answer in two sentences.";
+        Tool orderTool = Tool.builder()
+            .name("get_order_status")
+            .description("Look up the shipping status of one order by its id.")
+            .inputSchema(Tool.InputSchema.builder()
+                .properties(JsonValue.from(Map.of("orderId", Map.of("type", "string"))))
+                .required(List.of("orderId"))
+                .build())
+            .build();
+
+        // 1. The question on its own
+        print("question only", count(client, base().addUserMessage(question)));
+
+        // 2. Plus a system prompt
+        print("+ system prompt", count(client, base().system(system).addUserMessage(question)));
+
+        // 3. Plus one tool definition
+        print("+ one tool", count(client, base().system(system).addTool(orderTool).addUserMessage(question)));
+
+        // 4. The same question after 20 earlier turns: the whole history goes in again
+        MessageCountTokensParams.Builder chat = base().system(system).addTool(orderTool);
+        for (int turn = 1; turn <= 20; turn++) {
+            chat.addUserMessage("Earlier question number " + turn + " about another order.");
+            chat.addAssistantMessage("Order B-" + (2000 + turn) + " shipped on Monday and should arrive this week.");
+        }
+        print("+ 20 earlier turns", count(client, chat.addUserMessage(question)));
+    }
+
+    static MessageCountTokensParams.Builder base() {
+        return MessageCountTokensParams.builder().model(MODEL);
+    }
+
+    static long count(AnthropicClient client, MessageCountTokensParams.Builder params) {
+        return client.messages().countTokens(params.build()).inputTokens(); // free, but rate limited
+    }
+
+    static void print(String label, long tokens) {
+        System.out.printf("%-20s %,7d input tokens%n", label, tokens);
+    }
+}
+```
+
+Run it on your own prompt and read the four lines. The question is the smallest part of its own request.
+
+## What loads before you type
+
+Coding agents add more before your first word. The Claude Code docs list what loads at session start: CLAUDE.md (or AGENTS.md), auto memory, MCP tool names and skill descriptions, plus anything your own setup adds.[^7] Auto memory loads its first 200 lines or 25KB.[^8] MCP tool definitions are deferred by default, so only the names and server instructions go in until a tool is used.[^9]
+
+Claude Code has a command that shows the real breakdown: `/context`.[^7]
+
+None of this is waste: it is how the agent knows your project. But all of it is sent again with every request in the session.
+
+## Every turn pays for the whole history
+
+Over a session, that adds up. **Example math** (not a measured run): Claude Sonnet 5.5 at $2 per million input tokens and $10 per million output tokens (claude.com/pricing, checked 6 Nov 2026).[^10] Assume 20,000 tokens of startup context, and each turn adds 1,000 tokens (your message plus tool results) and a 500-token answer. No caching:
+
+| Turn | Input tokens this turn | Total cost so far |
+|---|---|---|
+| 1 | 21,000 | $0.047 |
+| 10 | 34,500 | $0.61 |
+| 30 | 64,500 | $2.72 |
+| 50 | 94,500 | $6.03 |
+
+By turn 50, the startup context alone has been sent 50 times: a million input tokens, $2.00 of the $6.03. Prompt caching changes that price a lot. On Sonnet 5.5 a cache read costs $0.10 per million tokens,[^10] so the same million tokens cost about $0.15 with one cache write and 49 reads. But the docs are clear about what caching does not change: "Cached prompt prefixes still occupy the context window."[^2] Caching makes the history cheaper. It does not make it smaller.
+
+## Why the middle gets lost
+
+A bigger window is not a better memory, either. The docs: "As token count grows, accuracy and recall degrade, a phenomenon known as *context rot*."[^2] Anthropic's post on context engineering gives part of the reason: attention creates "n² pairwise relationships for n tokens", so focus spreads thinner as context grows. It calls context "a finite resource with diminishing marginal returns."[^11]
+
+A 2023 study, "Lost in the Middle", found that on the models it tested, performance was "often highest when relevant information occurs at the beginning or end of the input context" and dropped when the answer sat in the middle.[^12] I would not assume that exact curve for today's models. The lesson holds: what you put in the window matters more than how much room is left.
+
+That is what "the model forgot" usually means. Nothing was deleted. The detail is still in the request, buried under, say, 60,000 tokens of tool output, and the model weighed it less.
+
+## When the window fills up
+
+On the API, input that is too long fails with a 400 `invalid_request_error` ("prompt is too long"). On Claude 4.5 models and newer, a response that runs into the limit stops with `stop_reason: "model_context_window_exceeded"`.[^2]
+
+Products handle it for you, in ways that look like forgetting. Chat interfaces such as claude.ai can manage the window on a rolling "first in, first out" basis.[^2] Claude Code compacts: it summarizes the conversation and starts again from the summary. After compaction, the project-root CLAUDE.md and auto memory are re-read from disk, and Claude Code re-reads up to five of the files it read or edited, most recently modified first.[^7] Anything that only lived in the conversation is now a summary of itself.
+
+## Where memory actually lives
+
+Real memory lives outside the window. The Claude Code docs open their memory page with: "Each Claude Code session begins with a fresh context window." What carries across sessions is files: CLAUDE.md, which you write, and auto memory, which Claude writes.[^8] The API's memory tool keeps notes "in files you control."[^5] Anthropic calls the pattern "structured note-taking".[^11]
+
+To a backend engineer this is familiar. The context window is the request. Memory is the database. You decide what each request loads, the way you decide which columns a query selects.
+
+What I do with that, in my own work:
+1. **Clear between tasks.** `/clear` when I switch to unrelated work.[^9]
+2. **Keep CLAUDE.md short.** The docs suggest under 200 lines, with workflow-specific instructions moved into skills, which load only when used.[^9]
+3. **Send big reads to a subagent.** It reads in its own context window and returns a summary.[^7]
+4. **Count before I ship.** I count a typical request with the endpoint above and keep the number next to the latency budget. (My own habit, not from a doc.)
+
+<Aside title="Next issue">
+
+MCP, opened up. It is JSON over a pipe, and I build a small server in Spring Boot.
+
+</Aside>
+
+[^1]: Claude docs, "Glossary" (Context window, Tokens). https://platform.claude.com/docs/en/about-claude/glossary
+[^2]: Claude docs, "Context windows". https://platform.claude.com/docs/en/build-with-claude/context-windows
+[^3]: Claude docs, "Using the Messages API". https://platform.claude.com/docs/en/build-with-claude/working-with-messages
+[^4]: Claude docs, "Token counting". https://platform.claude.com/docs/en/build-with-claude/token-counting
+[^5]: Claude docs, "Tool use with Claude" (pricing table, memory tool). https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview
+[^6]: anthropic-sdk-java. https://github.com/anthropics/anthropic-sdk-java
+[^7]: Claude Code docs, "Explore the context window". https://code.claude.com/docs/en/context-window
+[^8]: Claude Code docs, "How Claude remembers your project". https://code.claude.com/docs/en/memory
+[^9]: Claude Code docs, "Manage costs effectively". https://code.claude.com/docs/en/costs
+[^10]: Claude pricing, checked 2026-11-06. https://claude.com/pricing
+[^11]: Anthropic, "Effective context engineering for AI agents", 29 Sep 2025. https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
+[^12]: Liu et al., "Lost in the Middle: How Language Models Use Long Contexts", arXiv 2307.03172 (2023), TACL. https://arxiv.org/abs/2307.03172
